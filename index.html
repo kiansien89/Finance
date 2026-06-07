@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f0f;--surface:#171717;--surface2:#1f1f1f;--surface3:#252525;
+  --border:#2a2a2a;--border2:#333;
+  --text:#f0ede8;--text2:#9a9690;--text3:#5a5754;
+  --green:#2dd4a0;--green-dim:#0d3d2e;--green-text:#1a9e72;
+  --red:#e05252;--red-dim:#3d1515;--red-text:#c03a3a;
+  --blue:#4f8ef7;--blue-dim:#0d1f3d;--blue-text:#2b6fd4;
+  --amber:#f0a940;--amber-dim:#3d2a0d;--amber-text:#c07a10;
+  --purple:#9b7cf4;--purple-dim:#1e1040;
+  --mono:'DM Mono',monospace;--serif:'Instrument Serif',serif;--sans:'DM Sans',sans-serif;
+  --r:10px;--r-lg:14px;
+}
+html{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+body{max-width:900px;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+/* AUTH SCREEN */
+#authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;gap:1.5rem}
+#authScreen h1{font-family:var(--serif);font-size:2.2rem;font-weight:400;color:var(--text)}
+#authScreen p{color:var(--text2);font-size:0.9rem;max-width:320px;line-height:1.6}
+.auth-btn{display:inline-flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:12px 24px;color:var(--text);font-family:var(--sans);font-size:0.9rem;cursor:pointer;transition:background 0.15s,border-color 0.15s}
+.auth-btn:hover{background:var(--surface3);border-color:#444}
+.auth-btn svg{width:18px;height:18px}
+.auth-note{font-size:0.75rem;color:var(--text3);max-width:280px;line-height:1.5}
+
+/* TOP BAR */
+#appScreen{display:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.logo{font-family:var(--serif);font-size:1.3rem;color:var(--text);font-style:italic}
+.sync-status{display:flex;align-items:center;gap:5px;font-size:0.7rem;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text3)}
+.sync-status.ok{color:var(--green-text);border-color:var(--green-dim);background:rgba(45,212,160,0.06)}
+.sync-status.syncing{color:var(--blue);border-color:var(--blue-dim);background:rgba(79,142,247,0.06)}
+.sync-status.err{color:var(--red-text);border-color:var(--red-dim);background:rgba(224,82,82,0.06)}
+.sync-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.month-nav{display:flex;align-items:center;gap:4px}
+.month-nav button{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:11px;transition:border-color 0.1s}
+.month-nav button:hover{border-color:var(--border2);color:var(--text)}
+#monthLbl{font-size:0.8rem;color:var(--text);min-width:100px;text-align:center;font-weight:500}
+.sign-out{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text3);font-size:11px;font-family:var(--sans)}
+.sign-out:hover{color:var(--text2);border-color:var(--border2)}
+
+/* WALLET SECTION */
+.section-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.wallet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:8px}
+.wallet-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;position:relative;transition:border-color 0.15s}
+.wallet-card:hover{border-color:var(--border2)}
+.w-icon{font-size:1.2rem;margin-bottom:8px}
+.w-name{font-size:0.75rem;color:var(--text2);margin-bottom:4px;padding-right:20px}
+.w-bal{font-family:var(--mono);font-size:1rem;font-weight:500;color:var(--text)}
+.w-type{font-size:0.68rem;color:var(--text3);margin-top:4px}
+.w-actions{position:absolute;top:8px;right:8px;display:flex;gap:2px}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:3px;border-radius:4px;font-size:12px;line-height:1;transition:color 0.1s}
+.icon-btn:hover{color:var(--text2)}
+.icon-btn.danger:hover{color:var(--red)}
+.wallet-total{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:1.5rem}
+.wallet-total-label{font-size:0.75rem;color:var(--text2)}
+.wallet-total-val{font-family:var(--mono);font-size:1.1rem;font-weight:500;color:var(--green)}
+
+/* METRICS */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.m-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:6px}
+.m-val{font-family:var(--mono);font-size:1.1rem;font-weight:500}
+.m-sub{font-size:0.68rem;color:var(--text3);margin-top:3px}
+.m-income .m-val{color:var(--green)}
+.m-expense .m-val{color:var(--red)}
+.m-savings .m-val{color:var(--blue)}
+.m-balance .m-val{color:var(--text)}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:10px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.panel-title{font-size:0.8rem;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:6px}
+.panel-title span{font-size:0.95rem}
+.add-btn{background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text2);font-size:0.72rem;font-family:var(--sans);display:flex;align-items:center;gap:4px;transition:all 0.1s}
+.add-btn:hover{border-color:#555;color:var(--text)}
+
+/* TRANSACTION LIST */
+.tx-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+.tx-item:last-child{border-bottom:none}
+.tx-emoji{font-size:1rem;width:24px;text-align:center;flex-shrink:0}
+.tx-info{flex:1;min-width:0}
+.tx-name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:0.82rem}
+.tx-meta{font-size:0.68rem;color:var(--text3);margin-top:1px}
+.tx-tag{font-size:0.65rem;padding:2px 6px;border-radius:20px;background:var(--surface2);color:var(--text3);white-space:nowrap;border:1px solid var(--border)}
+.tx-amt{font-family:var(--mono);font-size:0.82rem;font-weight:500;white-space:nowrap}
+.tx-amt.out{color:var(--red)}
+.tx-amt.in{color:var(--green)}
+.tx-amt.sav{color:var(--blue)}
+
+/* FUTURE PAYMENTS */
+.fut-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+.fut-item:last-child{border-bottom:none}
+.fut-info{flex:1;min-width:0}
+.fut-name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fut-meta{font-size:0.68rem;color:var(--text3);margin-top:1px}
+.fut-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.badge{font-size:0.65rem;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap}
+.badge.overdue{background:var(--red-dim);color:var(--red)}
+.badge.today{background:var(--blue-dim);color:var(--blue)}
+.badge.upcoming{background:var(--green-dim);color:var(--green)}
+.fut-amt{font-family:var(--mono);font-size:0.75rem;color:var(--text2)}
+.fut-days{font-size:0.65rem;color:var(--text3)}
+
+/* CATEGORY BARS */
+.cat-item{margin-bottom:10px}
+.cat-label{display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text2);margin-bottom:4px}
+.cat-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.cat-fill{height:100%;border-radius:2px;transition:width 0.5s}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:20px 0;color:var(--text3);font-size:0.78rem}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);padding:22px;width:100%;max-width:340px}
+.modal h3{font-size:0.95rem;font-weight:500;margin-bottom:16px;color:var(--text)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:0.68rem;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--sans);font-size:0.82rem;outline:none;transition:border-color 0.1s}
+.field input:focus,.field select:focus{border-color:#555}
+.field select option{background:var(--surface2)}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.btn{padding:7px 16px;border-radius:6px;font-size:0.78rem;cursor:pointer;font-family:var(--sans);border:1px solid var(--border2);transition:all 0.1s}
+.btn-ghost{background:none;color:var(--text2)}
+.btn-ghost:hover{background:var(--surface2)}
+.btn-primary{background:var(--surface3);color:var(--text);border-color:#444}
+.btn-primary:hover{background:#2e2e2e;border-color:#555}
+
+/* FOOTER NOTE */
+.footer-note{text-align:center;font-size:0.7rem;color:var(--text3);margin-top:2rem;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div>
+    <div style="font-size:2rem;margin-bottom:0.5rem">📊</div>
+    <h1>Finance Dashboard</h1>
+  </div>
+  <p>Track daily transactions, wallet balances, and upcoming payments — synced to your Google Drive.</p>
+  <button class="auth-btn" id="signInBtn">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Sign in with Google
+  </button>
+  <p class="auth-note">Your data is stored in your own Google Drive. This app never sees your credentials.</p>
+  <div id="clientIdSetup" style="margin-top:1rem;width:100%;max-width:340px">
+    <div class="field">
+      <label>Google OAuth Client ID</label>
+      <input type="text" id="clientIdInput" placeholder="Paste your Client ID here" style="width:100%">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveClientId()">Save &amp; Continue</button>
+    <p style="font-size:0.68rem;color:var(--text3);margin-top:8px;text-align:center">Need help? Follow the setup guide below ↓</p>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="logo">Finance</span>
+      <div class="sync-status" id="syncStatus"><span class="sync-dot"></span><span id="syncLabel">Ready</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="month-nav">
+        <button id="prevM">&#8249;</button>
+        <span id="monthLbl"></span>
+        <button id="nextM">&#8250;</button>
+      </div>
+      <button class="sign-out" id="signOutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <!-- WALLETS -->
+  <div class="section-label">
+    <span>Wallets &amp; accounts</span>
+    <button class="add-btn" id="openWallet">+ Add account</button>
+  </div>
+  <div class="wallet-grid" id="walletGrid"></div>
+  <div class="wallet-total">
+    <span class="wallet-total-label">Total balance</span>
+    <span class="wallet-total-val" id="walletTotal">RM 0.00</span>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metric-grid">
+    <div class="metric m-income"><div class="m-label">Income</div><div class="m-val" id="mIncome">RM 0</div><div class="m-sub" id="mIncomeSub">—</div></div>
+    <div class="metric m-expense"><div class="m-label">Expenses</div><div class="m-val" id="mExpense">RM 0</div><div class="m-sub" id="mExpSub">—</div></div>
+    <div class="metric m-savings"><div class="m-label">Saved</div><div class="m-val" id="mSaved">RM 0</div><div class="m-sub" id="mSavedSub">—</div></div>
+    <div class="metric m-balance"><div class="m-label">Net balance</div><div class="m-val" id="mBalance">RM 0</div><div class="m-sub" id="mUpcoming">—</div></div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title"><span>⇄</span> Daily transactions</div>
+      <button class="add-btn" id="openTx">+ Add</button>
+    </div>
+    <div id="txList"><div class="empty">No transactions yet this month.</div></div>
+  </div>
+
+  <!-- FUTURE + CATEGORY -->
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><span>📅</span> Future payments</div>
+        <button class="add-btn" id="openFuture">+ Add</button>
+      </div>
+      <div id="futureList"><div class="empty">No upcoming payments.</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><span>▦</span> By category</div>
+      </div>
+      <div id="catBreak"><div class="empty">No expense data.</div></div>
+    </div>
+  </div>
+
+  <div class="footer-note">Data saved to <strong style="color:var(--text2)">finance_dashboard_data.json</strong> in your Google Drive · Auto-syncs on every change</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="txOverlay">
+  <div class="modal">
+    <h3>Add transaction</h3>
+    <div class="field"><label>Type</label><select id="txType"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings transfer</option></select></div>
+    <div class="field"><label>Description</label><input type="text" id="txDesc" placeholder="e.g. Grab, salary, Tesco"></div>
+    <div class="field"><label>Amount (RM)</label><input type="number" id="txAmt" step="0.01" min="0" placeholder="0.00"></div>
+    <div class="field"><label>Account</label><select id="txWallet"><option value="">— none —</option></select></div>
+    <div class="field"><label>Category</label><select id="txCat">
+      <option>Food &amp; drink</option><option>Transport</option><option>Groceries</option>
+      <option>Utilities</option><option>Shopping</option><option>Health</option>
+      <option>Entertainment</option><option>Salary</option><option>Savings</option><option>Other</option>
+    </select></div>
+    <div class="field"><label>Date</label><input type="date" id="txDate"></div>
+    <div class="field"><label>Note (optional)</label><input type="text" id="txNote" placeholder="optional"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="cancelTx">Cancel</button><button class="btn btn-primary" id="saveTx">Add transaction</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="futureOverlay">
+  <div class="modal">
+    <h3>Add future payment</h3>
+    <div class="field"><label>Description</label><input type="text" id="fDesc" placeholder="e.g. Netflix, rent"></div>
+    <div class="field"><label>Amount (RM)</label><input type="number" id="fAmt" step="0.01" min="0" placeholder="0.00"></div>
+    <div class="field"><label>Due date</label><input type="date" id="fDate"></div>
+    <div class="field"><label>Category</label><select id="fCat">
+      <option>Subscription</option><option>Rent/Mortgage</option><option>Utilities</option>
+      <option>Insurance</option><option>Loan repayment</option><option>Investment</option><option>Other</option>
+    </select></div>
+    <div class="field"><label>Recurrence</label><select id="fRecur">
+      <option value="once">One-time</option><option value="monthly">Monthly</option><option value="weekly">Weekly</option>
+    </select></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="cancelFuture">Cancel</button><button class="btn btn-primary" id="saveFuture">Add payment</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="walletOverlay">
+  <div class="modal">
+    <h3 id="walletModalTitle">Add account</h3>
+    <div class="field"><label>Account name</label><input type="text" id="wName" placeholder="e.g. Maybank, TNG, Cash"></div>
+    <div class="field"><label>Type</label><select id="wType">
+      <option value="bank">Bank</option><option value="ewallet">E-wallet</option>
+      <option value="cash">Cash</option><option value="savings">Savings</option><option value="investment">Investment</option>
+    </select></div>
+    <div class="field"><label>Balance (RM)</label><input type="number" id="wBal" step="0.01" placeholder="0.00"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="cancelWallet">Cancel</button><button class="btn btn-primary" id="saveWallet">Save</button></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const DRIVE_FILE = 'finance_dashboard_data.json';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+const DISCOVERY = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAT_EMOJI = {'Food & drink':'🍜','Transport':'🚗','Groceries':'🛒','Utilities':'💡','Shopping':'🛍️','Health':'💊','Entertainment':'🎬','Salary':'💼','Savings':'🏦','Other':'📦','Subscription':'📱','Rent/Mortgage':'🏠','Insurance':'🛡️','Loan repayment':'💳','Investment':'📈'};
+const CAT_COLORS = ['#2dd4a0','#4f8ef7','#e05252','#f0a940','#9b7cf4','#e879a0','#6bbf3f'];
+const W_ICONS = {bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈'};
+const W_LABELS = {bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment'};
+
+// ── STATE ───────────────────────────────────────────────────────────────────
+let state = {transactions:[], futures:[], wallets:[]};
+let viewYear, viewMonth, driveFileId = null, editWalletIdx = -1;
+let tokenClient, gapiInited = false, gisInited = false;
+const now = new Date(); viewYear = now.getFullYear(); viewMonth = now.getMonth();
+
+// ── CLIENT ID ───────────────────────────────────────────────────────────────
+function getClientId(){ return localStorage.getItem('gClientId')||''; }
+function saveClientId(){
+  const v = document.getElementById('clientIdInput').value.trim();
+  if(!v){ alert('Please paste your Client ID first.'); return; }
+  localStorage.setItem('gClientId', v);
+  location.reload();
+}
+
+// ── GOOGLE API INIT ─────────────────────────────────────────────────────────
+function gapiLoaded(){
+  gapi.load('client', async ()=>{
+    await gapi.client.init({discoveryDocs:[DISCOVERY]});
+    gapiInited = true;
+    maybeEnableSignIn();
+  });
+}
+function gisLoaded(){
+  const cid = getClientId();
+  if(!cid) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: cid,
+    scope: SCOPES,
+    callback: async (resp)=>{
+      if(resp.error){ setSyncStatus('err','Auth failed'); return; }
+      await loadData();
+      showApp();
+    }
+  });
+  gisInited = true;
+  maybeEnableSignIn();
+}
+function maybeEnableSignIn(){
+  if(gapiInited && gisInited){
+    // Auto sign-in if token exists
+    const tok = localStorage.getItem('gToken');
+    if(tok){
+      gapi.client.setToken({access_token: tok});
+      loadData().then(showApp).catch(()=>{ localStorage.removeItem('gToken'); });
+    }
+    document.getElementById('signInBtn').onclick = ()=>{
+      tokenClient.requestAccessToken({prompt: tok?'':'consent'});
+    };
+  }
+}
+
+// ── DRIVE SYNC ──────────────────────────────────────────────────────────────
+function setSyncStatus(s, msg){
+  const el = document.getElementById('syncStatus');
+  el.className = 'sync-status '+s;
+  document.getElementById('syncLabel').textContent = msg;
+}
+
+async function findOrCreateFile(){
+  if(driveFileId) return driveFileId;
+  const r = await gapi.client.drive.files.list({q:`name='${DRIVE_FILE}' and trashed=false`,fields:'files(id,name)',spaces:'drive'});
+  if(r.result.files.length > 0){ driveFileId = r.result.files[0].id; return driveFileId; }
+  const meta = {name: DRIVE_FILE, mimeType:'application/json'};
+  const body = JSON.stringify({transactions:[],futures:[],wallets:[]});
+  const boundary = '-------fin_boundary';
+  const multipart = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+  const cr = await gapi.client.request({path:'/upload/drive/v3/files',method:'POST',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${boundary}"`},body:multipart});
+  driveFileId = cr.result.id;
+  return driveFileId;
+}
+
+async function loadData(){
+  setSyncStatus('syncing','Loading...');
+  try{
+    const fid = await findOrCreateFile();
+    const r = await gapi.client.drive.files.get({fileId:fid, alt:'media'});
+    const parsed = typeof r.result === 'string' ? JSON.parse(r.result) : r.result;
+    state.transactions = parsed.transactions||[];
+    state.futures = parsed.futures||[];
+    state.wallets = parsed.wallets||[];
+    const tok = gapi.client.getToken();
+    if(tok) localStorage.setItem('gToken', tok.access_token);
+    setSyncStatus('ok','Synced');
+    render();
+  }catch(e){ setSyncStatus('err','Load failed'); }
+}
+
+async function saveData(){
+  setSyncStatus('syncing','Saving...');
+  try{
+    const fid = await findOrCreateFile();
+    const body = JSON.stringify(state, null, 2);
+    const boundary = '-------fin_boundary';
+    const meta = {name: DRIVE_FILE, mimeType:'application/json'};
+    const multipart = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+    await gapi.client.request({path:`/upload/drive/v3/files/${fid}`,method:'PATCH',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${boundary}"`},body:multipart});
+    setSyncStatus('ok','Saved '+new Date().toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){ setSyncStatus('err','Save failed'); }
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function ce(c){ return CAT_EMOJI[c]||'📦'; }
+function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+function fmt(n){ return 'RM '+Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtR(n){ return 'RM '+Math.round(Number(n)).toLocaleString('en-MY'); }
+
+function monthTx(){ return state.transactions.filter(t=>{ const d=new Date(t.date); return d.getFullYear()===viewYear&&d.getMonth()===viewMonth; }); }
+
+function renderWallets(){
+  const grid = document.getElementById('walletGrid');
+  const total = state.wallets.reduce((s,w)=>s+Number(w.balance),0);
+  grid.innerHTML = state.wallets.length ? state.wallets.map((w,i)=>`
+    <div class="wallet-card">
+      <div class="w-actions">
+        <button class="icon-btn" onclick="editWallet(${i})" title="Edit">✎</button>
+        <button class="icon-btn danger" onclick="delWallet(${i})" title="Delete">✕</button>
+      </div>
+      <div class="w-icon">${W_ICONS[w.type]||'💳'}</div>
+      <div class="w-name">${esc(w.name)}</div>
+      <div class="w-bal">${fmt(w.balance)}</div>
+      <div class="w-type">${W_LABELS[w.type]||w.type}</div>
+    </div>`).join('') : '<div class="empty" style="text-align:left">No accounts added yet.</div>';
+  document.getElementById('walletTotal').textContent = fmt(total);
+  // update wallet select
+  const sel = document.getElementById('txWallet');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— none —</option>';
+  state.wallets.forEach(w=>{ const o=document.createElement('option');o.value=w.id;o.textContent=w.name;sel.appendChild(o); });
+  if(cur) sel.value = cur;
+}
+
+function updateMetrics(){
+  const txs = monthTx();
+  let inc=0,exp=0,sav=0;
+  txs.forEach(t=>{ if(t.type==='income')inc+=Number(t.amount); else if(t.type==='expense')exp+=Number(t.amount); else if(t.type==='savings')sav+=Number(t.amount); });
+  const bal = inc-exp-sav;
+  const pct = inc>0?Math.round((sav/inc)*100):0;
+  const tod = new Date().toISOString().slice(0,10);
+  const upc = state.futures.filter(f=>f.date>=tod).reduce((s,f)=>s+Number(f.amount),0);
+  document.getElementById('mIncome').textContent = fmtR(inc);
+  document.getElementById('mIncomeSub').textContent = txs.filter(t=>t.type==='income').length+' entries';
+  document.getElementById('mExpense').textContent = fmtR(exp);
+  document.getElementById('mExpSub').textContent = txs.filter(t=>t.type==='expense').length+' entries';
+  document.getElementById('mSaved').textContent = fmtR(sav);
+  document.getElementById('mSavedSub').textContent = pct+'% of income';
+  const mb = document.getElementById('mBalance');
+  mb.textContent = fmtR(bal);
+  mb.style.color = bal>=0?'var(--text)':'var(--red)';
+  document.getElementById('mUpcoming').textContent = 'Upcoming: '+fmtR(upc);
+}
+
+function updateTxList(){
+  const txs = monthTx().slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const el = document.getElementById('txList');
+  if(!txs.length){ el.innerHTML='<div class="empty">No transactions this month.</div>'; return; }
+  el.innerHTML = txs.map(t=>{
+    const gi = state.transactions.indexOf(t);
+    const cls = t.type==='income'?'in':t.type==='savings'?'sav':'out';
+    const sign = t.type==='income'?'+':'-';
+    const ds = new Date(t.date).toLocaleDateString('en-MY',{day:'numeric',month:'short'});
+    const w = t.walletId?state.wallets.find(w=>w.id==t.walletId):null;
+    return `<div class="tx-item">
+      <div class="tx-emoji">${ce(t.category)}</div>
+      <div class="tx-info">
+        <div class="tx-name">${esc(t.description)}</div>
+        <div class="tx-meta">${ds}${w?' · '+esc(w.name):''}${t.note?' · '+esc(t.note):''}</div>
+      </div>
+      <span class="tx-tag">${esc(t.category)}</span>
+      <span class="tx-amt ${cls}">${sign}${fmt(t.amount)}</span>
+      <button class="icon-btn danger" onclick="delTx(${gi})" title="Delete">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function updateFutureList(){
+  const el = document.getElementById('futureList');
+  const fs = state.futures.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!fs.length){ el.innerHTML='<div class="empty">No upcoming payments.</div>'; return; }
+  el.innerHTML = fs.map((f,i)=>{
+    const d = new Date(f.date); const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((d-today)/86400000);
+    let badge, dl;
+    if(diff<0){badge='<span class="badge overdue">Overdue</span>';dl=Math.abs(diff)+'d ago';}
+    else if(diff===0){badge='<span class="badge today">Today</span>';dl='due today';}
+    else{badge='<span class="badge upcoming">Upcoming</span>';dl='in '+diff+'d';}
+    const ds = d.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});
+    return `<div class="fut-item">
+      <div class="tx-emoji">${ce(f.category)}</div>
+      <div class="fut-info">
+        <div class="fut-name">${esc(f.description)}</div>
+        <div class="fut-meta">${ds} · ${esc(f.recurrence)}</div>
+      </div>
+      <div class="fut-right">${badge}<span class="fut-amt">${fmt(f.amount)}</span><span class="fut-days">${dl}</span></div>
+      <button class="icon-btn danger" onclick="delFuture(${i})" title="Delete">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function updateCat(){
+  const txs = monthTx().filter(t=>t.type==='expense');
+  const el = document.getElementById('catBreak');
+  if(!txs.length){ el.innerHTML='<div class="empty">No expense data.</div>'; return; }
+  const totals={}; txs.forEach(t=>{totals[t.category]=(totals[t.category]||0)+Number(t.amount);});
+  const total = Object.values(totals).reduce((a,b)=>a+b,0);
+  const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  el.innerHTML = sorted.map(([cat,amt],i)=>{
+    const pct = total>0?Math.round((amt/total)*100):0;
+    return `<div class="cat-item">
+      <div class="cat-label"><span>${ce(cat)} ${esc(cat)}</span><span style="font-family:var(--mono);font-size:0.72rem">${fmt(amt)} (${pct}%)</span></div>
+      <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${CAT_COLORS[i%CAT_COLORS.length]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function render(){
+  document.getElementById('monthLbl').textContent = MONTHS[viewMonth]+' '+viewYear;
+  renderWallets(); updateMetrics(); updateTxList(); updateFutureList(); updateCat();
+}
+
+// ── CRUD ─────────────────────────────────────────────────────────────────────
+window.delTx = async function(i){ state.transactions.splice(i,1); render(); await saveData(); };
+window.delFuture = async function(i){ state.futures.splice(i,1); render(); await saveData(); };
+window.delWallet = async function(i){ state.wallets.splice(i,1); render(); await saveData(); };
+window.editWallet = function(i){
+  editWalletIdx=i; const w=state.wallets[i];
+  document.getElementById('wName').value=w.name;
+  document.getElementById('wType').value=w.type;
+  document.getElementById('wBal').value=w.balance;
+  document.getElementById('walletModalTitle').textContent='Edit account';
+  document.getElementById('walletOverlay').classList.add('open');
+};
+
+// ── SHOW / HIDE APP ───────────────────────────────────────────────────────────
+function showApp(){ document.getElementById('authScreen').style.display='none'; document.getElementById('appScreen').style.display='block'; render(); }
+function showAuth(){ document.getElementById('authScreen').style.display='flex'; document.getElementById('appScreen').style.display='none'; }
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+document.getElementById('prevM').onclick = ()=>{ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} render(); };
+document.getElementById('nextM').onclick = ()=>{ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} render(); };
+document.getElementById('signOutBtn').onclick = ()=>{
+  google.accounts.oauth2.revoke(gapi.client.getToken()?.access_token||'');
+  gapi.client.setToken('');
+  localStorage.removeItem('gToken');
+  driveFileId=null;
+  showAuth();
+};
+
+// TX MODAL
+const txOv=document.getElementById('txOverlay');
+document.getElementById('openTx').onclick=()=>{ document.getElementById('txDate').value=new Date().toISOString().slice(0,10); renderWallets(); txOv.classList.add('open'); };
+document.getElementById('cancelTx').onclick=()=>txOv.classList.remove('open');
+txOv.onclick=e=>{ if(e.target===txOv)txOv.classList.remove('open'); };
+document.getElementById('txType').onchange=function(){ const c=document.getElementById('txCat'); if(this.value==='income')c.value='Salary'; else if(this.value==='savings')c.value='Savings'; else c.value='Food & drink'; };
+document.getElementById('saveTx').onclick=async function(){
+  const desc=document.getElementById('txDesc').value.trim();
+  const amt=parseFloat(document.getElementById('txAmt').value);
+  const date=document.getElementById('txDate').value;
+  const type=document.getElementById('txType').value;
+  const cat=document.getElementById('txCat').value;
+  const note=document.getElementById('txNote').value.trim();
+  const walletId=document.getElementById('txWallet').value||null;
+  if(!desc||!amt||!date||amt<=0){ alert('Please fill description, amount, and date.'); return; }
+  state.transactions.push({description:desc,amount:amt,date,type,category:cat,note,walletId,id:Date.now()});
+  document.getElementById('txDesc').value=''; document.getElementById('txAmt').value=''; document.getElementById('txNote').value='';
+  txOv.classList.remove('open'); render(); await saveData();
+};
+
+// FUTURE MODAL
+const fuOv=document.getElementById('futureOverlay');
+document.getElementById('openFuture').onclick=()=>fuOv.classList.add('open');
+document.getElementById('cancelFuture').onclick=()=>fuOv.classList.remove('open');
+fuOv.onclick=e=>{ if(e.target===fuOv)fuOv.classList.remove('open'); };
+document.getElementById('saveFuture').onclick=async function(){
+  const desc=document.getElementById('fDesc').value.trim();
+  const amt=parseFloat(document.getElementById('fAmt').value);
+  const date=document.getElementById('fDate').value;
+  if(!desc||!amt||!date||amt<=0){ alert('Fill description, amount, and date.'); return; }
+  state.futures.push({description:desc,amount:amt,date,category:document.getElementById('fCat').value,recurrence:document.getElementById('fRecur').value,id:Date.now()});
+  document.getElementById('fDesc').value=''; document.getElementById('fAmt').value=''; document.getElementById('fDate').value='';
+  fuOv.classList.remove('open'); render(); await saveData();
+};
+
+// WALLET MODAL
+const wOv=document.getElementById('walletOverlay');
+document.getElementById('openWallet').onclick=()=>{ editWalletIdx=-1; document.getElementById('wName').value=''; document.getElementById('wType').value='bank'; document.getElementById('wBal').value=''; document.getElementById('walletModalTitle').textContent='Add account'; wOv.classList.add('open'); };
+document.getElementById('cancelWallet').onclick=()=>wOv.classList.remove('open');
+wOv.onclick=e=>{ if(e.target===wOv)wOv.classList.remove('open'); };
+document.getElementById('saveWallet').onclick=async function(){
+  const name=document.getElementById('wName').value.trim();
+  const type=document.getElementById('wType').value;
+  const balance=parseFloat(document.getElementById('wBal').value);
+  if(!name||isNaN(balance)){ alert('Fill name and balance.'); return; }
+  if(editWalletIdx>=0){ state.wallets[editWalletIdx]={...state.wallets[editWalletIdx],name,type,balance}; }
+  else{ state.wallets.push({name,type,balance,id:Date.now()}); }
+  wOv.classList.remove('open'); render(); await saveData();
+};
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(function init(){
+  const cid = getClientId();
+  if(cid){
+    document.getElementById('clientIdSetup').style.display='none';
+    // load Google APIs
+    const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);
+    const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);
+  } else {
+    const saved = localStorage.getItem('gClientId');
+    if(saved) document.getElementById('clientIdInput').value=saved;
+  }
+})();
+</script>
+</body>
+</html>
