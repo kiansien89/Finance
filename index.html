@@ -780,6 +780,7 @@ function renderGoalPlans(){
   else if(goalPlanFilter!=='all')filtered=plans.filter(g=>g.type===goalPlanFilter);
   filtered.sort((a,b)=>{if(!a.targetDate&&!b.targetDate)return 0;if(!a.targetDate)return 1;if(!b.targetDate)return -1;return a.targetDate.localeCompare(b.targetDate);});
   const wrap=document.getElementById('goalsTimeline');
+  if(!wrap)return;
   if(!filtered.length){wrap.innerHTML='<div class="todo-empty">No goals here — add one above.</div>';return;}
   const byYear={};
   filtered.forEach(g=>{const yr=g.targetDate?new Date(g.targetDate).getFullYear():'No target date';if(!byYear[yr])byYear[yr]=[];byYear[yr].push(g);});
@@ -951,20 +952,18 @@ function getDueLabel(due){
 }
 
 function renderTodos(){
-  const catF=document.getElementById('todoCatFilter').value;
+  const catFEl=document.getElementById('todoCatFilter');
+  const catF=catFEl?catFEl.value:'';
   const tod=todayStr();
   let todos=[...state.todos];
 
-  // stats
+  // stats — guard each element
   const total=todos.length;
   const pending=todos.filter(t=>!t.done).length;
   const done=todos.filter(t=>t.done).length;
   const overdue=todos.filter(t=>!t.done&&t.due&&t.due<tod).length;
-  document.getElementById('tdTotal').textContent=total;
-  document.getElementById('tdPending').textContent=pending;
-  document.getElementById('tdDone').textContent=done;
-  document.getElementById('tdOverdue').textContent=overdue;
-  document.getElementById('todoBadge').textContent=pending;
+  const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  setEl('tdTotal',total);setEl('tdPending',pending);setEl('tdDone',done);setEl('tdOverdue',overdue);setEl('todoBadge',pending);
 
   // filter
   if(catF)todos=todos.filter(t=>t.category===catF);
@@ -985,6 +984,7 @@ function renderTodos(){
   });
 
   const wrap=document.getElementById('todoListWrap');
+  if(!wrap)return;
   if(!todos.length){wrap.innerHTML='<div class="todo-empty">No tasks here.</div>';return;}
 
   // group pending vs done
