@@ -868,7 +868,14 @@ function getClientId(){return localStorage.getItem('gClientId')||'';}
 function saveClientId(){const v=document.getElementById('clientIdInput').value.trim();if(!v){alert('Please paste your Client ID.');return;}localStorage.setItem('gClientId',v);location.reload();}
 function gapiLoaded(){gapi.load('client',async()=>{await gapi.client.init({discoveryDocs:[DISCOVERY]});gapiInited=true;maybeInit();});}
 function gisLoaded(){const cid=getClientId();if(!cid)return;tokenClient=google.accounts.oauth2.initTokenClient({client_id:cid,scope:SCOPES,callback:async resp=>{if(resp.error){setSyncStatus('err','Auth failed');return;}localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');await loadData();showApp();}});gisInited=true;maybeInit();}
-function maybeInit(){if(!gapiInited||!gisInited)return;const tok=localStorage.getItem('gToken');if(tok){gapi.client.setToken({access_token:tok});loadData().then(showApp).catch(()=>{localStorage.removeItem('gToken');});}document.getElementById('signInBtn').style.display='flex';document.getElementById('signInBtn').onclick=()=>tokenClient.requestAccessToken({prompt:''});}
+function maybeInit(){
+  const btn=document.getElementById('signInBtn');
+  if(btn)btn.style.display='flex';
+  if(!gapiInited||!gisInited)return;
+  const tok=localStorage.getItem('gToken');
+  if(tok){gapi.client.setToken({access_token:tok});loadData().then(showApp).catch(()=>{localStorage.removeItem('gToken');});}
+  if(btn)btn.onclick=()=>tokenClient.requestAccessToken({prompt:''});
+}
 function setSyncStatus(s,msg){const p=document.getElementById('syncPill');p.className='sync-pill '+s;document.getElementById('syncLbl').textContent=msg;}
 async function findOrCreate(){if(driveFileId)return driveFileId;const r=await gapi.client.drive.files.list({q:`name='${DRIVE_FILE}' and trashed=false`,fields:'files(id)',spaces:'drive'});if(r.result.files.length){driveFileId=r.result.files[0].id;return driveFileId;}const meta={name:DRIVE_FILE,mimeType:'application/json'};const body=JSON.stringify(state);const bnd='---fin_bnd';const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bnd}--`;const cr=await gapi.client.request({path:'/upload/drive/v3/files',method:'POST',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});driveFileId=cr.result.id;return driveFileId;}
 async function loadData(){setSyncStatus('syncing','Loading...');try{const fid=await findOrCreate();const r=await gapi.client.drive.files.get({fileId:fid,alt:'media'});const p=typeof r.result==='string'?JSON.parse(r.result):r.result;state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');setSyncStatus('ok','Synced');render();const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;if(age>3600000)fetchFxRates();else renderFx();}catch(e){setSyncStatus('err','Load failed');tryLocal();}}
@@ -1256,7 +1263,10 @@ document.getElementById('saveGoalPlan').onclick=async function(){
   gpOv.classList.remove('open');renderGoalPlans();await saveData();
 };
 
-(function init(){const cid=getClientId();if(cid){document.getElementById('clientIdInput').value=cid;const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);}})();
+(function init(){const cid=getClientId();if(cid){document.getElementById('clientIdInput').value=cid;
+  // Show button immediately — don't wait for APIs to load
+  const btn=document.getElementById('signInBtn');if(btn){btn.style.display='flex';btn.onclick=()=>{if(tokenClient)tokenClient.requestAccessToken({prompt:''});else{const t=setInterval(()=>{if(tokenClient){clearInterval(t);tokenClient.requestAccessToken({prompt:''});}},200);}};}
+  const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);}})();
 </script>
 </body>
 </html>
