@@ -553,6 +553,7 @@ input,select,button,textarea{font-family:var(--sans)}
             <div class="snapshot-item"><div class="snapshot-item-val" id="snapTasks">0</div><div class="snapshot-item-lbl">Tasks due today</div><div class="snapshot-item-sub" id="snapTasksSub">0 overdue</div></div>
             <div class="snapshot-item"><div class="snapshot-item-val" id="snapGoals">0</div><div class="snapshot-item-lbl">Active goals</div><div class="snapshot-item-sub" id="snapGoalsSub">0 on track</div></div>
           </div>
+        </div><!-- end snapshot -->
         <div class="section-hdr"><span class="section-title">Wallets &amp; Accounts</span><button class="add-btn" id="openWallet">+ Add account</button></div>
         <div class="wallet-grid" id="walletGrid"></div>
         <div class="total-bar"><span class="total-lbl">Total balance</span><span class="total-val" id="walletTotal">RM 0.00</span></div>
@@ -1213,17 +1214,24 @@ window.editDebt=i=>{editDebtIdx=i;const d=state.debts[i];document.getElementById
 
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
-  document.getElementById('topTabFinance').classList.toggle('active',name==='finance');
-  document.getElementById('topTabTodo').classList.toggle('active',name==='todo');
-  document.getElementById('topTabGoals').classList.toggle('active',name==='goals');
-  document.getElementById('page-finance').classList.toggle('active',name==='finance');
-  document.getElementById('page-todo').classList.toggle('active',name==='todo');
-  document.getElementById('page-goals').classList.toggle('active',name==='goals');
-  document.getElementById('monthNavWrap').style.display=name==='finance'?'flex':'none';
-  // Re-render the target tab so content is always fresh
+  // Use explicit add/remove instead of toggle for reliability
+  ['finance','todo','goals'].forEach(n=>{
+    const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
+    const page=document.getElementById('page-'+n);
+    if(n===name){
+      if(tab)tab.classList.add('active');
+      if(page){page.classList.add('active');page.style.display='block';}
+    }else{
+      if(tab)tab.classList.remove('active');
+      if(page){page.classList.remove('active');page.style.display='none';}
+    }
+  });
+  const mnw=document.getElementById('monthNavWrap');
+  if(mnw)mnw.style.display=name==='finance'?'flex':'none';
+  // Re-render target tab content
   if(name==='todo')renderTodos();
   else if(name==='goals')renderGoalPlans();
-  else if(name==='finance')render();
+  else render();
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
