@@ -1220,6 +1220,10 @@ function switchAppTab(name){
   document.getElementById('page-todo').classList.toggle('active',name==='todo');
   document.getElementById('page-goals').classList.toggle('active',name==='goals');
   document.getElementById('monthNavWrap').style.display=name==='finance'?'flex':'none';
+  // Re-render the target tab so content is always fresh
+  if(name==='todo')renderTodos();
+  else if(name==='goals')renderGoalPlans();
+  else if(name==='finance')render();
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
