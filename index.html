@@ -1205,6 +1205,9 @@ function renderSnapshot(){
 }
 window.delFuture=async i=>{state.futures.splice(i,1);render();await saveData();};
 window.delWallet=async i=>{state.wallets.splice(i,1);render();await saveData();};
+window.delTx=async i=>{state.transactions.splice(i,1);render();await saveData();};
+window.delFuture=async i=>{state.futures.splice(i,1);render();await saveData();};
+window.delWallet=async i=>{state.wallets.splice(i,1);render();await saveData();};
 window.delGoal=async i=>{state.goals.splice(i,1);render();await saveData();};
 window.delDebt=async i=>{state.debts.splice(i,1);render();await saveData();};
 window.delBudget=async cat=>{delete state.budgets[cat];render();await saveData();};
