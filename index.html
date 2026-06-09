@@ -299,18 +299,25 @@ input,select,button,textarea{font-family:var(--sans)}
 /* ── GOALS PATH PLANNING ─────────────────────────────── */
 .goals-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
 .goals-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
-.goals-stat{background:var(--glass);backdrop-filter:blur(16px);border-radius:var(--rl);box-shadow:var(--shadow);padding:12px 14px;text-align:center;border:1px solid var(--border2)}
-.goals-stat-val{font-family:var(--mono);font-size:1.2rem;font-weight:800;color:var(--t1)}
-.goals-stat-lbl{font-size:0.65rem;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:3px}
+.goals-stat{background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:12px 14px;text-align:center;border:1px solid rgba(0,0,0,0.08)}
+.goals-stat-val{font-family:var(--mono);font-size:1.2rem;font-weight:800;color:#1A1A1A}
+.goals-stat-lbl{font-size:0.65rem;color:#6A6A6A;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:3px}
 .goals-cat-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
-.goals-cat-btn{background:var(--glass);backdrop-filter:blur(12px);border:1.5px solid rgba(0,0,0,0.1);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);transition:all 0.15s;font-family:var(--sans)}
+.goals-cat-btn{background:rgba(255,255,255,0.92);border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:#4A4A4A;transition:all 0.15s;font-family:var(--sans)}
 .goals-cat-btn:hover{color:var(--t1)}
 .goals-cat-btn.active{background:var(--red);color:white;border-color:var(--red);box-shadow:0 2px 8px rgba(191,0,0,0.3)}
 /* TIMELINE */
 .timeline-wrap{position:relative;padding-bottom:1rem}
-.timeline-year-label{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);text-shadow:0 1px 3px rgba(0,0,0,0.4);padding:10px 0 6px;display:flex;align-items:center;gap:10px}
+.timeline-year-label{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:white;text-shadow:0 2px 6px rgba(0,0,0,0.8);padding:10px 0 6px;display:flex;align-items:center;gap:10px}
 .timeline-year-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.15)}
-.goal-card{background:var(--glass);backdrop-filter:blur(16px);border-radius:var(--rl);box-shadow:var(--shadow);padding:16px;margin-bottom:10px;border:1px solid var(--border2);border-left:4px solid var(--red);transition:box-shadow 0.15s;position:relative}
+.goal-card{background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow2);padding:16px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08);border-left:4px solid var(--red);transition:box-shadow 0.15s;position:relative}
+.goal-card:hover{box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.goal-card.status-done{border-left-color:#007A38}
+.goal-card.status-active{border-left-color:#0055AA}
+.goal-card.status-paused{border-left-color:#C06000}
+.goal-card-title{font-size:0.95rem;font-weight:800;color:#1A1A1A;margin-bottom:3px}
+.goal-card-desc{font-size:0.78rem;color:#6A6A6A;font-weight:500;line-height:1.5;margin-bottom:6px}
+.milestones-wrap{border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;background:rgba(0,0,0,0.02);border-radius:0 0 var(--r) var(--r);margin:-1px -1px -1px -1px;padding:10px 14px}
 .goal-card:hover{box-shadow:var(--shadow2)}
 .goal-card.status-done{border-left-color:var(--green);opacity:0.8}
 .goal-card.status-active{border-left-color:var(--blue)}
@@ -397,6 +404,33 @@ input,select,button,textarea{font-family:var(--sans)}
 .goal-health{display:flex;align-items:center;gap:6px;margin-top:6px}
 .health-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .health-label{font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em}
+/* ── GANTT CHART ──────────────────────────────────────── */
+.gantt-wrap{background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow2);padding:18px;border:1px solid rgba(0,0,0,0.08)}
+.gantt-title{font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.gantt-header{display:flex;margin-bottom:6px;padding-left:160px}
+.gantt-month{flex:1;font-size:0.6rem;font-weight:700;color:#9A9A9A;text-align:center;text-transform:uppercase}
+.gantt-row{display:flex;align-items:center;margin-bottom:8px;min-height:32px}
+.gantt-label{width:155px;flex-shrink:0;font-size:0.75rem;font-weight:700;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;display:flex;align-items:center;gap:5px}
+.gantt-track{flex:1;height:24px;background:#F5F5F5;border-radius:4px;position:relative;overflow:visible}
+.gantt-bar{position:absolute;height:100%;border-radius:4px;display:flex;align-items:center;padding:0 6px;font-size:0.62rem;font-weight:800;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity 0.2s;min-width:4px}
+.gantt-bar:hover{opacity:0.85}
+.gantt-today{position:absolute;top:-4px;bottom:-4px;width:2px;background:#BF0000;z-index:10}
+.gantt-today::before{content:'Today';position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:0.58rem;color:#BF0000;font-weight:800;white-space:nowrap}
+.gantt-legend{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.gantt-legend-item{display:flex;align-items:center;gap:4px;font-size:0.68rem;color:#6A6A6A;font-weight:600}
+.gantt-legend-dot{width:10px;height:10px;border-radius:2px}
+/* ── AI SUGGEST ───────────────────────────────────────── */
+.ai-suggest-btn{background:rgba(106,0,204,0.08);border:1.5px solid rgba(106,0,204,0.2);border-radius:6px;padding:3px 9px;cursor:pointer;color:#6A00CC;font-size:0.65rem;font-weight:800;white-space:nowrap;transition:all 0.15s;font-family:var(--sans)}
+.ai-suggest-btn:hover{background:rgba(106,0,204,0.14)}
+.ai-suggest-btn:disabled{opacity:0.5;cursor:not-allowed}
+.ai-milestone-option{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.07);cursor:pointer}
+.ai-milestone-option:last-child{border-bottom:none}
+.ai-milestone-option:hover{background:rgba(106,0,204,0.03)}
+.ai-ms-check{width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(106,0,204,0.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-top:2px}
+.ai-ms-check.selected{background:#6A00CC;border-color:#6A00CC;color:white;font-size:10px;font-weight:900}
+.ai-ms-text{flex:1}
+.ai-ms-title{font-size:0.82rem;font-weight:700;color:#1A1A1A}
+.ai-ms-hint{font-size:0.7rem;color:#6A6A6A;font-weight:500;margin-top:2px}
 /* FOOTER */
 .footer{text-align:center;font-size:0.68rem;color:rgba(255,255,255,0.4);margin-top:2rem;line-height:1.7;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
 .footer strong{color:rgba(255,255,255,0.6)}
@@ -679,7 +713,10 @@ input,select,button,textarea{font-family:var(--sans)}
           <button class="goals-cat-btn" onclick="setGoalFilter('done',this)">✅ Done</button>
         </div>
         <button class="btn btn-red" id="openGoalPlan">+ Add goal</button>
+        <button class="btn" id="toggleGanttBtn" onclick="toggleGanttView()" style="background:white;border:1.5px solid rgba(0,0,0,0.15);color:#4A4A4A;font-weight:700">📊 Gantt view</button>
       </div>
+      <!-- GANTT CHART -->
+      <div id="ganttWrap" style="display:none;margin-bottom:1rem"></div>
       <div id="goalsTimeline"><div class="todo-empty">No goals yet — tap Add goal to start your path.</div></div>
     </div>
 
@@ -724,6 +761,19 @@ input,select,button,textarea{font-family:var(--sans)}
   </div>
 </div>
 
+<!-- AI SUGGEST MODAL -->
+<div class="modal-overlay" id="aiSuggestOverlay">
+  <div class="modal" style="max-width:420px">
+    <h3 id="aiSuggestTitle">✨ AI Suggested Milestones</h3>
+    <p style="font-size:0.78rem;color:#6A6A6A;margin-bottom:14px;font-weight:500">Select milestones to add to your goal. You can edit them after.</p>
+    <div id="aiSuggestList"><div style="text-align:center;padding:20px;color:#9A9A9A;font-size:0.82rem">Generating suggestions...</div></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelAiSuggest">Close</button>
+      <button class="btn btn-red" id="addSelectedMilestones">Add selected</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const DRIVE_FILE='finance_dashboard_data.json',SCOPES='https://www.googleapis.com/auth/drive.file',DISCOVERY='https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -764,6 +814,155 @@ function goalHealthHtml(g){
   else{dot='#BF0000';label='Needs attention';color='#BF0000';}
   return'<div class="goal-health"><div class="health-dot" style="background:'+dot+'"></div><span class="health-label" style="color:'+color+'">'+label+'</span><span style="font-size:0.65rem;color:#9A9A9A;font-weight:600;margin-left:4px">'+Math.round(timePct)+'% time · '+progPct+'% done</span></div>';
 }
+
+// ── GANTT CHART ───────────────────────────────────────
+let ganttVisible=false;
+function toggleGanttView(){
+  ganttVisible=!ganttVisible;
+  const wrap=document.getElementById('ganttWrap');
+  const btn=document.getElementById('toggleGanttBtn');
+  if(!wrap||!btn)return;
+  wrap.style.display=ganttVisible?'block':'none';
+  btn.textContent=ganttVisible?'📋 List view':'📊 Gantt view';
+  if(ganttVisible)renderGantt();
+}
+function renderGantt(){
+  const wrap=document.getElementById('ganttWrap');
+  if(!wrap)return;
+  const plans=state.goalPlans||[];
+  if(!plans.length){wrap.innerHTML='<div class="gantt-wrap"><div class="empty">No goals to display.</div></div>';return;}
+  // Determine date range: today to furthest target date + 1 month buffer
+  const today=new Date();today.setHours(0,0,0,0);
+  const allDates=plans.filter(g=>g.targetDate).map(g=>new Date(g.targetDate));
+  const maxDate=allDates.length?new Date(Math.max(...allDates)):new Date(today.getFullYear(),today.getMonth()+12,1);
+  maxDate.setMonth(maxDate.getMonth()+1);
+  const minDate=new Date(today.getFullYear(),today.getMonth()-1,1);
+  // Build month headers
+  const months=[];let d=new Date(minDate);
+  while(d<=maxDate){months.push(new Date(d));d.setMonth(d.getMonth()+1);}
+  const totalMs=maxDate-minDate;
+  const pct=(date)=>Math.max(0,Math.min(100,((new Date(date)-minDate)/totalMs)*100));
+  const STATUS_COLORS={'not-started':'#9A9A9A',active:'#0055AA',done:'#007A38',paused:'#C06000'};
+  const TYPE_COLORS={Career:'#0055AA',Financial:'#007A38',Life:'#9B6EF5'};
+  const todayPct=pct(today);
+  let html=`<div class="gantt-wrap">
+    <div class="gantt-title">📊 Goal Timeline — Gantt Chart</div>
+    <div class="gantt-header">`;
+  months.forEach(m=>{html+=`<div class="gantt-month">${m.toLocaleDateString('en-MY',{month:'short',year:'2-digit'})}</div>`;});
+  html+=`</div>`;
+  plans.forEach(g=>{
+    const color=STATUS_COLORS[g.status||'not-started'];
+    const start=g.createdAt?new Date(g.createdAt):new Date(today.getFullYear(),today.getMonth()-1,1);
+    const end=g.targetDate?new Date(g.targetDate):new Date(today.getFullYear(),today.getMonth()+6,1);
+    const left=pct(start);
+    const width=Math.max(1,pct(end)-left);
+    html+=`<div class="gantt-row">
+      <div class="gantt-label">${esc(g.icon||'🎯')} ${esc(g.title)}</div>
+      <div class="gantt-track">
+        <div class="gantt-today" style="left:${todayPct}%"></div>
+        <div class="gantt-bar" style="left:${left}%;width:${width}%;background:${color}" title="${esc(g.title)}: ${g.status||'not started'}">
+          ${width>8?esc(g.title):''}
+        </div>
+      </div>
+    </div>`;
+    // Render milestones as diamond markers
+    if(g.milestones&&g.milestones.length){
+      g.milestones.filter(m=>m.due).forEach(m=>{
+        const mp=pct(new Date(m.due));
+        html+=`<div class="gantt-row" style="min-height:18px">
+          <div class="gantt-label" style="font-size:0.65rem;color:#9A9A9A;padding-left:16px">↳ ${esc(m.title)}</div>
+          <div class="gantt-track" style="height:14px">
+            <div style="position:absolute;left:${mp}%;top:50%;transform:translate(-50%,-50%) rotate(45deg);width:8px;height:8px;background:${m.done?'#007A38':'#BF0000'};border:1.5px solid white"></div>
+          </div>
+        </div>`;
+      });
+    }
+  });
+  html+=`<div class="gantt-legend">
+    <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:#9A9A9A"></div>Not started</div>
+    <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:#0055AA"></div>Active</div>
+    <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:#007A38"></div>Achieved</div>
+    <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:#C06000"></div>Paused</div>
+    <div class="gantt-legend-item"><div style="width:10px;height:10px;transform:rotate(45deg);background:#BF0000;display:inline-block"></div> Milestone pending</div>
+    <div class="gantt-legend-item"><div style="width:10px;height:10px;transform:rotate(45deg);background:#007A38;display:inline-block"></div> Milestone done</div>
+    <div class="gantt-legend-item"><div style="width:2px;height:12px;background:#BF0000;display:inline-block"></div> Today</div>
+  </div></div>`;
+  wrap.innerHTML=html;
+}
+
+// ── AI SUGGEST ────────────────────────────────────────
+let aiSuggestGoalIdx=-1;
+let aiSuggestSelections=[];
+window.openAiSuggest=async function(idx){
+  aiSuggestGoalIdx=idx;
+  aiSuggestSelections=[];
+  const g=state.goalPlans[idx];
+  if(!g)return;
+  document.getElementById('aiSuggestTitle').textContent=`✨ AI Milestones — ${g.title}`;
+  document.getElementById('aiSuggestList').innerHTML='<div style="text-align:center;padding:24px;color:#9A9A9A;font-size:0.82rem">⏳ Generating suggestions...</div>';
+  document.getElementById('aiSuggestOverlay').classList.add('open');
+  try{
+    const prompt=`You are a practical life and financial planning assistant. 
+Goal: "${g.title}"
+Type: ${g.type||'Life'}
+Status: ${g.status||'not started'}
+Target date: ${g.targetDate||'not set'}
+Description: ${g.desc||'none'}
+Existing milestones: ${(g.milestones||[]).map(m=>m.title).join(', ')||'none'}
+
+Suggest exactly 5 specific, actionable milestones for this goal. Each milestone should be a concrete step.
+Reply ONLY with a JSON array of exactly 5 objects with keys "title" (string, max 60 chars) and "hint" (string, max 80 chars brief explanation).
+No markdown, no backticks, just raw JSON array.`;
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await resp.json();
+    const text=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const clean=text.replace(/```json|```/g,'').trim();
+    const suggestions=JSON.parse(clean);
+    aiSuggestSelections=new Array(suggestions.length).fill(false);
+    document.getElementById('aiSuggestList').innerHTML=suggestions.map((s,i)=>`
+      <div class="ai-milestone-option" onclick="toggleAiMs(${i},this)">
+        <div class="ai-ms-check" id="ai-ms-check-${i}"></div>
+        <div class="ai-ms-text">
+          <div class="ai-ms-title">${esc(s.title)}</div>
+          <div class="ai-ms-hint">${esc(s.hint)}</div>
+        </div>
+      </div>`).join('');
+    // store suggestions for later use
+    document.getElementById('aiSuggestList').dataset.suggestions=JSON.stringify(suggestions);
+  }catch(e){
+    document.getElementById('aiSuggestList').innerHTML='<div style="text-align:center;padding:20px;color:#BF0000;font-size:0.82rem">Failed to generate suggestions. Please try again.</div>';
+  }
+};
+window.toggleAiMs=function(i,el){
+  aiSuggestSelections[i]=!aiSuggestSelections[i];
+  const check=document.getElementById('ai-ms-check-'+i);
+  if(aiSuggestSelections[i]){check.classList.add('selected');check.textContent='✓';}
+  else{check.classList.remove('selected');check.textContent='';}
+};
+document.getElementById('cancelAiSuggest').onclick=()=>document.getElementById('aiSuggestOverlay').classList.remove('open');
+document.getElementById('aiSuggestOverlay').onclick=e=>{if(e.target===document.getElementById('aiSuggestOverlay'))document.getElementById('aiSuggestOverlay').classList.remove('open');};
+document.getElementById('addSelectedMilestones').onclick=async function(){
+  const g=state.goalPlans[aiSuggestGoalIdx];
+  if(!g)return;
+  if(!g.milestones)g.milestones=[];
+  const listEl=document.getElementById('aiSuggestList');
+  let suggestions=[];
+  try{suggestions=JSON.parse(listEl.dataset.suggestions||'[]');}catch(e){}
+  let added=0;
+  aiSuggestSelections.forEach((sel,i)=>{
+    if(sel&&suggestions[i]){g.milestones.push({title:suggestions[i].title,due:'',done:false,id:Date.now()+i});added++;}
+  });
+  if(added===0){alert('Select at least one milestone.');return;}
+  // auto update progress
+  if(g.milestones.length>0)g.progress=Math.round((g.milestones.filter(m=>m.done).length/g.milestones.length)*100);
+  document.getElementById('aiSuggestOverlay').classList.remove('open');
+  renderGoalPlans();
+  await saveData();
+};
 
 function renderGoalPlans(){
   const plans=state.goalPlans||[];
@@ -812,6 +1011,7 @@ function renderGoalPlans(){
             ${goalHealthHtml(g)}
           </div>
           <div class="goal-card-actions">
+            <button class="ai-suggest-btn" onclick="openAiSuggest(${idx})" title="AI suggest milestones">✨ AI suggest</button>
             <button class="ic-btn" onclick="openEditGoalPlan(${idx})" title="Edit">✎</button>
             <button class="ic-btn del" onclick="delGoalPlan(${idx})" title="Delete">✕</button>
           </div>
@@ -838,6 +1038,7 @@ function renderGoalPlans(){
     });
   });
   wrap.innerHTML=html;
+  if(ganttVisible)renderGantt();
 }
 window.setGoalFilter=function(f,btn){goalPlanFilter=f;document.querySelectorAll('.goals-cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGoalPlans();};
 window.delGoalPlan=async function(i){state.goalPlans.splice(i,1);renderGoalPlans();await saveData();};
