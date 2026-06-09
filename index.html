@@ -318,15 +318,9 @@ input,select,button,textarea{font-family:var(--sans)}
 .goal-card-title{font-size:0.95rem;font-weight:800;color:#1A1A1A;margin-bottom:3px}
 .goal-card-desc{font-size:0.78rem;color:#6A6A6A;font-weight:500;line-height:1.5;margin-bottom:6px}
 .milestones-wrap{border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;background:rgba(0,0,0,0.02);border-radius:0 0 var(--r) var(--r);margin:-1px -1px -1px -1px;padding:10px 14px}
-.goal-card:hover{box-shadow:var(--shadow2)}
-.goal-card.status-done{border-left-color:var(--green);opacity:0.8}
-.goal-card.status-active{border-left-color:var(--blue)}
-.goal-card.status-paused{border-left-color:var(--amber)}
 .goal-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
 .goal-card-icon{font-size:1.6rem;flex-shrink:0;margin-top:2px}
 .goal-card-info{flex:1;min-width:0}
-.goal-card-title{font-size:0.95rem;font-weight:800;color:var(--t1);margin-bottom:3px}
-.goal-card-desc{font-size:0.78rem;color:var(--t3);font-weight:500;line-height:1.5;margin-bottom:6px}
 .goal-card-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .goal-type-badge{font-size:0.62rem;padding:2px 8px;border-radius:20px;font-weight:800}
 .type-career{background:rgba(0,85,170,0.1);color:var(--blue)}
@@ -1117,9 +1111,55 @@ function showSignInStep(){
 }
 function setSyncStatus(s,msg){const p=document.getElementById('syncPill');p.className='sync-pill '+s;document.getElementById('syncLbl').textContent=msg;}
 async function findOrCreate(){if(driveFileId)return driveFileId;const r=await gapi.client.drive.files.list({q:`name='${DRIVE_FILE}' and trashed=false`,fields:'files(id)',spaces:'drive'});if(r.result.files.length){driveFileId=r.result.files[0].id;return driveFileId;}const meta={name:DRIVE_FILE,mimeType:'application/json'};const body=JSON.stringify(state);const bnd='---fin_bnd';const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bnd}--`;const cr=await gapi.client.request({path:'/upload/drive/v3/files',method:'POST',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});driveFileId=cr.result.id;return driveFileId;}
-async function loadData(){setSyncStatus('syncing','Loading...');try{const fid=await findOrCreate();const r=await gapi.client.drive.files.get({fileId:fid,alt:'media'});const p=typeof r.result==='string'?JSON.parse(r.result):r.result;state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');setSyncStatus('ok','Synced');render();const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;if(age>3600000)fetchFxRates();else renderFx();}catch(e){setSyncStatus('err','Load failed');tryLocal();}}
+async function loadData(){
+  setSyncStatus('syncing','Loading...');
+  try{
+    const fid=await findOrCreate();
+    const r=await gapi.client.drive.files.get({fileId:fid,alt:'media'});
+    const p=typeof r.result==='string'?JSON.parse(r.result):r.result;
+    state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
+    state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
+    state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
+    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];
+    localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
+    setSyncStatus('ok','Synced');render();
+    const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
+    if(age>3600000)fetchFxRates();else renderFx();
+  }catch(e){
+    // Token likely expired — clear it and prompt re-sign-in
+    if(e&&(e.status===401||e.status===403||(e.result&&e.result.error&&e.result.error.code===401))){
+      localStorage.removeItem('gToken');
+      setSyncStatus('err','Session expired — please sign in again');
+      setTimeout(()=>{showAuth();},1500);
+    }else{
+      setSyncStatus('err','Load failed — tap to retry');
+      document.getElementById('syncPill').onclick=()=>loadData();
+    }
+  }
+}
 function tryLocal(){try{const s=localStorage.getItem('fin_v5');if(s){const p=JSON.parse(s);Object.assign(state,p);render();renderFx();}}catch(e){}}
-async function saveData(){setSyncStatus('syncing','Saving...');const payload=JSON.stringify(state,null,2);try{const fid=await findOrCreate();const bnd='---fin_bnd';const meta={name:DRIVE_FILE,mimeType:'application/json'};const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${bnd}--`;await gapi.client.request({path:`/upload/drive/v3/files/${fid}`,method:'PATCH',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});setSyncStatus('ok','Saved '+new Date().toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}));try{localStorage.setItem('fin_v5',payload);}catch(e){}}catch(e){setSyncStatus('err','Save failed');try{localStorage.setItem('fin_v5',payload);}catch(e2){}}}
+async function saveData(){
+  setSyncStatus('syncing','Saving...');
+  const payload=JSON.stringify(state,null,2);
+  try{
+    const fid=await findOrCreate();
+    const bnd='---fin_bnd';
+    const meta={name:DRIVE_FILE,mimeType:'application/json'};
+    const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${bnd}--`;
+    await gapi.client.request({path:`/upload/drive/v3/files/${fid}`,method:'PATCH',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});
+    setSyncStatus('ok','Saved '+new Date().toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}));
+    try{localStorage.setItem('fin_v5',payload);}catch(e){}
+  }catch(e){
+    if(e&&(e.status===401||e.status===403)){
+      localStorage.removeItem('gToken');
+      setSyncStatus('err','Session expired — please sign in again');
+      setTimeout(()=>{showAuth();},1500);
+    }else{
+      setSyncStatus('err','Save failed');
+      try{localStorage.setItem('fin_v5',payload);}catch(e2){}
+    }
+  }
+}
 
 async function fetchFxRates(){try{const r=await fetch('https://api.exchangerate-api.com/v4/latest/MYR');const d=await r.json();state.fxRates=d.rates||{};state.fxLastUpdate=Date.now();renderFx();await saveData();}catch(e){state.fxRates={USD:0.2174,NZD:0.3623,SGD:0.2907,EUR:0.2012,GBP:0.1712,JPY:32.5,AUD:0.338,CNY:1.575};state.fxLastUpdate=Date.now();renderFx();}}
 function renderFx(){const rates=state.fxRates;if(!Object.keys(rates).length)return;const curs=state.fxCurrencies;document.getElementById('fxTickerItems').innerHTML=curs.map(cur=>{const rate=rates[cur]??0;return`<div class="fx-item"><span class="fx-pair">MYR/${cur}</span><span class="fx-rate">${(1/rate).toFixed(4)}</span></div>`;}).join('');const t=state.fxLastUpdate?new Date(state.fxLastUpdate).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}):'—';document.getElementById('fxTime').textContent=t;document.getElementById('fxConvTime').textContent='Rates as of '+t;document.getElementById('fxRatesGrid').innerHTML=curs.map(cur=>{const rate=rates[cur]??0;return`<div class="fx-rate-card"><div class="fx-rate-pair">1 MYR → ${cur}</div><div class="fx-rate-val">${Number(rate).toFixed(4)}</div><div style="font-size:0.65rem;color:var(--t3);margin-top:3px;font-weight:600">1 ${cur} = RM ${(1/rate).toFixed(4)}</div></div>`;}).join('');document.getElementById('fxChips').innerHTML=curs.map(cur=>`<div class="fx-chip">${cur} <button onclick="removeFxCurrency('${cur}')" title="Remove">✕</button></div>`).join('');const populate=id=>{const sel=document.getElementById(id);const cur=sel.value;sel.innerHTML=['MYR',...curs,...ALL_CURRENCIES.filter(c=>!curs.includes(c))].map(c=>`<option${c===cur?' selected':''}>${c}</option>`).join('');};populate('fxFromCur');populate('fxToCur');calcFx();}
