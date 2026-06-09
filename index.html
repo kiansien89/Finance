@@ -478,16 +478,11 @@ input,select,button,textarea{font-family:var(--sans)}
     <div class="auth-tagline">Personal Dashboard · Malaysia</div>
   </div>
   <div class="auth-form">
-    <div id="clientIdSection">
-      <div class="field"><label>Google OAuth Client ID</label><input type="text" id="clientIdInput" placeholder="Paste your Client ID here"></div>
-      <button class="btn btn-red btn-full" onclick="saveClientId()" style="margin-bottom:12px">Save &amp; Continue</button>
-    </div>
-    <button class="auth-btn" id="signInBtn" style="display:none">
+    <button class="auth-btn" id="signInBtn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
       Sign in with Google
     </button>
-    <button class="btn-ghost btn" id="changeClientBtn" style="display:none;width:100%;margin-top:8px;font-size:0.72rem" onclick="resetClientId()">Change Client ID</button>
-    <p style="font-size:0.68rem;color:var(--t4);margin-top:10px;text-align:center;font-weight:600">Data stored in your own Google Drive only.</p>
+    <p style="font-size:0.68rem;color:var(--t4);margin-top:12px;text-align:center;font-weight:600">Data stored in your own Google Drive only.</p>
   </div>
 </div>
 
@@ -867,17 +862,55 @@ const fmtN=n=>Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumF
 const monthTx=()=>state.transactions.filter(t=>{const d=new Date(t.date);return d.getFullYear()===viewYear&&d.getMonth()===viewMonth;});
 const todayStr=()=>new Date().toISOString().slice(0,10);
 
-function getClientId(){return localStorage.getItem('gClientId')||'';}
-function saveClientId(){const v=document.getElementById('clientIdInput').value.trim();if(!v){alert('Please paste your Client ID.');return;}localStorage.setItem('gClientId',v);location.reload();}
-function gapiLoaded(){gapi.load('client',async()=>{await gapi.client.init({discoveryDocs:[DISCOVERY]});gapiInited=true;maybeInit();});}
-function gisLoaded(){const cid=getClientId();if(!cid)return;tokenClient=google.accounts.oauth2.initTokenClient({client_id:cid,scope:SCOPES,callback:async resp=>{if(resp.error){setSyncStatus('err','Auth failed');return;}localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');await loadData();showApp();}});gisInited=true;maybeInit();}
-function maybeInit(){
-  const btn=document.getElementById('signInBtn');
-  if(btn)btn.style.display='flex';
+function getClientId(){return localStorage.getItem('gClientId')||'880872981289-g1eh79116mu0f061l3ie7ac8ah0q6nlb.apps.googleusercontent.com';}
+function saveClientId(){
+  const v=document.getElementById('clientIdInput').value.trim();
+  if(!v){alert('Please paste your Client ID.');return;}
+  localStorage.setItem('gClientId',v);
+  location.reload();
+}
+function resetClientId(){
+  localStorage.removeItem('gClientId');
+  localStorage.removeItem('gToken');
+  location.reload();
+}
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    await gapi.client.init({discoveryDocs:[DISCOVERY]});
+    gapiInited=true;
+    maybeAutoSignIn();
+  });
+}
+function gisLoaded(){
+  const cid=getClientId();if(!cid)return;
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:cid,scope:SCOPES,
+    callback:async resp=>{
+      if(resp.error){setSyncStatus('err','Auth failed');return;}
+      localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
+      await loadData();showApp();
+    }
+  });
+  gisInited=true;
+  maybeAutoSignIn();
+}
+function maybeAutoSignIn(){
   if(!gapiInited||!gisInited)return;
   const tok=localStorage.getItem('gToken');
-  if(tok){gapi.client.setToken({access_token:tok});loadData().then(showApp).catch(()=>{localStorage.removeItem('gToken');});}
-  if(btn)btn.onclick=()=>tokenClient.requestAccessToken({prompt:''});
+  if(tok){
+    gapi.client.setToken({access_token:tok});
+    loadData().then(showApp).catch(()=>{localStorage.removeItem('gToken');});
+  }
+}
+function showSignInStep(){
+  const btn=document.getElementById('signInBtn');
+  if(btn)btn.onclick=()=>{
+    if(tokenClient){tokenClient.requestAccessToken({prompt:''});}
+    else{
+      const t=setInterval(()=>{if(tokenClient){clearInterval(t);tokenClient.requestAccessToken({prompt:''});}},100);
+      setTimeout(()=>clearInterval(t),10000);
+    }
+  };
 }
 function setSyncStatus(s,msg){const p=document.getElementById('syncPill');p.className='sync-pill '+s;document.getElementById('syncLbl').textContent=msg;}
 async function findOrCreate(){if(driveFileId)return driveFileId;const r=await gapi.client.drive.files.list({q:`name='${DRIVE_FILE}' and trashed=false`,fields:'files(id)',spaces:'drive'});if(r.result.files.length){driveFileId=r.result.files[0].id;return driveFileId;}const meta={name:DRIVE_FILE,mimeType:'application/json'};const body=JSON.stringify(state);const bnd='---fin_bnd';const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bnd}--`;const cr=await gapi.client.request({path:'/upload/drive/v3/files',method:'POST',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});driveFileId=cr.result.id;return driveFileId;}
@@ -1056,6 +1089,7 @@ window.addSubtask=async function(tid){
   input.value='';
   renderTodos();await saveData();
 };
+window.toggleTodo=async function(id){
   const t=state.todos.find(t=>t.id===id);
   if(!t)return;
   if(!t.done){
@@ -1267,27 +1301,11 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 };
 
 (function init(){
-  const cid=getClientId();
-  if(cid){
-    // Client ID already saved — hide the input section, show sign in button directly
-    const cidSection=document.getElementById('clientIdSection');
-    const btn=document.getElementById('signInBtn');
-    const changeBtn=document.getElementById('changeClientBtn');
-    if(cidSection)cidSection.style.display='none';
-    if(btn){btn.style.display='flex';}
-    if(changeBtn)changeBtn.style.display='block';
-    // Wire click handler — polls until tokenClient is ready
-    if(btn)btn.onclick=()=>{
-      if(tokenClient)tokenClient.requestAccessToken({prompt:''});
-      else{const t=setInterval(()=>{if(tokenClient){clearInterval(t);tokenClient.requestAccessToken({prompt:''});}},150);}
-    };
-    // Load Google APIs
-    const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);
-    const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);
-  }
+  // Client ID is hardcoded — always go straight to sign in
+  showSignInStep();
+  const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);
+  const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);
 })();
-
-function resetClientId(){localStorage.removeItem('gClientId');localStorage.removeItem('gToken');location.reload();}
 </script>
 </body>
 </html>
