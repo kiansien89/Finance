@@ -595,6 +595,7 @@ input,select,button,textarea{font-family:var(--sans)}
         <button class="tab" onclick="switchTab('goals')">Goals</button>
         <button class="tab" onclick="switchTab('fx')">Currency</button>
         <button class="tab" onclick="switchTab('report')">Report</button>
+        <button class="tab" onclick="switchTab('balance')">Balance Sheet</button>
       </div>
 
       <div class="tab-page active" id="tab-overview">
@@ -615,7 +616,7 @@ input,select,button,textarea{font-family:var(--sans)}
         </div><!-- end snapshot -->
         <div class="section-hdr"><span class="section-title">Wallets &amp; Accounts</span><button class="add-btn" id="openWallet">+ Add account</button></div>
         <div class="wallet-grid" id="walletGrid"></div>
-        <div class="total-bar"><span class="total-lbl">Total balance</span><span class="total-val" id="walletTotal">RM 0.00</span></div>
+        <div class="total-bar"><span class="total-lbl">Total balance<br><span id="walletTotalSub" style="font-size:0.65rem;opacity:0.7;font-weight:500"></span></span><span class="total-val" id="walletTotal">RM 0.00</span></div>
         <div class="metric-grid">
           <div class="metric m-income"><div class="m-lbl">Income</div><div class="m-val" id="mIncome">RM 0</div><div class="m-sub" id="mIncomeSub">—</div></div>
           <div class="metric m-expense"><div class="m-lbl">Expenses</div><div class="m-val" id="mExpense">RM 0</div><div class="m-sub" id="mExpSub">—</div></div>
@@ -682,6 +683,55 @@ input,select,button,textarea{font-family:var(--sans)}
         <div class="two-col">
           <div class="panel"><div class="ph"><div class="pt">📊 Monthly summary</div></div><div id="reportRows"><div class="empty">No data.</div></div></div>
           <div class="panel"><div class="ph"><div class="pt">🏆 Top expenses</div></div><div id="topExpenses"><div class="empty">No data.</div></div></div>
+        </div>
+      </div>
+      <div class="tab-page" id="tab-balance">
+        <!-- NET WORTH HERO -->
+        <div style="background:linear-gradient(135deg,#1A1A2E,#16213E,#0F3460);border-radius:var(--rl);padding:20px 24px;margin-bottom:1rem;box-shadow:var(--shadow2)">
+          <div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);margin-bottom:6px">NET WORTH</div>
+          <div style="font-family:var(--mono);font-size:2rem;font-weight:800;color:white" id="bsNetWorth">RM 0.00</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;font-weight:600" id="bsNetWorthSub">Total assets minus total liabilities</div>
+        </div>
+        <!-- ASSETS vs LIABILITIES SUMMARY -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+          <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:16px;border-top:4px solid #007A38">
+            <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#007A38;margin-bottom:8px">📈 Total Assets</div>
+            <div style="font-family:var(--mono);font-size:1.4rem;font-weight:800;color:#007A38" id="bsTotalAssets">RM 0.00</div>
+            <div style="font-size:0.72rem;color:#9A9A9A;margin-top:4px;font-weight:600" id="bsAssetCount">0 accounts</div>
+          </div>
+          <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:16px;border-top:4px solid #BF0000">
+            <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#BF0000;margin-bottom:8px">📉 Total Liabilities</div>
+            <div style="font-family:var(--mono);font-size:1.4rem;font-weight:800;color:#BF0000" id="bsTotalLiabilities">RM 0.00</div>
+            <div style="font-size:0.72rem;color:#9A9A9A;margin-top:4px;font-weight:600" id="bsLiabilityCount">0 accounts</div>
+          </div>
+        </div>
+        <!-- ASSETS BREAKDOWN -->
+        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
+          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px;display:flex;align-items:center;gap:8px">📈 Assets breakdown</div>
+          <div id="bsAssetsList"><div class="empty">No asset accounts added yet.</div></div>
+          <div style="border-top:1px solid rgba(0,0,0,0.08);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.78rem;font-weight:800;color:#1A1A1A">Total assets</span>
+            <span style="font-family:var(--mono);font-size:0.95rem;font-weight:800;color:#007A38" id="bsAssetTotal2">RM 0.00</span>
+          </div>
+        </div>
+        <!-- LIABILITIES BREAKDOWN -->
+        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
+          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px;display:flex;align-items:center;gap:8px">📉 Liabilities breakdown</div>
+          <div id="bsLiabilitiesList"><div class="empty">No liability accounts added yet.<br><span style="font-size:0.72rem;color:#9A9A9A">Add a Credit Card or Loan account type to track debts.</span></div></div>
+          <div style="border-top:1px solid rgba(0,0,0,0.08);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.78rem;font-weight:800;color:#1A1A1A">Total liabilities</span>
+            <span style="font-family:var(--mono);font-size:0.95rem;font-weight:800;color:#BF0000" id="bsLiabilityTotal2">RM 0.00</span>
+          </div>
+        </div>
+        <!-- DEBT TRACKER -->
+        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
+          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">💳 Debt paydown tracker</div>
+          <div id="bsDebtTracker"><div class="empty">No loans or debts tracked.</div></div>
+        </div>
+        <!-- RATIO ANALYSIS -->
+        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;border:1px solid rgba(0,0,0,0.08)">
+          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">📊 Financial ratios</div>
+          <div id="bsRatios"><div class="empty">Add accounts to see ratios.</div></div>
         </div>
       </div>
     </div>
@@ -752,7 +802,7 @@ input,select,button,textarea{font-family:var(--sans)}
 <!-- FINANCE MODALS -->
 <div class="modal-overlay" id="txOverlay"><div class="modal"><h3>Add transaction</h3><div class="field"><label>Type</label><select id="txType"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings transfer</option></select></div><div class="field"><label>Description</label><input type="text" id="txDesc" placeholder="e.g. Grab, Tesco, salary"></div><div class="field"><label>Amount (RM)</label><input type="number" id="txAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Account</label><select id="txWallet"><option value="">— none —</option></select></div><div class="field"><label>Category</label><select id="txCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Salary</option><option>Savings</option><option>Other</option></select></div><div class="field"><label>Date</label><input type="date" id="txDate"></div><div class="field"><label>Note (optional)</label><input type="text" id="txNote" placeholder="optional"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTx">Cancel</button><button class="btn btn-red" id="saveTx">Add</button></div></div></div>
 <div class="modal-overlay" id="futureOverlay"><div class="modal"><h3>Add bill / future payment</h3><div class="field"><label>Description</label><input type="text" id="fDesc" placeholder="e.g. Astro, TNB, car loan"></div><div class="field"><label>Amount (RM)</label><input type="number" id="fAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Due date</label><input type="date" id="fDate"></div><div class="field"><label>Category</label><select id="fCat"><option>Subscription</option><option>Rent/Mortgage</option><option>Utilities</option><option>Insurance</option><option>Loan repayment</option><option>Investment</option><option>Telco</option><option>Other</option></select></div><div class="field"><label>Recurrence</label><select id="fRecur"><option value="once">One-time</option><option value="monthly">Monthly</option><option value="weekly">Weekly</option><option value="yearly">Yearly</option></select></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelFuture">Cancel</button><button class="btn btn-red" id="saveFuture">Add</button></div></div></div>
-<div class="modal-overlay" id="walletOverlay"><div class="modal"><h3 id="walletModalTitle">Add account</h3><div class="field"><label>Account name</label><input type="text" id="wName" placeholder="e.g. Maybank, TNG, Cash"></div><div class="field"><label>Type</label><select id="wType"><option value="bank">Bank</option><option value="ewallet">E-wallet</option><option value="cash">Cash</option><option value="savings">Savings</option><option value="investment">Investment</option></select></div><div class="field"><label>Balance (RM)</label><input type="number" id="wBal" step="0.01" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelWallet">Cancel</button><button class="btn btn-red" id="saveWallet">Save</button></div></div></div>
+<div class="modal-overlay" id="walletOverlay"><div class="modal"><h3 id="walletModalTitle">Add account</h3><div class="field"><label>Account name</label><input type="text" id="wName" placeholder="e.g. Maybank, TNG, Cash"></div><div class="field"><label>Type</label><select id="wType"><option value="bank">Bank</option><option value="ewallet">E-wallet</option><option value="cash">Cash</option><option value="savings">Savings</option><option value="investment">Investment</option><option value="credit">Credit Card</option><option value="loan">Loan / BNPL</option></select></div><div class="field"><label>Balance (RM)</label><input type="number" id="wBal" step="0.01" placeholder="0.00 (use negative for debt)"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelWallet">Cancel</button><button class="btn btn-red" id="saveWallet">Save</button></div></div></div>
 <div class="modal-overlay" id="goalOverlay"><div class="modal"><h3 id="goalModalTitle">Add savings goal</h3><div class="field"><label>Goal name</label><input type="text" id="gName" placeholder="e.g. Emergency fund, Holiday"></div><div class="field"><label>Emoji icon</label><input type="text" id="gIcon" placeholder="🎯" maxlength="2" value="🎯"></div><div class="field"><label>Target amount (RM)</label><input type="number" id="gTarget" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Current saved (RM)</label><input type="number" id="gSaved" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Target date (optional)</label><input type="date" id="gDate"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelGoal">Cancel</button><button class="btn btn-red" id="saveGoal">Save</button></div></div></div>
 <div class="modal-overlay" id="debtOverlay"><div class="modal"><h3 id="debtModalTitle">Add debt / loan</h3><div class="field"><label>Name</label><input type="text" id="dName" placeholder="e.g. PTPTN, Car loan, Credit card"></div><div class="field"><label>Total amount (RM)</label><input type="number" id="dTotal" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Amount paid so far (RM)</label><input type="number" id="dPaid" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Monthly payment (RM)</label><input type="number" id="dMonthly" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Interest rate % (optional)</label><input type="number" id="dRate" step="0.01" min="0" placeholder="e.g. 3.5"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelDebt">Cancel</button><button class="btn btn-red" id="saveDebt">Save</button></div></div></div>
 <div class="modal-overlay" id="budgetOverlay"><div class="modal"><h3>Set budget target</h3><div class="field"><label>Category</label><select id="budgetCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Other</option></select></div><div class="field"><label>Monthly limit (RM)</label><input type="number" id="budgetAmt" step="0.01" min="0" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelBudget">Cancel</button><button class="btn btn-red" id="saveBudget">Save</button></div></div></div>
@@ -804,8 +854,8 @@ const DRIVE_FILE='finance_dashboard_data.json',SCOPES='https://www.googleapis.co
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CAT_EMOJI={'Food & drink':'🍜','Transport':'🚗','Groceries':'🛒','Utilities':'💡','Shopping':'🛍️','Health':'💊','Entertainment':'🎬','Salary':'💼','Savings':'🏦','Other':'📦','Subscription':'📱','Rent/Mortgage':'🏠','Insurance':'🛡️','Loan repayment':'💳','Investment':'📈','Telco':'📡'};
 const CAT_COLORS=['#BF0000','#0055AA','#007A38','#C06000','#7A50C8','#C04878','#4A9820','#0088AA'];
-const W_ICONS={bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈'};
-const W_LABELS={bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment'};
+const W_ICONS={bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈',credit:'💳',loan:'🏷️'};
+const W_LABELS={bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment',credit:'Credit Card',loan:'Loan / BNPL'};
 const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY','KRW','NZD','PHP','SAR','SGD','THB','TWD','USD'];
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
@@ -924,8 +974,89 @@ window.openAiSuggest=async function(idx){
   const g=state.goalPlans[idx];
   if(!g)return;
   document.getElementById('aiSuggestTitle').textContent=`✨ AI Milestones — ${g.title}`;
-  document.getElementById('aiSuggestList').innerHTML='<div style="text-align:center;padding:24px;color:#9A9A9A;font-size:0.82rem">⏳ Generating suggestions...</div>';
   document.getElementById('aiSuggestOverlay').classList.add('open');
+
+  // Build prompt for Claude.ai
+  const existing=(g.milestones||[]).map(m=>m.title).join(', ')||'none';
+  const prompt=`I have a goal in my KiaN Life Path dashboard:\n\nGoal: "${g.title}"\nType: ${g.type||'Life'}\nStatus: ${g.status||'not started'}\nTarget date: ${g.targetDate||'not set'}\nDescription: ${g.desc||'(none)'}\nExisting milestones: ${existing}\n\nSuggest 5 specific, actionable milestones for this goal. Make them practical and relevant to Malaysia context. Format as a numbered list.`;
+
+  const claudeUrl='https://claude.ai/new?q='+encodeURIComponent(prompt);
+
+  document.getElementById('aiSuggestList').innerHTML=`
+    <div style="padding:8px 0">
+      <p style="font-size:0.82rem;color:#1A1A1A;font-weight:600;margin-bottom:12px;line-height:1.6">
+        Click below to open Claude.ai with your goal details pre-filled.<br>
+        <span style="color:#6A6A6A;font-weight:500">Copy the suggestions back here and add them as milestones.</span>
+      </p>
+      <a href="${claudeUrl}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#BF0000;color:white;border-radius:8px;padding:12px 20px;font-size:0.88rem;font-weight:800;text-decoration:none;margin-bottom:14px">
+        ✨ Open Claude.ai — Get AI suggestions
+      </a>
+      <div style="background:#F8F8F8;border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Or use local suggestions below</div>
+        <div id="localSuggestList"></div>
+      </div>
+    </div>`;
+
+  // Also show local suggestions as fallback
+  const title=(g.title||'').toLowerCase();
+  const desc=(g.desc||'').toLowerCase();
+  const type=g.type||'Life';
+  const progress=Number(g.progress)||0;
+  const existingArr=(g.milestones||[]).map(m=>m.title.toLowerCase());
+  const combined=title+' '+desc;
+  const kw=(k)=>combined.includes(k);
+  const scoreT=(keys)=>keys.filter(k=>kw(k)).length;
+
+  const scores={
+    loan:scoreT(['loan','b10','leapmotor','hp ','hire purchase','maybank','ctos','ccris','dsr']),
+    car:scoreT(['car','vehicle','myvi','proton','perodua','honda','toyota','drive']),
+    house:scoreT(['house','home','property','condo','apartment','landed','spa','mortgage']),
+    save:scoreT(['save','saving','emergency fund','rainy day','reserve']),
+    debt:scoreT(['debt','ptptn','outstanding','owe','clear','pay off','settle']),
+    credit:scoreT(['credit card','cc','visa','mastercard','utilisation','limit']),
+    invest:scoreT(['invest','stock','share','portfolio','dividend','bursa','klci','etf']),
+    share:scoreT(['share option','esos','rsu','vesting','vest','exercise price']),
+    epf:scoreT(['epf','kwsp','pension','voluntary contribution','i-akaun']),
+    asb:scoreT(['asb','amanah saham bumiputera','asb loan']),
+    amanah:scoreT(['asnb','unit trust','amanah','myasnb']),
+    tax:scoreT(['tax','lhdn','pcb','be form','mytax','income tax','relief']),
+    business:scoreT(['business','ssm','sdn bhd','sole proprietor','startup']),
+    freelance:scoreT(['freelance','side income','gig','client','retainer']),
+    education:scoreT(['degree','diploma','masters','university','ptptn','study']),
+    wedding:scoreT(['wedding','kahwin','nikah','bertunang','hantaran']),
+    children:scoreT(['child','sspn','kids','baby','education fund','school']),
+    insurance:scoreT(['insurance','takaful','life cover','medical card','critical illness']),
+    reno:scoreT(['renovation','reno','renovate','contractor','kitchen','bathroom']),
+    digital:scoreT(['digital','coding','python','sql','power bi','data','ai']),
+    brand:scoreT(['linkedin','personal brand','content','networking','profile']),
+    travel:scoreT(['travel','trip','holiday','vacation','flight','hotel','tour']),
+    nz:scoreT(['queenstown','new zealand','nz','christchurch','milford','wanaka']),
+    health:scoreT(['health','fit','weight','gym','run','exercise','diet']),
+    career:scoreT(['career','job','work','position','promotion','salary']),
+    retire:scoreT(['retire','retirement','financial independence','fi','fire']),
+  };
+
+  let best=type;let bestScore=0;
+  Object.entries(scores).forEach(([k,v])=>{if(v>bestScore){bestScore=v;best=k;}});
+  let suggestions=(templates[best]||templates[type]||templates.Life).slice();
+  suggestions=suggestions.filter(s=>!existingArr.some(e=>e.includes(s.title.toLowerCase().slice(0,15))));
+  if(progress>=50&&suggestions.length>3)suggestions=suggestions.slice(Math.floor(suggestions.length/2));
+  suggestions=suggestions.slice(0,5);
+
+  aiSuggestSelections=new Array(suggestions.length).fill(false);
+  const localEl=document.getElementById('localSuggestList');
+  if(localEl){
+    localEl.innerHTML=suggestions.map((s,i)=>`
+      <div class="ai-milestone-option" onclick="toggleAiMs(${i},this)" style="padding:7px 0">
+        <div class="ai-ms-check" id="ai-ms-check-${i}"></div>
+        <div class="ai-ms-text">
+          <div class="ai-ms-title">${esc(s.title)}</div>
+          <div class="ai-ms-hint">${esc(s.hint)}</div>
+        </div>
+      </div>`).join('');
+    document.getElementById('aiSuggestList').dataset.suggestions=JSON.stringify(suggestions);
+  }
+};
 
   // Smart local suggestion engine — zero cost, no API needed
   const title=(g.title||'').toLowerCase();
@@ -1227,26 +1358,6 @@ window.openAiSuggest=async function(idx){
   // Filter already existing milestones
   suggestions=suggestions.filter(s=>!existing.some(e=>e.includes(s.title.toLowerCase().slice(0,15))));
 
-  // If goal is 50%+ done, skip early-stage suggestions
-  if(progress>=50&&suggestions.length>3)suggestions=suggestions.slice(Math.floor(suggestions.length/2));
-
-  // Max 5
-  suggestions=suggestions.slice(0,5);
-
-  // Brief UX delay
-  await new Promise(r=>setTimeout(r,500));
-
-    aiSuggestSelections=new Array(suggestions.length).fill(false);
-  document.getElementById('aiSuggestList').innerHTML=suggestions.map((s,i)=>`
-    <div class="ai-milestone-option" onclick="toggleAiMs(${i},this)">
-      <div class="ai-ms-check" id="ai-ms-check-${i}"></div>
-      <div class="ai-ms-text">
-        <div class="ai-ms-title">${esc(s.title)}</div>
-        <div class="ai-ms-hint">${esc(s.hint)}</div>
-      </div>
-    </div>`).join('');
-  document.getElementById('aiSuggestList').dataset.suggestions=JSON.stringify(suggestions);
-};
 window.toggleAiMs=function(i,el){
   aiSuggestSelections[i]=!aiSuggestSelections[i];
   const check=document.getElementById('ai-ms-check-'+i);
@@ -1487,7 +1598,39 @@ document.getElementById('fxRefreshBtn').onclick=fetchFxRates;
 document.getElementById('fxFromAmt').addEventListener('input',calcFx);
 document.addEventListener('change',function(e){if(e.target.id==='fxFromCur'||e.target.id==='fxToCur')calcFx();});
 
-function renderWallets(){const grid=document.getElementById('walletGrid');const total=state.wallets.reduce((s,w)=>s+Number(w.balance),0);grid.innerHTML=state.wallets.length?state.wallets.map((w,i)=>`<div class="wallet-card"><div class="w-actions"><button class="ic-btn" onclick="editWallet(${i})">✎</button><button class="ic-btn del" onclick="delWallet(${i})">✕</button></div><div class="w-icon">${W_ICONS[w.type]||'💳'}</div><div class="w-name">${esc(w.name)}</div><div class="w-bal">${fmt(w.balance)}</div><div class="w-type">${W_LABELS[w.type]||w.type}</div></div>`).join(''):'<div class="empty" style="text-align:left">No accounts yet.</div>';document.getElementById('walletTotal').textContent=fmt(total);const sel=document.getElementById('txWallet');const cur=sel.value;sel.innerHTML='<option value="">— none —</option>';state.wallets.forEach(w=>{const o=document.createElement('option');o.value=w.id;o.textContent=w.name;sel.appendChild(o);});if(cur)sel.value=cur;}
+function renderWallets(){
+  const grid=document.getElementById('walletGrid');
+  const assets=state.wallets.filter(w=>!['credit','loan'].includes(w.type));
+  const debts=state.wallets.filter(w=>['credit','loan'].includes(w.type));
+  const totalAssets=assets.reduce((s,w)=>s+Number(w.balance),0);
+  const totalDebt=debts.reduce((s,w)=>s+Number(w.balance),0);
+  const netTotal=totalAssets+totalDebt;
+  grid.innerHTML=state.wallets.length?state.wallets.map((w,i)=>{
+    const isDebt=['credit','loan'].includes(w.type);
+    const bal=Number(w.balance);
+    const balColor=bal<0?'#BF0000':bal===0?'#9A9A9A':'#1A1A1A';
+    const cardBorder=isDebt?'border-top:3px solid #BF0000':'border-top:3px solid #BF0000';
+    return`<div class="wallet-card" style="${isDebt?'border-top-color:#BF0000;':''}">
+      <div class="w-actions"><button class="ic-btn" onclick="editWallet(${i})">✎</button><button class="ic-btn del" onclick="delWallet(${i})">✕</button></div>
+      <div class="w-icon">${W_ICONS[w.type]||'💳'}</div>
+      <div class="w-name">${esc(w.name)}</div>
+      <div class="w-bal" style="color:${balColor}">${fmt(w.balance)}</div>
+      <div class="w-type" style="display:flex;align-items:center;justify-content:space-between">
+        <span>${W_LABELS[w.type]||w.type}</span>
+        ${isDebt?'<span style="font-size:0.6rem;background:#FFEEEE;color:#BF0000;padding:1px 6px;border-radius:10px;font-weight:800">DEBT</span>':''}
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty" style="text-align:left">No accounts yet.</div>';
+  // Show net total with breakdown
+  const totalEl=document.getElementById('walletTotal');
+  const totalBar=document.getElementById('walletTotalBar');
+  if(totalEl)totalEl.textContent=fmt(netTotal);
+  if(totalEl)totalEl.style.color=netTotal<0?'#FFB3B3':'white';
+  // Update sub-label if exists
+  const subEl=document.getElementById('walletTotalSub');
+  if(subEl&&debts.length>0)subEl.textContent=`Assets ${fmt(totalAssets)} · Debt ${fmt(Math.abs(totalDebt))}`;
+  const sel=document.getElementById('txWallet');const cur=sel.value;sel.innerHTML='<option value="">— none —</option>';state.wallets.forEach(w=>{const o=document.createElement('option');o.value=w.id;o.textContent=w.name;sel.appendChild(o);});if(cur)sel.value=cur;
+}
 function updateMetrics(){const txs=monthTx();let inc=0,exp=0,sav=0;txs.forEach(t=>{if(t.type==='income')inc+=Number(t.amount);else if(t.type==='expense')exp+=Number(t.amount);else if(t.type==='savings')sav+=Number(t.amount);});const bal=inc-exp-sav;const pct=inc>0?Math.round((sav/inc)*100):0;const tod=todayStr();const upc=state.futures.filter(f=>f.date>=tod).reduce((s,f)=>s+Number(f.amount),0);document.getElementById('mIncome').textContent=fmtR(inc);document.getElementById('mIncomeSub').textContent=txs.filter(t=>t.type==='income').length+' entries';document.getElementById('mExpense').textContent=fmtR(exp);document.getElementById('mExpSub').textContent=txs.filter(t=>t.type==='expense').length+' entries';document.getElementById('mSaved').textContent=fmtR(sav);document.getElementById('mSavedSub').textContent=pct+'% of income';const mb=document.getElementById('mBalance');mb.textContent=fmtR(bal);mb.style.color=bal>=0?'var(--t1)':'var(--red)';document.getElementById('mUpcoming').textContent='Upcoming: '+fmtR(upc);}
 function renderTxList(elId,txs,limit){const el=document.getElementById(elId);if(!txs.length){el.innerHTML='<div class="empty">No transactions.</div>';return;}const show=limit?txs.slice(0,limit):txs;el.innerHTML=show.map(t=>{const gi=state.transactions.indexOf(t);const cls=t.type==='income'?'in':t.type==='savings'?'sav':'out';const sign=t.type==='income'?'+':'-';const ds=new Date(t.date).toLocaleDateString('en-MY',{day:'numeric',month:'short'});const w=t.walletId?state.wallets.find(w=>w.id==t.walletId):null;return`<div class="tx-item"><div class="tx-emoji">${ce(t.category)}</div><div class="tx-info"><div class="tx-name">${esc(t.description)}</div><div class="tx-meta">${ds}${w?' · '+esc(w.name):''}${t.note?' · '+esc(t.note):''}</div></div><span class="tx-tag">${esc(t.category)}</span><span class="amt ${cls}">${sign}${fmt(t.amount)}</span><button class="ic-btn del" onclick="delTx(${gi})">✕</button></div>`;}).join('');}
 function renderFutureList(elId,limit){const el=document.getElementById(elId);const fs=state.futures.slice().sort((a,b)=>a.date.localeCompare(b.date));if(!fs.length){el.innerHTML='<div class="empty">No upcoming payments.</div>';return;}const show=limit?fs.slice(0,limit):fs;el.innerHTML=show.map(f=>{const d=new Date(f.date);const today=new Date();today.setHours(0,0,0,0);const diff=Math.round((d-today)/86400000);let badge,dl;if(f.paid){badge='<span class="badge" style="background:rgba(0,122,56,0.1);color:var(--green)">✓ Paid</span>';dl='';}else if(diff<0){badge='<span class="badge overdue">Overdue</span>';dl=Math.abs(diff)+'d ago';}else if(diff===0){badge='<span class="badge today">Today</span>';dl='due today';}else if(diff<=7){badge='<span class="badge soon">Soon</span>';dl='in '+diff+'d';}else{badge='<span class="badge upcoming">Upcoming</span>';dl='in '+diff+'d';}const ds=d.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});const ri=state.futures.indexOf(f);const payBtn=f.paid?`<button class="unpay-btn" onclick="togglePaid(${ri})">Undo</button>`:`<button class="pay-btn" onclick="togglePaid(${ri})">✓ Mark paid</button>`;return`<div class="fut-item${f.paid?' paid':''}"><div class="tx-emoji">${ce(f.category)}</div><div class="fut-info"><div class="fut-name">${esc(f.description)}</div><div class="fut-meta">${ds} · ${esc(f.recurrence)}</div></div><div class="fut-r">${badge}<span style="font-family:var(--mono);font-size:0.72rem;color:var(--t2);font-weight:700">${fmt(f.amount)}</span>${dl?`<span style="font-size:0.65rem;color:var(--t4);font-weight:600">${dl}</span>`:''}</div>${payBtn}<button class="ic-btn del" onclick="delFuture(${ri})">✕</button></div>`;}).join('');}
@@ -1688,7 +1831,7 @@ function render(){
   const txs=monthTx().slice().sort((a,b)=>b.date.localeCompare(a.date));
   renderTxList('txListOv',txs,5);renderFutureList('futureListOv',4);renderFutureList('futureListFull',0);
   renderGoalList('goalListOv');renderGoalList('goalListFull');renderDebtList();renderBudgetList();
-  renderCatBreak('catBreakOv');renderReport();renderFilteredTx();renderTodos();renderGoalPlans();renderSnapshot();
+  renderCatBreak('catBreakOv');renderReport();renderFilteredTx();renderTodos();renderGoalPlans();renderSnapshot();renderBalanceSheet();
 }
 
 // ── CRUD ──────────────────────────────────────────────
@@ -1793,7 +1936,177 @@ function switchAppTab(name){
   else if(name==='goals')renderGoalPlans();
   else render();
 }
-function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
+function renderBalanceSheet(){
+  const wallets=state.wallets||[];
+  const debts=state.debts||[];
+
+  // Separate assets vs liabilities
+  const assetTypes=['bank','ewallet','cash','savings','investment'];
+  const liabilityTypes=['credit','loan'];
+  const assets=wallets.filter(w=>assetTypes.includes(w.type));
+  const liabilities=wallets.filter(w=>liabilityTypes.includes(w.type));
+
+  const totalAssets=assets.reduce((s,w)=>s+Number(w.balance),0);
+  const totalLiabilities=Math.abs(liabilities.reduce((s,w)=>s+Number(w.balance),0));
+  const netWorth=totalAssets-totalLiabilities;
+
+  // NET WORTH hero
+  const nwEl=document.getElementById('bsNetWorth');
+  const nwSub=document.getElementById('bsNetWorthSub');
+  if(nwEl){
+    nwEl.textContent=fmt(netWorth);
+    nwEl.style.color=netWorth>=0?'#4AE09A':'#FF6B6B';
+  }
+  if(nwSub)nwSub.textContent=netWorth>=0?'✓ Positive net worth — assets exceed liabilities':'⚠ Liabilities exceed assets — focus on debt reduction';
+
+  // Summary tiles
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('bsTotalAssets',fmt(totalAssets));
+  setEl('bsAssetCount',assets.length+' account'+(assets.length!==1?'s':''));
+  setEl('bsTotalLiabilities',fmt(totalLiabilities));
+  setEl('bsLiabilityCount',liabilities.length+' account'+(liabilities.length!==1?'s':''));
+  setEl('bsAssetTotal2',fmt(totalAssets));
+  setEl('bsLiabilityTotal2',fmt(totalLiabilities));
+
+  // Type labels and icons for grouping
+  const typeOrder={bank:'🏦 Bank accounts',ewallet:'📱 E-wallets & digital',cash:'💵 Cash',savings:'🐖 Savings accounts',investment:'📈 Investments'};
+  const liabOrder={credit:'💳 Credit cards',loan:'🏷️ Loans & BNPL'};
+
+  // ASSETS breakdown
+  const aEl=document.getElementById('bsAssetsList');
+  if(aEl){
+    if(!assets.length){aEl.innerHTML='<div class="empty">No asset accounts added yet.</div>';}
+    else{
+      // Group by type
+      const grouped={};
+      assets.forEach(w=>{if(!grouped[w.type])grouped[w.type]=[];grouped[w.type].push(w);});
+      aEl.innerHTML=Object.entries(typeOrder).filter(([t])=>grouped[t]).map(([t,label])=>`
+        <div style="margin-bottom:12px">
+          <div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">${label}</div>
+          ${grouped[t].map(w=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+              <span style="font-size:0.82rem;font-weight:600;color:#1A1A1A">${esc(w.name)}</span>
+              <span style="font-family:var(--mono);font-size:0.85rem;font-weight:700;color:#007A38">${fmt(w.balance)}</span>
+            </div>`).join('')}
+          <div style="display:flex;justify-content:flex-end;padding:5px 0;font-size:0.72rem;font-weight:700;color:#9A9A9A">
+            Subtotal: ${fmt(grouped[t].reduce((s,w)=>s+Number(w.balance),0))}
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  // LIABILITIES breakdown
+  const lEl=document.getElementById('bsLiabilitiesList');
+  if(lEl){
+    if(!liabilities.length){lEl.innerHTML='<div class="empty">No liability accounts added yet.<br><span style="font-size:0.72rem;color:#9A9A9A">Add a Credit Card or Loan account type to track debts.</span></div>';}
+    else{
+      const grouped={};
+      liabilities.forEach(w=>{if(!grouped[w.type])grouped[w.type]=[];grouped[w.type].push(w);});
+      lEl.innerHTML=Object.entries(liabOrder).filter(([t])=>grouped[t]).map(([t,label])=>`
+        <div style="margin-bottom:12px">
+          <div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">${label}</div>
+          ${grouped[t].map(w=>{
+            const bal=Math.abs(Number(w.balance));
+            return`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+              <span style="font-size:0.82rem;font-weight:600;color:#1A1A1A">${esc(w.name)}</span>
+              <span style="font-family:var(--mono);font-size:0.85rem;font-weight:700;color:#BF0000">${fmt(bal)}</span>
+            </div>`;
+          }).join('')}
+          <div style="display:flex;justify-content:flex-end;padding:5px 0;font-size:0.72rem;font-weight:700;color:#9A9A9A">
+            Subtotal: ${fmt(grouped[t].reduce((s,w)=>s+Math.abs(Number(w.balance)),0))}
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  // DEBT PAYDOWN TRACKER — from state.debts
+  const dtEl=document.getElementById('bsDebtTracker');
+  if(dtEl){
+    if(!debts.length&&!liabilities.length){dtEl.innerHTML='<div class="empty">No loans or debts tracked.<br><span style="font-size:0.72rem;color:#9A9A9A">Add debts in the Budget tab or add Credit Card / Loan accounts.</span></div>';}
+    else{
+      let html='';
+      // From debt tracker
+      if(debts.length){
+        html+=debts.map((d,i)=>{
+          const pct=d.total>0?Math.min(100,Math.round((d.paid/d.total)*100)):0;
+          const rem=Math.max(0,d.total-d.paid);
+          const monthsLeft=d.monthly>0?Math.ceil(rem/d.monthly):null;
+          return`<div style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.07)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+              <span style="font-size:0.85rem;font-weight:700;color:#1A1A1A">${esc(d.name)}</span>
+              <div style="text-align:right">
+                <span style="font-size:0.72rem;font-family:var(--mono);color:#BF0000;font-weight:700">${fmt(rem)} left</span>
+                ${d.rate?`<span style="font-size:0.65rem;color:#C06000;font-weight:700;margin-left:6px">${d.rate}% p.a.</span>`:''}
+              </div>
+            </div>
+            <div style="height:6px;background:#F5F5F5;border-radius:3px;overflow:hidden;margin-bottom:5px">
+              <div style="width:${pct}%;height:100%;background:#007A38;border-radius:3px;transition:width 0.5s"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#9A9A9A;font-weight:600">
+              <span>${fmt(d.paid)} paid of ${fmt(d.total)} (${pct}% done)</span>
+              <span>${monthsLeft?monthsLeft+' months remaining at '+fmt(d.monthly)+'/mo':''}</span>
+            </div>
+          </div>`;
+        }).join('');
+      }
+      // From wallet liabilities
+      if(liabilities.length){
+        html+=liabilities.map(w=>{
+          const bal=Math.abs(Number(w.balance));
+          return`<div style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.07)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:0.85rem;font-weight:700;color:#1A1A1A">${esc(w.name)}</span>
+              <span style="font-size:0.85rem;font-family:var(--mono);color:#BF0000;font-weight:800">${fmt(bal)} outstanding</span>
+            </div>
+            <div style="font-size:0.68rem;color:#9A9A9A;margin-top:3px;font-weight:600">${W_LABELS[w.type]||w.type} — update balance regularly to track paydown</div>
+          </div>`;
+        }).join('');
+      }
+      dtEl.innerHTML=html||'<div class="empty">No debts.</div>';
+    }
+  }
+
+  // FINANCIAL RATIOS
+  const rEl=document.getElementById('bsRatios');
+  if(rEl&&(assets.length||liabilities.length)){
+    const debtToAsset=totalAssets>0?((totalLiabilities/totalAssets)*100).toFixed(1):null;
+    const monthlyIncome=state.transactions.filter(t=>{const d=new Date(t.date);return d.getFullYear()===viewYear&&d.getMonth()===viewMonth&&t.type==='income';}).reduce((s,t)=>s+Number(t.amount),0);
+    const monthlyExp=state.transactions.filter(t=>{const d=new Date(t.date);return d.getFullYear()===viewYear&&d.getMonth()===viewMonth&&t.type==='expense';}).reduce((s,t)=>s+Number(t.amount),0);
+    const savingsRate=monthlyIncome>0?(((monthlyIncome-monthlyExp)/monthlyIncome)*100).toFixed(1):null;
+    const liquidAssets=wallets.filter(w=>['bank','ewallet','cash'].includes(w.type)).reduce((s,w)=>s+Number(w.balance),0);
+    const monthlyCommit=(state.futures||[]).filter(f=>f.recurrence==='monthly').reduce((s,f)=>s+Number(f.amount),0);
+    const liquidCoverage=monthlyCommit>0?(liquidAssets/monthlyCommit).toFixed(1):null;
+
+    const ratioRow=(label,value,good,warn,tip,unit='')=>{
+      if(!value)return`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06)"><span style="font-size:0.82rem;color:#9A9A9A;font-weight:600">${label}</span><span style="font-size:0.78rem;color:#C8C8C8;font-weight:600">No data</span></div>`;
+      const num=parseFloat(value);
+      const color=num<=good?'#007A38':num<=warn?'#C06000':'#BF0000';
+      const status=num<=good?'✓ Good':num<=warn?'⚠ Fair':'✕ High';
+      return`<div style="padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <span style="font-size:0.82rem;font-weight:700;color:#1A1A1A">${label}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--mono);font-size:0.88rem;font-weight:800;color:${color}">${value}${unit}</span>
+            <span style="font-size:0.65rem;font-weight:800;color:${color}">${status}</span>
+          </div>
+        </div>
+        <div style="font-size:0.68rem;color:#9A9A9A;font-weight:500">${tip}</div>
+      </div>`;
+    };
+
+    rEl.innerHTML=`
+      ${ratioRow('Debt-to-Asset ratio',debtToAsset,30,60,'Target below 30% — your liabilities vs total assets','%')}
+      ${savingsRate!==null?ratioRow('Monthly savings rate',savingsRate,20,10,'Target above 20% of income — higher is better','%'):''}
+      ${liquidCoverage!==null?ratioRow('Liquid coverage ratio',liquidCoverage,6,3,'How many months of bills your liquid assets cover',' months'):''}
+      <div style="font-size:0.68rem;color:#9A9A9A;margin-top:10px;font-weight:500;line-height:1.6">
+        Ratios are calculated from your current account balances and this month's transactions.
+        Update account balances regularly for accurate readings.
+      </div>`;
+  }else if(rEl){
+    rEl.innerHTML='<div class="empty">Add accounts to see financial ratios.</div>';
+  }
+}
+function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');if(name==='balance')renderBalanceSheet();}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
 function showAuth(){document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none';}
 
