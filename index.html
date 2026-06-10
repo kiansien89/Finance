@@ -1623,7 +1623,7 @@ function renderWallets(){
   }).join(''):'<div class="empty" style="text-align:left">No accounts yet.</div>';
   // Show net total with breakdown
   const totalEl=document.getElementById('walletTotal');
-  const totalBar=document.getElementById('walletTotalBar');
+
   if(totalEl)totalEl.textContent=fmt(netTotal);
   if(totalEl)totalEl.style.color=netTotal<0?'#FFB3B3':'white';
   // Update sub-label if exists
@@ -1831,7 +1831,7 @@ function render(){
   const txs=monthTx().slice().sort((a,b)=>b.date.localeCompare(a.date));
   renderTxList('txListOv',txs,5);renderFutureList('futureListOv',4);renderFutureList('futureListFull',0);
   renderGoalList('goalListOv');renderGoalList('goalListFull');renderDebtList();renderBudgetList();
-  renderCatBreak('catBreakOv');renderReport();renderFilteredTx();renderTodos();renderGoalPlans();renderSnapshot();renderBalanceSheet();
+  renderCatBreak('catBreakOv');renderReport();renderFilteredTx();renderTodos();renderGoalPlans();renderSnapshot();
 }
 
 // ── CRUD ──────────────────────────────────────────────
@@ -1952,13 +1952,10 @@ function renderBalanceSheet(){
   const netWorth=totalAssets-totalLiabilities;
 
   // NET WORTH hero
+  setEl('bsNetWorth',fmt(netWorth));
   const nwEl=document.getElementById('bsNetWorth');
-  const nwSub=document.getElementById('bsNetWorthSub');
-  if(nwEl){
-    nwEl.textContent=fmt(netWorth);
-    nwEl.style.color=netWorth>=0?'#4AE09A':'#FF6B6B';
-  }
-  if(nwSub)nwSub.textContent=netWorth>=0?'✓ Positive net worth — assets exceed liabilities':'⚠ Liabilities exceed assets — focus on debt reduction';
+  if(nwEl)nwEl.style.color=netWorth>=0?'#4AE09A':'#FF6B6B';
+  setEl('bsNetWorthSub',netWorth>=0?'✓ Positive net worth — assets exceed liabilities':'⚠ Liabilities exceed assets — focus on debt reduction');
 
   // Summary tiles
   const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
