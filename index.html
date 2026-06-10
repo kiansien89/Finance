@@ -2247,10 +2247,28 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 };
 
 (function init(){
-  // Client ID is hardcoded — always go straight to sign in
   showSignInStep();
-  const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);
-  const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);
+  // Load Google GAPI
+  const s1=document.createElement('script');
+  s1.src='https://apis.google.com/js/api.js';
+  s1.async=true;
+  s1.onload=gapiLoaded;
+  s1.onerror=()=>setAuthStatus('Failed to load Google API');
+  document.body.appendChild(s1);
+  // Load Google Identity Services
+  const s2=document.createElement('script');
+  s2.src='https://accounts.google.com/gsi/client';
+  s2.async=true;
+  s2.onload=gisLoaded;
+  s2.onerror=()=>setAuthStatus('Failed to load Google Identity');
+  document.body.appendChild(s2);
+  // After 8s — unlock button so user can try anyway
+  setTimeout(()=>{
+    if(!gapiInited||!gisInited){
+      setSignInBtn('Sign in with Google',true);
+      setAuthStatus('Slow connection — try clicking or use Local mode below');
+    }
+  },8000);
 })();
 </script>
 </body>
