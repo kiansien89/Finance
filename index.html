@@ -1937,7 +1937,8 @@ function switchAppTab(name){
   else render();
 }
 function renderBalanceSheet(){
-  const wallets=state.wallets||[];
+  // Only render if balance sheet tab elements exist in DOM
+  if(!document.getElementById('bsNetWorth'))return;
   const debts=state.debts||[];
 
   // Separate assets vs liabilities
