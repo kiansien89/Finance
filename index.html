@@ -926,41 +926,326 @@ window.openAiSuggest=async function(idx){
   document.getElementById('aiSuggestTitle').textContent=`✨ AI Milestones — ${g.title}`;
   document.getElementById('aiSuggestList').innerHTML='<div style="text-align:center;padding:24px;color:#9A9A9A;font-size:0.82rem">⏳ Generating suggestions...</div>';
   document.getElementById('aiSuggestOverlay').classList.add('open');
-  try{
-    const prompt=`You are a practical life and financial planning assistant. 
-Goal: "${g.title}"
-Type: ${g.type||'Life'}
-Status: ${g.status||'not started'}
-Target date: ${g.targetDate||'not set'}
-Description: ${g.desc||'none'}
-Existing milestones: ${(g.milestones||[]).map(m=>m.title).join(', ')||'none'}
 
-Suggest exactly 5 specific, actionable milestones for this goal. Each milestone should be a concrete step.
-Reply ONLY with a JSON array of exactly 5 objects with keys "title" (string, max 60 chars) and "hint" (string, max 80 chars brief explanation).
-No markdown, no backticks, just raw JSON array.`;
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await resp.json();
-    const text=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
-    const clean=text.replace(/```json|```/g,'').trim();
-    const suggestions=JSON.parse(clean);
+  // Smart local suggestion engine — zero cost, no API needed
+  const title=(g.title||'').toLowerCase();
+  const desc=(g.desc||'').toLowerCase();
+  const type=g.type||'Life';
+  const progress=Number(g.progress)||0;
+  const existing=(g.milestones||[]).map(m=>m.title.toLowerCase());
+  const combined=title+' '+desc;
+  const kw=(k)=>combined.includes(k);
+  const score=(keys)=>keys.filter(k=>kw(k)).length;
+
+  const templates={
+    loan:[
+      {title:'Pull CCRIS & CTOS report — know your score',hint:'Free at BNM eLINK or ctoscredit.com.my'},
+      {title:'Reduce credit card limits to below RM 30K',hint:'Each RM 10K cut = RM 500 freed from DSR'},
+      {title:'Wait 3 months for CCRIS to reflect changes',hint:'Banks assess trailing 12-month behaviour'},
+      {title:'Build down payment savings to target amount',hint:'Larger down = lower monthly + better DSR'},
+      {title:'Apply via Maybank RM with relationship flag',hint:'Internal scoring considers payment behaviour'},
+      {title:'Receive and review approval letter',hint:'Check rate, tenure, and lock-in period'},
+    ],
+    car:[
+      {title:'Research OTR prices — check paultan.org',hint:'Compare all-in price across dealers'},
+      {title:'Get HP pre-approval or bank quotation',hint:'Know your ceiling before visiting dealer'},
+      {title:'Test drive at least 2-3 shortlisted models',hint:'Book weekday slots to avoid crowds'},
+      {title:'Negotiate OTR price and free accessories',hint:'Ask for tinting, floor mats, free service'},
+      {title:'Compare insurance quotes on Loanstreet',hint:'Save RM 500-1,500 vs dealer insurance'},
+      {title:'Collect car — verify all documents',hint:'Grant, keys, service book, warranty card'},
+    ],
+    house:[
+      {title:'Define budget, location, and property type',hint:'Max price, area, landed vs high-rise'},
+      {title:'Get home loan pre-approval from bank',hint:'Confirms borrowing limit before viewings'},
+      {title:'View minimum 5 properties before deciding',hint:'Never buy the first one you see'},
+      {title:'Negotiate asking price — counter 5-10% lower',hint:'Most sellers have room to move'},
+      {title:'Appoint conveyancing lawyer for SPA',hint:'Budget RM 3,000-6,000 for legal fees'},
+      {title:'Sign SPA and settle 10% down payment',hint:'Minus booking fee already paid'},
+    ],
+    save:[
+      {title:'Calculate exact monthly savings required',hint:'Target amount ÷ months remaining'},
+      {title:'Open dedicated savings account',hint:'Keep it separate from daily spending'},
+      {title:'Set auto-transfer on salary credit day',hint:'Pay yourself first — non-negotiable'},
+      {title:'Cut one recurring expense and redirect',hint:'Subscriptions, food delivery, or impulse buys'},
+      {title:'Reach 50% of target — halfway checkpoint',hint:'Review if monthly amount is sustainable'},
+      {title:'Final top-up using bonus or extra income',hint:'Close any gap in the last month'},
+    ],
+    debt:[
+      {title:'List all debts — balance, rate, minimum',hint:'Full picture before planning attack'},
+      {title:'Rank by interest rate — target highest first',hint:'Avalanche method saves most money'},
+      {title:'Redirect RM 500+ extra to highest-rate debt',hint:'Pay minimum on all others'},
+      {title:'Clear first target debt — snowball to next',hint:'Redirect freed payment to next debt'},
+      {title:'Reduce credit card limit after clearing',hint:'Prevents re-spending, improves CTOS'},
+      {title:'Declare debt-free milestone',hint:'Calculate total interest saved vs original plan'},
+    ],
+    credit:[
+      {title:'Get CCRIS report — map all balances',hint:'Free at BNM eLINK every 3 months'},
+      {title:'Pay more than minimum on every card',hint:'Minimum payments barely touch principal'},
+      {title:'Call bank — request interest rate reduction',hint:'Loyal customers often get 1-2% off'},
+      {title:'Set up full statement auto-pay',hint:'Eliminates late fees and interest forever'},
+      {title:'Reduce limit after clearing each card',hint:'Improves DSR and CTOS score'},
+      {title:'Close unnecessary cards — keep max 2',hint:'Fewer cards = cleaner credit profile'},
+    ],
+    invest:[
+      {title:'Define goal and risk tolerance clearly',hint:'Capital growth vs income, 5-10 year horizon'},
+      {title:'Open Rakuten Trade or Mplus account',hint:'Low brokerage, good for Malaysian stocks'},
+      {title:'Fund account with initial capital',hint:'Start with amount you can afford to hold'},
+      {title:'Research first 3 stocks or ETFs',hint:'KLCI ETF is a safe beginner starting point'},
+      {title:'Execute first purchase — start small',hint:'RM 1,000-5,000 to learn the process'},
+      {title:'Set up monthly investment plan — DCA',hint:'Dollar cost averaging over 12+ months'},
+    ],
+    share:[
+      {title:'Confirm vesting schedule and exercise price',hint:'Check employment share agreement'},
+      {title:'Understand perquisite tax on exercise gains',hint:'LHDN taxes ESOS gains as employment income'},
+      {title:'Decide: exercise-and-sell vs hold',hint:'Depends on company outlook and your tax rate'},
+      {title:'Exercise vested options via HR/administrator',hint:'Contact stock plan team when vested'},
+      {title:'Transfer proceeds to investment or savings',hint:'Plan use of funds before exercising'},
+      {title:'Declare in tax return under perquisite income',hint:'Required in year of exercise — BE form'},
+    ],
+    travel:[
+      {title:'Lock in destination and travel window',hint:'Check school holidays and peak pricing'},
+      {title:'Set detailed budget — flights, stays, food',hint:'Add 15% buffer for surprises'},
+      {title:'Book flights via Google Flights alerts',hint:'Book 3-6 months ahead for best fares'},
+      {title:'Book accommodation with free cancellation',hint:'Flexibility until 2 weeks before travel'},
+      {title:'Plan itinerary and pre-book key activities',hint:'Popular spots need advance reservation'},
+      {title:'Sort travel insurance and check passport',hint:'6 months validity, visa if required'},
+    ],
+    nz:[
+      {title:'Check NZ visa requirements for Malaysian passport',hint:'Currently visa-free for short visits'},
+      {title:'Book KUL-CHC or KUL-ZQN flights early',hint:'AirAsia or Jetstar via Singapore or Sydney'},
+      {title:'Book Queenstown accommodation',hint:'Prices spike Jun-Aug ski season'},
+      {title:'Book Skyline Gondola and Luge',hint:'Book online — queues are long in season'},
+      {title:'Plan Milford Sound day trip',hint:'Book guided tour — 12 hour return from QT'},
+      {title:'Arrange Wise card for NZD spending',hint:'Best rates, no foreign transaction fee'},
+    ],
+    health:[
+      {title:'Book full medical check-up with blood panel',hint:'Baseline: glucose, cholesterol, BP, BMI'},
+      {title:'Set exercise schedule — 3x per week minimum',hint:'Calendar block it — treat like a meeting'},
+      {title:'Track food intake for 2 weeks',hint:'Awareness alone reduces intake 10-15%'},
+      {title:'Hit 30 consecutive days of exercise',hint:'First month is the hardest — just show up'},
+      {title:'Recheck metrics vs baseline at 3 months',hint:'Compare to check-up results'},
+      {title:'Reach target and shift to maintenance mode',hint:'Goal achieved — build it into lifestyle'},
+    ],
+    career:[
+      {title:'Define target: role, company, salary, date',hint:'Specific goals get specific results'},
+      {title:'Identify top 3 skill gaps to close',hint:'Ask manager or check target job descriptions'},
+      {title:'Complete one certification or course',hint:'Udemy, Coursera, or industry certification'},
+      {title:'Update CV and LinkedIn with achievements',hint:'Metrics-driven bullets, not just duties'},
+      {title:'Apply to 10+ relevant roles or internal posts',hint:'Volume is a legitimate strategy'},
+      {title:'Negotiate and accept target offer',hint:'Always negotiate before verbal acceptance'},
+    ],
+    epf:[
+      {title:'Log in i-Akaun and review current balance',hint:'Check Acc 1, Acc 2, and Acc 3 breakdown'},
+      {title:'Calculate voluntary contribution amount',hint:'Up to RM 100K/year, tax deductible'},
+      {title:'Submit voluntary top-up via i-Akaun',hint:'Instant credit, earns dividend from day one'},
+      {title:'Review EPF dividend declaration for the year',hint:'Typically 5-6% — better than FD'},
+      {title:'Plan Account 2 withdrawal timeline at 50',hint:'Housing, education, health, or investment'},
+    ],
+    retire:[
+      {title:'Calculate retirement number — expenses × 300',hint:'25x annual expenses = financial independence'},
+      {title:'Review EPF projected balance at 55',hint:'Use EPF retirement calculator at kwsp.gov.my'},
+      {title:'Open Private Retirement Scheme (PRS)',hint:'Tax relief up to RM 3,000/year'},
+      {title:'Increase savings rate by 5% of salary',hint:'Small increases compound dramatically'},
+      {title:'Diversify — EPF, PRS, stocks, property',hint:'No single asset class should dominate'},
+    ],
+    Financial:[
+      {title:'Define exact target amount and deadline',hint:'Specific number makes tracking possible'},
+      {title:'Calculate required monthly contribution',hint:'Target ÷ months remaining'},
+      {title:'Open dedicated account for this goal',hint:'Separation prevents accidental spending'},
+      {title:'Automate monthly transfer on salary day',hint:'Remove willpower from the equation'},
+      {title:'Midpoint review — on track?',hint:'Adjust monthly amount if ahead or behind'},
+      {title:'Final top-up and goal completion',hint:'Use bonus or extra income to close gap'},
+    ],
+    Career:[
+      {title:'Write specific success criteria',hint:'Role, company, salary, timeline'},
+      {title:'Identify the single most critical gap',hint:'What is holding you back most'},
+      {title:'Complete one concrete upskilling step',hint:'Course, project, or certification'},
+      {title:'Take the key action most people avoid',hint:'Apply, pitch, present, or ask'},
+      {title:'Achieve goal and document lessons learned',hint:'What worked for replication next time'},
+    ],
+    Life:[
+      {title:'Define what success looks like precisely',hint:'Specific and measurable outcome'},
+      {title:'Research — learn from those who did it',hint:'Books, YouTube, your network'},
+      {title:'Create a step-by-step weekly action plan',hint:'Break the goal into weekly actions'},
+      {title:'Take the first concrete step this week',hint:'Momentum starts with one action'},
+      {title:'Midpoint review — adjust plan if needed',hint:'Stay flexible on method, firm on goal'},
+      {title:'Complete and celebrate the achievement',hint:'You earned it — mark it properly'},
+    ],
+    asb:[
+      {title:'Open ASB account at Maybank or ASNB counter',hint:'Only for Bumiputera — bring IC and birth cert'},
+      {title:'Calculate ASB loan eligibility and quota',hint:'Check current ASB loan interest rate vs dividend'},
+      {title:'Apply for ASB financing at bank',hint:'Maybank, BSN, or Bank Rakyat offer ASB loans'},
+      {title:'Set up monthly ASB top-up via online banking',hint:'Auto-debit from salary account on payday'},
+      {title:'Review annual ASB dividend declaration',hint:'Typically 4-6% — reinvest for compounding'},
+      {title:'Track investment growth vs loan interest cost',hint:'Net gain should be positive each year'},
+    ],
+    amanah:[
+      {title:'Research ASNB unit trust funds available',hint:'ASB, ASB2, ASW 2020, ASGB — check eligibility'},
+      {title:'Open ASNB account online via myASNB app',hint:'myASNB app — quick registration with MyKad'},
+      {title:'Start monthly investment via myASNB',hint:'As low as RM 10/month to start'},
+      {title:'Compare fixed price vs variable price funds',hint:'ASB is fixed price, less volatile'},
+      {title:'Set reinvestment of dividends to compound',hint:'Do not withdraw dividends — let them compound'},
+      {title:'Review portfolio allocation annually',hint:'Rebalance between fixed and variable as needed'},
+    ],
+    tax:[
+      {title:'Gather all income documents by Jan',hint:'Payslips, EA form, freelance invoices, rental income'},
+      {title:'Log in to MyTax portal — mytax.hasil.gov.my',hint:'Use MyKad digital certificate or password'},
+      {title:'Key in all relief claims — maximise deductions',hint:'EPF, insurance, education, lifestyle, parents'},
+      {title:'Check if eligible for PCB rebate or refund',hint:'Compare monthly PCB deducted vs actual tax'},
+      {title:'Submit BE form before 30 April deadline',hint:'Late submission attracts 10% penalty'},
+      {title:'Pay any tax balance due before deadline',hint:'FPX payment via MyTax — instant clearance'},
+    ],
+    business:[
+      {title:'Validate business idea — survey 10 potential customers',hint:'Confirm people will actually pay before building'},
+      {title:'Register SSM — sole proprietor or Sdn Bhd',hint:'Sole prop RM 30-60, Sdn Bhd RM 1,000+'},
+      {title:'Open dedicated business bank account',hint:'Never mix personal and business money'},
+      {title:'Set up simple bookkeeping — income and expenses',hint:'Wave Accounting or simple spreadsheet'},
+      {title:'Get first paying customer — not friends',hint:'Revenue validates the business model'},
+      {title:'Register for Sales Tax if revenue exceeds RM 500K',hint:'Mandatory SST registration threshold'},
+      {title:'File business income in tax return',hint:'Report under B40/B income in LHDN BE form'},
+    ],
+    freelance:[
+      {title:'Define niche and target client clearly',hint:'Specific is better — copywriter vs writer'},
+      {title:'Set up portfolio — Behance, LinkedIn, or own site',hint:'3-5 work samples minimum before pitching'},
+      {title:'Price services — research market rate',hint:'Underpricing is as bad as overpricing'},
+      {title:'Land first paying client — not free work',hint:'Charge from day one to set expectations'},
+      {title:'Register as sole proprietor with SSM',hint:'RM 30/year — legitimises your freelance income'},
+      {title:'Set aside 10-15% of income for LHDN tax',hint:'Freelancers pay tax on net profit annually'},
+      {title:'Build 3 months retainer income — recurring clients',hint:'Retainers beat one-off projects for stability'},
+    ],
+    education:[
+      {title:'Research programme — accreditation and job outcomes',hint:'MQA accreditation is mandatory for recognition'},
+      {title:'Compare top 3 institutions and entry requirements',hint:'Public vs private vs online — cost and quality'},
+      {title:'Apply for PTPTN loan if eligible',hint:'Apply early — disbursement takes 2-3 months'},
+      {title:'Explore scholarship options — JPA, MARA, corporate',hint:'Deadline is usually 6-12 months before intake'},
+      {title:'Enrol and complete orientation',hint:'Connect with seniors — invaluable inside knowledge'},
+      {title:'Maintain CGPA above 3.0 each semester',hint:'Required for PTPTN moratorium and scholarships'},
+      {title:'Graduate and register with professional body',hint:'BEM, MIA, Bar Council etc — start early'},
+    ],
+    wedding:[
+      {title:'Set total wedding budget and guest count',hint:'Decide outdoor vs hall, traditional vs modern'},
+      {title:'Book wedding hall or venue — 12-18 months ahead',hint:'Good venues book out fast'},
+      {title:'Engage photographer and videographer',hint:'Book at least 9-12 months ahead'},
+      {title:'Book catering and confirm per-pax rate',hint:'Get itemised quote — food, serving, setup'},
+      {title:'Organise engagement (bertunang) ceremony',hint:'Agree on hantaran items and count with both families'},
+      {title:'Sort attire — baju pengantin fitting and deposit',hint:'Book 6 months ahead for custom tailoring'},
+      {title:'Apply for marriage certificate at JPN',hint:'Bring IC, birth cert, and witness — RM 30 fee'},
+      {title:'Plan honeymoon and book travel',hint:'Book 3-4 months ahead for best prices'},
+    ],
+    children:[
+      {title:'Open SSPN account for child education savings',hint:'Tax relief up to RM 8,000/year for parents'},
+      {title:'Start monthly SSPN contribution from birth',hint:'18 years of compounding makes a big difference'},
+      {title:'Get child medical insurance early',hint:'Premiums cheapest before pre-existing conditions'},
+      {title:'Research primary and secondary school options',hint:'Registration queues start years early for popular schools'},
+      {title:'Set aside monthly education fund separately',hint:'Target 4 years of local university at RM 40-60K'},
+      {title:'Review SSPN balance and adjust contributions',hint:'Increase as income grows'},
+    ],
+    insurance:[
+      {title:'Calculate income replacement needed',hint:'10x annual income is common rule of thumb'},
+      {title:'Get term life insurance quotes — compare 3',hint:'iMoney or PolicyStreet for online comparison'},
+      {title:'Get medical insurance with lifetime limit',hint:'Avoid annual limit plans — major illness can exceed'},
+      {title:'Add critical illness rider to life policy',hint:'36 critical illnesses covered — lump sum payout'},
+      {title:'Review sum assured every 3 years',hint:'Inflation reduces real value of coverage over time'},
+      {title:'Store all policy documents in one place',hint:'Tell family where policies are kept'},
+    ],
+    reno:[
+      {title:'Define scope and priority rooms for renovation',hint:'Kitchen and bathrooms give best ROI'},
+      {title:'Get 3 contractor quotes — itemised breakdown',hint:'Never accept verbal quotes — get it in writing'},
+      {title:'Check contractor licence on CIDB website',hint:'cidb.gov.my — registered contractors only'},
+      {title:'Agree on payment milestones — not upfront lump sum',hint:'Typical: 10% booking, 30% start, 40% mid, 20% completion'},
+      {title:'Document all work with before and after photos',hint:'Evidence for disputes and insurance claims'},
+      {title:'Snag list inspection before final payment',hint:'Walk through every room, test all fittings'},
+    ],
+    digital:[
+      {title:'Identify top 2 digital skills in demand for your role',hint:'Python, SQL, Power BI, or prompt engineering'},
+      {title:'Complete one structured online course',hint:'Coursera, Udemy, or Google Career Certificates'},
+      {title:'Build a portfolio project using the skill',hint:'Real work beats certificates in interviews'},
+      {title:'Add certification and project to LinkedIn',hint:'Recruiters search for these keywords'},
+      {title:'Apply the skill in your current job',hint:'Volunteer for projects that use it'},
+      {title:'Teach someone else — solidifies mastery',hint:'Internal lunch-and-learn or LinkedIn post'},
+    ],
+    brand:[
+      {title:'Define your professional niche and target audience',hint:'Who do you want to be known by and for what'},
+      {title:'Optimise LinkedIn profile with keyword-rich headline',hint:'Job title + specialty + value proposition'},
+      {title:'Publish first content piece — article or post',hint:'Share one insight from your work this week'},
+      {title:'Engage consistently — 3x per week minimum',hint:'Comment on 5 posts and post 1 per week'},
+      {title:'Reach 500 LinkedIn connections milestone',hint:'Unlocks full search visibility on the platform'},
+      {title:'Get 3 recommendations from colleagues',hint:'Specific skill-based recommendations carry weight'},
+    ],
+    nz:[
+      {title:'Check Malaysia passport NZ entry requirements',hint:'Malaysian passport — visa-free for up to 90 days'},
+      {title:'Register NZeTA (NZ Electronic Travel Authority)',hint:'Required even visa-free — NZD 9, apply at eta.immigration.govt.nz'},
+      {title:'Pay International Visitor Conservation & Tourism Levy',hint:'NZD 35 IVL — paid together with NZeTA'},
+      {title:'Book flights KUL → CHC or AKL → ZQN',hint:'Malaysia Airlines or AirAsia X — compare via Skyscanner'},
+      {title:'Book Queenstown accommodation 3+ months ahead',hint:'Prices double in ski season Jun-Aug and Dec-Jan'},
+      {title:'Get travel insurance covering adventure activities',hint:'Bungy, skiing, jet boat — standard plans exclude these'},
+      {title:'Book Skyline Gondola + Luge in advance',hint:'skyline.co.nz — buy online, queues can be 1hr+'},
+      {title:'Plan Milford Sound day trip from Queenstown',hint:'12hr return drive via Te Anau — book guided tour or self-drive'},
+      {title:'Consider Glenorchy or Wanaka day trips',hint:'Lord of the Rings filming locations — 45 min from QT'},
+      {title:'Get Wise multi-currency card loaded with NZD',hint:'Best exchange rate — no foreign transaction fee'},
+      {title:'Download CamperMate and NZ maps offline',hint:'Cell coverage patchy outside towns — offline maps essential'},
+      {title:'Book return — allow buffer day before KL flight',hint:'Weather delays common — do not cut transit tight'},
+    ],
+  };
+
+  // Score all templates and pick best match
+  const scores={
+    loan:score(['loan','b10','leapmotor','hp ','hire purchase','maybank','ctos','ccris','dsr','approval','finance']),
+    car:score(['car','vehicle','myvi','proton','perodua','axia','honda','toyota','bmw','drive']),
+    house:score(['house','home','property','condo','apartment','landed','terrace','semi','spa','mortgage','buy']),
+    save:score(['save','saving','emergency fund','rainy day','contingency','reserve']),
+    debt:score(['debt','ptptn','outstanding','owe','balance','clear','pay off','settle']),
+    credit:score(['credit card','cc','visa','mastercard','utilisation','limit','interest']),
+    invest:score(['invest','stock','share','portfolio','dividend','bursa','klci','etf','unit trust']),
+    share:score(['share option','esos','rsu','vesting','vest','exercise price','stock option','options']),
+    epf:score(['epf','kwsp','pension','voluntary contribution','i-akaun']),
+    asb:score(['asb','asb2','amanah saham bumiputera','asb loan','asb financing']),
+    amanah:score(['asnb','unit trust','amanah','asw','asgb','myasnb']),
+    tax:score(['tax','lhdn','pcb','be form','mytax','income tax','relief','rebate','filing']),
+    business:score(['business','ssm','sdn bhd','sole proprietor','company','enterprise','startup','sst']),
+    freelance:score(['freelance','side income','gig','client','project','retainer','self-employed']),
+    education:score(['degree','diploma','masters','phd','university','college','ptptn','study','mqa']),
+    wedding:score(['wedding','kahwin','nikah','engagement','bertunang','hantaran','majlis']),
+    children:score(['child','sspn','kids','baby','education fund','school','tuition']),
+    insurance:score(['insurance','takaful','life cover','medical card','critical illness','protection']),
+    reno:score(['renovation','reno','renovate','contractor','kitchen','bathroom','interior']),
+    digital:score(['digital','coding','python','sql','power bi','data','ai','prompt','tech skill']),
+    brand:score(['linkedin','personal brand','content','networking','profile','visibility','following']),
+    travel:score(['travel','trip','holiday','vacation','flight','hotel','tour','overseas']),
+    nz:score(['queenstown','new zealand','nz','nzd','christchurch','milford','fiordland','wanaka','auckland','zqn','chc']),
+    health:score(['health','fit','weight','gym','run','exercise','diet','calories','bmi']),
+    career:score(['career','job','work','position','promotion','salary','increment']),
+    retire:score(['retire','retirement','financial independence','fi','fire','passive income']),
+  };
+
+  // Score all templates and pick best match
+
+  let best=type;let bestScore=0;
+  Object.entries(scores).forEach(([k,v])=>{if(v>bestScore){bestScore=v;best=k;}});
+  let suggestions=(templates[best]||templates[type]||templates.Life).slice();
+
+  // Filter already existing milestones
+  suggestions=suggestions.filter(s=>!existing.some(e=>e.includes(s.title.toLowerCase().slice(0,15))));
+
+  // If goal is 50%+ done, skip early-stage suggestions
+  if(progress>=50&&suggestions.length>3)suggestions=suggestions.slice(Math.floor(suggestions.length/2));
+
+  // Max 5
+  suggestions=suggestions.slice(0,5);
+
+  // Brief UX delay
+  await new Promise(r=>setTimeout(r,500));
+
     aiSuggestSelections=new Array(suggestions.length).fill(false);
-    document.getElementById('aiSuggestList').innerHTML=suggestions.map((s,i)=>`
-      <div class="ai-milestone-option" onclick="toggleAiMs(${i},this)">
-        <div class="ai-ms-check" id="ai-ms-check-${i}"></div>
-        <div class="ai-ms-text">
-          <div class="ai-ms-title">${esc(s.title)}</div>
-          <div class="ai-ms-hint">${esc(s.hint)}</div>
-        </div>
-      </div>`).join('');
-    // store suggestions for later use
-    document.getElementById('aiSuggestList').dataset.suggestions=JSON.stringify(suggestions);
-  }catch(e){
-    document.getElementById('aiSuggestList').innerHTML='<div style="text-align:center;padding:20px;color:#BF0000;font-size:0.82rem">Failed to generate suggestions. Please try again.</div>';
-  }
+  document.getElementById('aiSuggestList').innerHTML=suggestions.map((s,i)=>`
+    <div class="ai-milestone-option" onclick="toggleAiMs(${i},this)">
+      <div class="ai-ms-check" id="ai-ms-check-${i}"></div>
+      <div class="ai-ms-text">
+        <div class="ai-ms-title">${esc(s.title)}</div>
+        <div class="ai-ms-hint">${esc(s.hint)}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('aiSuggestList').dataset.suggestions=JSON.stringify(suggestions);
 };
 window.toggleAiMs=function(i,el){
   aiSuggestSelections[i]=!aiSuggestSelections[i];
