@@ -539,13 +539,9 @@ input,select,button,textarea{font-family:var(--sans)}
   <div class="auth-form">
     <button class="auth-btn" id="signInBtn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      <span class="btn-text"> Connecting to Google...</span>
+      Sign in with Google
     </button>
-    <div id="authStatus" style="font-size:0.72rem;color:var(--t4);margin-top:8px;text-align:center;min-height:18px;font-weight:600"></div>
-    <button class="btn btn-ghost btn-full" onclick="useLocalMode()" style="margin-top:10px;font-size:0.72rem">
-      💾 Use without Google Drive (local only)
-    </button>
-    <p style="font-size:0.68rem;color:var(--t4);margin-top:10px;text-align:center;font-weight:600">Data stored in your own Google Drive only.</p>
+    <p style="font-size:0.68rem;color:var(--t4);margin-top:12px;text-align:center;font-weight:600">Data stored in your own Google Drive only.</p>
   </div>
 </div>
 
@@ -855,17 +851,6 @@ input,select,button,textarea{font-family:var(--sans)}
 
 <script>
 const DRIVE_FILE='finance_dashboard_data.json',SCOPES='https://www.googleapis.com/auth/drive.file',DISCOVERY='https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const CAT_EMOJI={'Food & drink':'🍜','Transport':'🚗','Groceries':'🛒','Utilities':'💡','Shopping':'🛍️','Health':'💊','Entertainment':'🎬','Salary':'💼','Savings':'🏦','Other':'📦','Subscription':'📱','Rent/Mortgage':'🏠','Insurance':'🛡️','Loan repayment':'💳','Investment':'📈','Telco':'📡'};
-const CAT_COLORS=['#BF0000','#0055AA','#007A38','#C06000','#7A50C8','#C04878','#4A9820','#0088AA'];
-const W_ICONS={bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈',credit:'💳',loan:'🏷️'};
-const W_LABELS={bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment',credit:'Credit Card',loan:'Loan / BNPL'};
-const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY','KRW','NZD','PHP','SAR','SGD','THB','TWD','USD'];
-const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
-const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
-
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[]};
-let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
 let todoFilter='all';
@@ -1502,132 +1487,13 @@ function resetClientId(){
   localStorage.removeItem('gToken');
   location.reload();
 }
-function setAuthStatus(msg){const el=document.getElementById('authStatus');if(el)el.textContent=msg;}
-function useLocalMode(){
-  // Skip Google Drive — load from localStorage only
-  const saved=localStorage.getItem('fin_v5');
-  if(saved){try{const p=JSON.parse(saved);Object.assign(state,p);}catch(e){}}
-  showApp();
-  setSyncStatus('err','Local only — Drive not connected');
-}
-function setSignInBtn(text,enabled){
-  const btn=document.getElementById('signInBtn');
-  if(!btn)return;
-  btn.style.opacity=enabled?'1':'0.65';
-  btn.style.cursor=enabled?'pointer':'not-allowed';
-  // Find or create the text span
-  let span=btn.querySelector('.btn-text');
-  if(!span){
-    span=document.createElement('span');
-    span.className='btn-text';
-    btn.appendChild(span);
-  }
-  span.textContent=' '+text;
-}
-function gapiLoaded(){
-  setAuthStatus('Step 1/2: Loading Google API...');
-  gapi.load('client',async()=>{
-    try{
-      await gapi.client.init({discoveryDocs:[DISCOVERY]});
-      gapiInited=true;
-      setAuthStatus(gisInited?'Ready — click to sign in':'Step 1/2 done, waiting...');
-      maybeAutoSignIn();
-    }catch(e){
-      setSignInBtn('Sign in with Google',true);
-      setAuthStatus('API error: '+e.message+' — try refreshing');
-    }
-  });
-}
-function gisLoaded(){
-  const cid=getClientId();if(!cid)return;
-  try{
-    tokenClient=google.accounts.oauth2.initTokenClient({
-      client_id:cid,scope:SCOPES,
-      callback:async resp=>{
-        if(resp.error){
-          setSignInBtn('Sign in with Google',true);
-          setAuthStatus('Sign in failed: '+resp.error);
-          return;
-        }
-        setAuthStatus('Signed in! Loading data...');
-        localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
-        await loadData();showApp();
-      }
-    });
-    gisInited=true;
-    setAuthStatus(gapiInited?'Ready — click to sign in':'Step 2/2 done, waiting...');
-    maybeAutoSignIn();
-  }catch(e){
-    setSignInBtn('Sign in with Google',true);
-    setAuthStatus('Auth error: '+e.message);
-  }
-}
-function maybeAutoSignIn(){
-  if(!gapiInited||!gisInited)return;
-  setSignInBtn('Sign in with Google',true);
-  setAuthStatus('Ready — click to sign in');
-  const tok=localStorage.getItem('gToken');
-  if(tok){
-    setSignInBtn('Restoring session...',false);
-    setAuthStatus('Restoring previous session...');
-    gapi.client.setToken({access_token:tok});
-    loadData().then(showApp).catch(()=>{
-      localStorage.removeItem('gToken');
-      setSignInBtn('Sign in with Google',true);
-      setAuthStatus('Session expired — please sign in again');
-    });
-  }
-}
-function showSignInStep(){
-  // Show loading state initially
-  setSignInBtn('Connecting to Google...',false);
-  const btn=document.getElementById('signInBtn');
-  if(btn)btn.onclick=()=>{
-    if(!gapiInited||!gisInited){
-      setSignInBtn('Still loading, please wait...',false);
-      // Retry after APIs load
-      const t=setInterval(()=>{
-        if(gapiInited&&gisInited){
-          clearInterval(t);
-          setSignInBtn('Sign in with Google',true);
-          tokenClient.requestAccessToken({prompt:''});
-        }
-      },200);
-      setTimeout(()=>{clearInterval(t);setSignInBtn('Sign in with Google',true);},15000);
-      return;
-    }
-    if(tokenClient){tokenClient.requestAccessToken({prompt:''});}
-  };
-}
+function gapiLoaded(){gapi.load('client',async()=>{await gapi.client.init({discoveryDocs:[DISCOVERY]});gapiInited=true;maybeInit();});}
+function gisLoaded(){const cid=getClientId();if(!cid)return;tokenClient=google.accounts.oauth2.initTokenClient({client_id:cid,scope:SCOPES,callback:async resp=>{if(resp.error){return;}localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');await loadData();showApp();}});gisInited=true;maybeInit();}
+function maybeInit(){if(!gapiInited||!gisInited)return;const tok=localStorage.getItem('gToken');if(tok){gapi.client.setToken({access_token:tok});loadData().then(showApp).catch(()=>{localStorage.removeItem('gToken');});}
+document.getElementById('signInBtn').onclick=()=>tokenClient.requestAccessToken({prompt:''});}
 function setSyncStatus(s,msg){const p=document.getElementById('syncPill');p.className='sync-pill '+s;document.getElementById('syncLbl').textContent=msg;}
 async function findOrCreate(){if(driveFileId)return driveFileId;const r=await gapi.client.drive.files.list({q:`name='${DRIVE_FILE}' and trashed=false`,fields:'files(id)',spaces:'drive'});if(r.result.files.length){driveFileId=r.result.files[0].id;return driveFileId;}const meta={name:DRIVE_FILE,mimeType:'application/json'};const body=JSON.stringify(state);const bnd='---fin_bnd';const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bnd}--`;const cr=await gapi.client.request({path:'/upload/drive/v3/files',method:'POST',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});driveFileId=cr.result.id;return driveFileId;}
-async function loadData(){
-  setSyncStatus('syncing','Loading...');
-  try{
-    const fid=await findOrCreate();
-    const r=await gapi.client.drive.files.get({fileId:fid,alt:'media'});
-    const p=typeof r.result==='string'?JSON.parse(r.result):r.result;
-    state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
-    state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
-    state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
-    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];
-    localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
-    setSyncStatus('ok','Synced');render();
-    const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
-    if(age>3600000)fetchFxRates();else renderFx();
-  }catch(e){
-    // Token likely expired — clear it and prompt re-sign-in
-    if(e&&(e.status===401||e.status===403||(e.result&&e.result.error&&e.result.error.code===401))){
-      localStorage.removeItem('gToken');
-      setSyncStatus('err','Session expired — please sign in again');
-      setTimeout(()=>{showAuth();},1500);
-    }else{
-      setSyncStatus('err','Load failed — tap to retry');
-      document.getElementById('syncPill').onclick=()=>loadData();
-    }
-  }
-}
-function tryLocal(){try{const s=localStorage.getItem('fin_v5');if(s){const p=JSON.parse(s);Object.assign(state,p);render();renderFx();}}catch(e){}}
+async function loadData(){setSyncStatus('syncing','Loading...');try{const fid=await findOrCreate();const r=await gapi.client.drive.files.get({fileId:fid,alt:'media'});const p=typeof r.result==='string'?JSON.parse(r.result):r.result;state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');setSyncStatus('ok','Synced');render();const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;if(age>3600000)fetchFxRates();else renderFx();}catch(e){if(e&&(e.status===401||e.status===403)){localStorage.removeItem('gToken');setSyncStatus('err','Session expired');setTimeout(()=>{showAuth();},1500);}else{setSyncStatus('err','Load failed');try{const s=localStorage.getItem('fin_v5');if(s){const p=JSON.parse(s);Object.assign(state,p);render();renderFx();}}catch(e2){}}}};
 async function saveData(){
   setSyncStatus('syncing','Saving...');
   const payload=JSON.stringify(state,null,2);
@@ -2247,28 +2113,8 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 };
 
 (function init(){
-  showSignInStep();
-  // Load Google GAPI
-  const s1=document.createElement('script');
-  s1.src='https://apis.google.com/js/api.js';
-  s1.async=true;
-  s1.onload=gapiLoaded;
-  s1.onerror=()=>setAuthStatus('Failed to load Google API');
-  document.body.appendChild(s1);
-  // Load Google Identity Services
-  const s2=document.createElement('script');
-  s2.src='https://accounts.google.com/gsi/client';
-  s2.async=true;
-  s2.onload=gisLoaded;
-  s2.onerror=()=>setAuthStatus('Failed to load Google Identity');
-  document.body.appendChild(s2);
-  // After 8s — unlock button so user can try anyway
-  setTimeout(()=>{
-    if(!gapiInited||!gisInited){
-      setSignInBtn('Sign in with Google',true);
-      setAuthStatus('Slow connection — try clicking or use Local mode below');
-    }
-  },8000);
+  const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);
+  const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);
 })();
 </script>
 </body>
