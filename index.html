@@ -310,16 +310,23 @@ input,select,button,textarea{font-family:var(--sans)}
 .timeline-wrap{position:relative;padding-bottom:1rem}
 .timeline-year-label{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:white;text-shadow:0 2px 6px rgba(0,0,0,0.8);padding:10px 0 6px;display:flex;align-items:center;gap:10px}
 .timeline-year-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.15)}
-.goal-card{background:#FFFFFF !important;border-radius:var(--rl);box-shadow:var(--shadow2);padding:16px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08);border-left:4px solid var(--red);transition:box-shadow 0.15s;position:relative}
+.goal-card{background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow2);padding:16px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08);border-left:4px solid var(--red);transition:box-shadow 0.15s;position:relative}
 .goal-card:hover{box-shadow:0 8px 32px rgba(0,0,0,0.2)}
 .goal-card.status-done{border-left-color:#007A38}
 .goal-card.status-active{border-left-color:#0055AA}
 .goal-card.status-paused{border-left-color:#C06000}
 .goal-card-title{font-size:0.95rem;font-weight:800;color:#1A1A1A;margin-bottom:3px}
 .goal-card-desc{font-size:0.78rem;color:#6A6A6A;font-weight:500;line-height:1.5;margin-bottom:6px}
+.milestones-wrap{border-top:1px solid rgba(0,0,0,0.1);padding-top:10px;background:rgba(0,0,0,0.02);border-radius:0 0 var(--r) var(--r);margin:-1px -1px -1px -1px;padding:10px 14px}
+.goal-card:hover{box-shadow:var(--shadow2)}
+.goal-card.status-done{border-left-color:var(--green);opacity:0.8}
+.goal-card.status-active{border-left-color:var(--blue)}
+.goal-card.status-paused{border-left-color:var(--amber)}
 .goal-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
 .goal-card-icon{font-size:1.6rem;flex-shrink:0;margin-top:2px}
 .goal-card-info{flex:1;min-width:0}
+.goal-card-title{font-size:0.95rem;font-weight:800;color:var(--t1);margin-bottom:3px}
+.goal-card-desc{font-size:0.78rem;color:var(--t3);font-weight:500;line-height:1.5;margin-bottom:6px}
 .goal-card-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .goal-type-badge{font-size:0.62rem;padding:2px 8px;border-radius:20px;font-weight:800}
 .type-career{background:rgba(0,85,170,0.1);color:var(--blue)}
@@ -337,6 +344,8 @@ input,select,button,textarea{font-family:var(--sans)}
 .goal-progress-top{display:flex;justify-content:space-between;font-size:0.72rem;color:var(--t2);margin-bottom:5px;font-weight:700}
 .goal-progress-track{height:7px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden}
 .goal-progress-fill{height:100%;border-radius:4px;transition:width 0.5s}
+/* MILESTONES */
+.milestones-wrap{border-top:1px solid rgba(0,0,0,0.07);padding-top:10px}
 .milestones-label{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--t3);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
 .milestone-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:0.8rem}
 .milestone-item:last-child{border-bottom:none}
@@ -435,40 +444,6 @@ input,select,button,textarea{font-family:var(--sans)}
   .content{padding:0.75rem}
   .app-top-tab-inner{padding:12px 10px;font-size:0.82rem}
 }
-
-/* Force solid backgrounds - override any cached rules */
-.goal-card, .goal-card * { color: inherit; }
-.goal-card { background: #FFFFFF !important; opacity: 1 !important; }
-.milestones-wrap { background: #F8F8F8 !important; }
-
-/* ── GOAL CARD SOLID OVERRIDE ──────────────────────── */
-.goal-card {
-  background: #FFFFFF !important;
-  border-radius: 14px !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12) !important;
-  padding: 16px !important;
-  margin-bottom: 10px !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-  border-left: 4px solid #BF0000 !important;
-  position: relative !important;
-  opacity: 1 !important;
-}
-.goal-card.status-done { border-left-color: #007A38 !important; }
-.goal-card.status-active { border-left-color: #0055AA !important; }
-.goal-card.status-paused { border-left-color: #C06000 !important; }
-.goal-card-title { color: #1A1A1A !important; }
-.goal-card-desc { color: #6A6A6A !important; }
-.milestones-wrap {
-  border-top: 1px solid rgba(0,0,0,0.08) !important;
-  padding: 10px 0 0 0 !important;
-  margin: 10px 0 0 0 !important;
-  background: transparent !important;
-}
-.milestones-label { color: #6A6A6A !important; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-.ms-title { color: #1A1A1A !important; }
-.add-milestone-input { background: #FFFFFF !important; color: #1A1A1A !important; }
-.add-milestone-date { background: #FFFFFF !important; color: #1A1A1A !important; }
-.gantt-wrap { background: #FFFFFF !important; }
 </style>
 </head>
 <body>
@@ -537,7 +512,7 @@ input,select,button,textarea{font-family:var(--sans)}
     <div class="auth-tagline">Personal Dashboard · Malaysia</div>
   </div>
   <div class="auth-form">
-    <button class="auth-btn" id="signInBtn" onclick="handleSignIn()">
+    <button class="auth-btn" id="signInBtn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
       Sign in with Google
     </button>
@@ -595,7 +570,6 @@ input,select,button,textarea{font-family:var(--sans)}
         <button class="tab" onclick="switchTab('goals')">Goals</button>
         <button class="tab" onclick="switchTab('fx')">Currency</button>
         <button class="tab" onclick="switchTab('report')">Report</button>
-        <button class="tab" onclick="switchTab('balance')">Balance Sheet</button>
       </div>
 
       <div class="tab-page active" id="tab-overview">
@@ -616,7 +590,7 @@ input,select,button,textarea{font-family:var(--sans)}
         </div><!-- end snapshot -->
         <div class="section-hdr"><span class="section-title">Wallets &amp; Accounts</span><button class="add-btn" id="openWallet">+ Add account</button></div>
         <div class="wallet-grid" id="walletGrid"></div>
-        <div class="total-bar"><span class="total-lbl">Total balance<br><span id="walletTotalSub" style="font-size:0.65rem;opacity:0.7;font-weight:500"></span></span><span class="total-val" id="walletTotal">RM 0.00</span></div>
+        <div class="total-bar"><span class="total-lbl">Total balance</span><span class="total-val" id="walletTotal">RM 0.00</span></div>
         <div class="metric-grid">
           <div class="metric m-income"><div class="m-lbl">Income</div><div class="m-val" id="mIncome">RM 0</div><div class="m-sub" id="mIncomeSub">—</div></div>
           <div class="metric m-expense"><div class="m-lbl">Expenses</div><div class="m-val" id="mExpense">RM 0</div><div class="m-sub" id="mExpSub">—</div></div>
@@ -683,55 +657,6 @@ input,select,button,textarea{font-family:var(--sans)}
         <div class="two-col">
           <div class="panel"><div class="ph"><div class="pt">📊 Monthly summary</div></div><div id="reportRows"><div class="empty">No data.</div></div></div>
           <div class="panel"><div class="ph"><div class="pt">🏆 Top expenses</div></div><div id="topExpenses"><div class="empty">No data.</div></div></div>
-        </div>
-      </div>
-      <div class="tab-page" id="tab-balance">
-        <!-- NET WORTH HERO -->
-        <div style="background:linear-gradient(135deg,#1A1A2E,#16213E,#0F3460);border-radius:var(--rl);padding:20px 24px;margin-bottom:1rem;box-shadow:var(--shadow2)">
-          <div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);margin-bottom:6px">NET WORTH</div>
-          <div style="font-family:var(--mono);font-size:2rem;font-weight:800;color:white" id="bsNetWorth">RM 0.00</div>
-          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;font-weight:600" id="bsNetWorthSub">Total assets minus total liabilities</div>
-        </div>
-        <!-- ASSETS vs LIABILITIES SUMMARY -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
-          <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:16px;border-top:4px solid #007A38">
-            <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#007A38;margin-bottom:8px">📈 Total Assets</div>
-            <div style="font-family:var(--mono);font-size:1.4rem;font-weight:800;color:#007A38" id="bsTotalAssets">RM 0.00</div>
-            <div style="font-size:0.72rem;color:#9A9A9A;margin-top:4px;font-weight:600" id="bsAssetCount">0 accounts</div>
-          </div>
-          <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:16px;border-top:4px solid #BF0000">
-            <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#BF0000;margin-bottom:8px">📉 Total Liabilities</div>
-            <div style="font-family:var(--mono);font-size:1.4rem;font-weight:800;color:#BF0000" id="bsTotalLiabilities">RM 0.00</div>
-            <div style="font-size:0.72rem;color:#9A9A9A;margin-top:4px;font-weight:600" id="bsLiabilityCount">0 accounts</div>
-          </div>
-        </div>
-        <!-- ASSETS BREAKDOWN -->
-        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
-          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px;display:flex;align-items:center;gap:8px">📈 Assets breakdown</div>
-          <div id="bsAssetsList"><div class="empty">No asset accounts added yet.</div></div>
-          <div style="border-top:1px solid rgba(0,0,0,0.08);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.78rem;font-weight:800;color:#1A1A1A">Total assets</span>
-            <span style="font-family:var(--mono);font-size:0.95rem;font-weight:800;color:#007A38" id="bsAssetTotal2">RM 0.00</span>
-          </div>
-        </div>
-        <!-- LIABILITIES BREAKDOWN -->
-        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
-          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px;display:flex;align-items:center;gap:8px">📉 Liabilities breakdown</div>
-          <div id="bsLiabilitiesList"><div class="empty">No liability accounts added yet.<br><span style="font-size:0.72rem;color:#9A9A9A">Add a Credit Card or Loan account type to track debts.</span></div></div>
-          <div style="border-top:1px solid rgba(0,0,0,0.08);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.78rem;font-weight:800;color:#1A1A1A">Total liabilities</span>
-            <span style="font-family:var(--mono);font-size:0.95rem;font-weight:800;color:#BF0000" id="bsLiabilityTotal2">RM 0.00</span>
-          </div>
-        </div>
-        <!-- DEBT TRACKER -->
-        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
-          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">💳 Debt paydown tracker</div>
-          <div id="bsDebtTracker"><div class="empty">No loans or debts tracked.</div></div>
-        </div>
-        <!-- RATIO ANALYSIS -->
-        <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;border:1px solid rgba(0,0,0,0.08)">
-          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">📊 Financial ratios</div>
-          <div id="bsRatios"><div class="empty">Add accounts to see ratios.</div></div>
         </div>
       </div>
     </div>
@@ -802,7 +727,7 @@ input,select,button,textarea{font-family:var(--sans)}
 <!-- FINANCE MODALS -->
 <div class="modal-overlay" id="txOverlay"><div class="modal"><h3>Add transaction</h3><div class="field"><label>Type</label><select id="txType"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings transfer</option></select></div><div class="field"><label>Description</label><input type="text" id="txDesc" placeholder="e.g. Grab, Tesco, salary"></div><div class="field"><label>Amount (RM)</label><input type="number" id="txAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Account</label><select id="txWallet"><option value="">— none —</option></select></div><div class="field"><label>Category</label><select id="txCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Salary</option><option>Savings</option><option>Other</option></select></div><div class="field"><label>Date</label><input type="date" id="txDate"></div><div class="field"><label>Note (optional)</label><input type="text" id="txNote" placeholder="optional"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTx">Cancel</button><button class="btn btn-red" id="saveTx">Add</button></div></div></div>
 <div class="modal-overlay" id="futureOverlay"><div class="modal"><h3>Add bill / future payment</h3><div class="field"><label>Description</label><input type="text" id="fDesc" placeholder="e.g. Astro, TNB, car loan"></div><div class="field"><label>Amount (RM)</label><input type="number" id="fAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Due date</label><input type="date" id="fDate"></div><div class="field"><label>Category</label><select id="fCat"><option>Subscription</option><option>Rent/Mortgage</option><option>Utilities</option><option>Insurance</option><option>Loan repayment</option><option>Investment</option><option>Telco</option><option>Other</option></select></div><div class="field"><label>Recurrence</label><select id="fRecur"><option value="once">One-time</option><option value="monthly">Monthly</option><option value="weekly">Weekly</option><option value="yearly">Yearly</option></select></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelFuture">Cancel</button><button class="btn btn-red" id="saveFuture">Add</button></div></div></div>
-<div class="modal-overlay" id="walletOverlay"><div class="modal"><h3 id="walletModalTitle">Add account</h3><div class="field"><label>Account name</label><input type="text" id="wName" placeholder="e.g. Maybank, TNG, Cash"></div><div class="field"><label>Type</label><select id="wType"><option value="bank">Bank</option><option value="ewallet">E-wallet</option><option value="cash">Cash</option><option value="savings">Savings</option><option value="investment">Investment</option><option value="credit">Credit Card</option><option value="loan">Loan / BNPL</option></select></div><div class="field"><label>Balance (RM)</label><input type="number" id="wBal" step="0.01" placeholder="0.00 (use negative for debt)"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelWallet">Cancel</button><button class="btn btn-red" id="saveWallet">Save</button></div></div></div>
+<div class="modal-overlay" id="walletOverlay"><div class="modal"><h3 id="walletModalTitle">Add account</h3><div class="field"><label>Account name</label><input type="text" id="wName" placeholder="e.g. Maybank, TNG, Cash"></div><div class="field"><label>Type</label><select id="wType"><option value="bank">Bank</option><option value="ewallet">E-wallet</option><option value="cash">Cash</option><option value="savings">Savings</option><option value="investment">Investment</option></select></div><div class="field"><label>Balance (RM)</label><input type="number" id="wBal" step="0.01" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelWallet">Cancel</button><button class="btn btn-red" id="saveWallet">Save</button></div></div></div>
 <div class="modal-overlay" id="goalOverlay"><div class="modal"><h3 id="goalModalTitle">Add savings goal</h3><div class="field"><label>Goal name</label><input type="text" id="gName" placeholder="e.g. Emergency fund, Holiday"></div><div class="field"><label>Emoji icon</label><input type="text" id="gIcon" placeholder="🎯" maxlength="2" value="🎯"></div><div class="field"><label>Target amount (RM)</label><input type="number" id="gTarget" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Current saved (RM)</label><input type="number" id="gSaved" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Target date (optional)</label><input type="date" id="gDate"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelGoal">Cancel</button><button class="btn btn-red" id="saveGoal">Save</button></div></div></div>
 <div class="modal-overlay" id="debtOverlay"><div class="modal"><h3 id="debtModalTitle">Add debt / loan</h3><div class="field"><label>Name</label><input type="text" id="dName" placeholder="e.g. PTPTN, Car loan, Credit card"></div><div class="field"><label>Total amount (RM)</label><input type="number" id="dTotal" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Amount paid so far (RM)</label><input type="number" id="dPaid" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Monthly payment (RM)</label><input type="number" id="dMonthly" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Interest rate % (optional)</label><input type="number" id="dRate" step="0.01" min="0" placeholder="e.g. 3.5"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelDebt">Cancel</button><button class="btn btn-red" id="saveDebt">Save</button></div></div></div>
 <div class="modal-overlay" id="budgetOverlay"><div class="modal"><h3>Set budget target</h3><div class="field"><label>Category</label><select id="budgetCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Other</option></select></div><div class="field"><label>Monthly limit (RM)</label><input type="number" id="budgetAmt" step="0.01" min="0" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelBudget">Cancel</button><button class="btn btn-red" id="saveBudget">Save</button></div></div></div>
@@ -851,6 +776,17 @@ input,select,button,textarea{font-family:var(--sans)}
 
 <script>
 const DRIVE_FILE='finance_dashboard_data.json',SCOPES='https://www.googleapis.com/auth/drive.file',DISCOVERY='https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAT_EMOJI={'Food & drink':'🍜','Transport':'🚗','Groceries':'🛒','Utilities':'💡','Shopping':'🛍️','Health':'💊','Entertainment':'🎬','Salary':'💼','Savings':'🏦','Other':'📦','Subscription':'📱','Rent/Mortgage':'🏠','Insurance':'🛡️','Loan repayment':'💳','Investment':'📈','Telco':'📡'};
+const CAT_COLORS=['#BF0000','#0055AA','#007A38','#C06000','#7A50C8','#C04878','#4A9820','#0088AA'];
+const W_ICONS={bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈'};
+const W_LABELS={bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment'};
+const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY','KRW','NZD','PHP','SAR','SGD','THB','TWD','USD'];
+const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
+const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
+
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[]};
+let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
 let todoFilter='all';
@@ -963,390 +899,44 @@ window.openAiSuggest=async function(idx){
   const g=state.goalPlans[idx];
   if(!g)return;
   document.getElementById('aiSuggestTitle').textContent=`✨ AI Milestones — ${g.title}`;
+  document.getElementById('aiSuggestList').innerHTML='<div style="text-align:center;padding:24px;color:#9A9A9A;font-size:0.82rem">⏳ Generating suggestions...</div>';
   document.getElementById('aiSuggestOverlay').classList.add('open');
+  try{
+    const prompt=`You are a practical life and financial planning assistant. 
+Goal: "${g.title}"
+Type: ${g.type||'Life'}
+Status: ${g.status||'not started'}
+Target date: ${g.targetDate||'not set'}
+Description: ${g.desc||'none'}
+Existing milestones: ${(g.milestones||[]).map(m=>m.title).join(', ')||'none'}
 
-  // Build prompt for Claude.ai
-  const existing=(g.milestones||[]).map(m=>m.title).join(', ')||'none';
-  const prompt=`I have a goal in my KiaN Life Path dashboard:\n\nGoal: "${g.title}"\nType: ${g.type||'Life'}\nStatus: ${g.status||'not started'}\nTarget date: ${g.targetDate||'not set'}\nDescription: ${g.desc||'(none)'}\nExisting milestones: ${existing}\n\nSuggest 5 specific, actionable milestones for this goal. Make them practical and relevant to Malaysia context. Format as a numbered list.`;
-
-  const claudeUrl='https://claude.ai/new?q='+encodeURIComponent(prompt);
-
-  document.getElementById('aiSuggestList').innerHTML=`
-    <div style="padding:8px 0">
-      <p style="font-size:0.82rem;color:#1A1A1A;font-weight:600;margin-bottom:12px;line-height:1.6">
-        Click below to open Claude.ai with your goal details pre-filled.<br>
-        <span style="color:#6A6A6A;font-weight:500">Copy the suggestions back here and add them as milestones.</span>
-      </p>
-      <a href="${claudeUrl}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#BF0000;color:white;border-radius:8px;padding:12px 20px;font-size:0.88rem;font-weight:800;text-decoration:none;margin-bottom:14px">
-        ✨ Open Claude.ai — Get AI suggestions
-      </a>
-      <div style="background:#F8F8F8;border-radius:8px;padding:12px;margin-bottom:12px">
-        <div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Or use local suggestions below</div>
-        <div id="localSuggestList"></div>
-      </div>
-    </div>`;
-
-  // Also show local suggestions as fallback
-  const title=(g.title||'').toLowerCase();
-  const desc=(g.desc||'').toLowerCase();
-  const type=g.type||'Life';
-  const progress=Number(g.progress)||0;
-  const existingArr=(g.milestones||[]).map(m=>m.title.toLowerCase());
-  const combined=title+' '+desc;
-  const kw=(k)=>combined.includes(k);
-  const scoreT=(keys)=>keys.filter(k=>kw(k)).length;
-
-  const scores={
-    loan:scoreT(['loan','b10','leapmotor','hp ','hire purchase','maybank','ctos','ccris','dsr']),
-    car:scoreT(['car','vehicle','myvi','proton','perodua','honda','toyota','drive']),
-    house:scoreT(['house','home','property','condo','apartment','landed','spa','mortgage']),
-    save:scoreT(['save','saving','emergency fund','rainy day','reserve']),
-    debt:scoreT(['debt','ptptn','outstanding','owe','clear','pay off','settle']),
-    credit:scoreT(['credit card','cc','visa','mastercard','utilisation','limit']),
-    invest:scoreT(['invest','stock','share','portfolio','dividend','bursa','klci','etf']),
-    share:scoreT(['share option','esos','rsu','vesting','vest','exercise price']),
-    epf:scoreT(['epf','kwsp','pension','voluntary contribution','i-akaun']),
-    asb:scoreT(['asb','amanah saham bumiputera','asb loan']),
-    amanah:scoreT(['asnb','unit trust','amanah','myasnb']),
-    tax:scoreT(['tax','lhdn','pcb','be form','mytax','income tax','relief']),
-    business:scoreT(['business','ssm','sdn bhd','sole proprietor','startup']),
-    freelance:scoreT(['freelance','side income','gig','client','retainer']),
-    education:scoreT(['degree','diploma','masters','university','ptptn','study']),
-    wedding:scoreT(['wedding','kahwin','nikah','bertunang','hantaran']),
-    children:scoreT(['child','sspn','kids','baby','education fund','school']),
-    insurance:scoreT(['insurance','takaful','life cover','medical card','critical illness']),
-    reno:scoreT(['renovation','reno','renovate','contractor','kitchen','bathroom']),
-    digital:scoreT(['digital','coding','python','sql','power bi','data','ai']),
-    brand:scoreT(['linkedin','personal brand','content','networking','profile']),
-    travel:scoreT(['travel','trip','holiday','vacation','flight','hotel','tour']),
-    nz:scoreT(['queenstown','new zealand','nz','christchurch','milford','wanaka']),
-    health:scoreT(['health','fit','weight','gym','run','exercise','diet']),
-    career:scoreT(['career','job','work','position','promotion','salary']),
-    retire:scoreT(['retire','retirement','financial independence','fi','fire']),
-  };
-
-  let best=type;let bestScore=0;
-  Object.entries(scores).forEach(([k,v])=>{if(v>bestScore){bestScore=v;best=k;}});
-  let suggestions=(templates[best]||templates[type]||templates.Life).slice();
-  suggestions=suggestions.filter(s=>!existingArr.some(e=>e.includes(s.title.toLowerCase().slice(0,15))));
-  if(progress>=50&&suggestions.length>3)suggestions=suggestions.slice(Math.floor(suggestions.length/2));
-  suggestions=suggestions.slice(0,5);
-
-  aiSuggestSelections=new Array(suggestions.length).fill(false);
-  const localEl=document.getElementById('localSuggestList');
-  if(localEl){
-    localEl.innerHTML=suggestions.map((s,i)=>`
-      <div class="ai-milestone-option" onclick="toggleAiMs(${i},this)" style="padding:7px 0">
+Suggest exactly 5 specific, actionable milestones for this goal. Each milestone should be a concrete step.
+Reply ONLY with a JSON array of exactly 5 objects with keys "title" (string, max 60 chars) and "hint" (string, max 80 chars brief explanation).
+No markdown, no backticks, just raw JSON array.`;
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await resp.json();
+    const text=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const clean=text.replace(/```json|```/g,'').trim();
+    const suggestions=JSON.parse(clean);
+    aiSuggestSelections=new Array(suggestions.length).fill(false);
+    document.getElementById('aiSuggestList').innerHTML=suggestions.map((s,i)=>`
+      <div class="ai-milestone-option" onclick="toggleAiMs(${i},this)">
         <div class="ai-ms-check" id="ai-ms-check-${i}"></div>
         <div class="ai-ms-text">
           <div class="ai-ms-title">${esc(s.title)}</div>
           <div class="ai-ms-hint">${esc(s.hint)}</div>
         </div>
       </div>`).join('');
+    // store suggestions for later use
     document.getElementById('aiSuggestList').dataset.suggestions=JSON.stringify(suggestions);
+  }catch(e){
+    document.getElementById('aiSuggestList').innerHTML='<div style="text-align:center;padding:20px;color:#BF0000;font-size:0.82rem">Failed to generate suggestions. Please try again.</div>';
   }
 };
-
-  // Smart local suggestion engine — zero cost, no API needed
-  const title=(g.title||'').toLowerCase();
-  const desc=(g.desc||'').toLowerCase();
-  const type=g.type||'Life';
-  const progress=Number(g.progress)||0;
-  const existing=(g.milestones||[]).map(m=>m.title.toLowerCase());
-  const combined=title+' '+desc;
-  const kw=(k)=>combined.includes(k);
-  const score=(keys)=>keys.filter(k=>kw(k)).length;
-
-  const templates={
-    loan:[
-      {title:'Pull CCRIS & CTOS report — know your score',hint:'Free at BNM eLINK or ctoscredit.com.my'},
-      {title:'Reduce credit card limits to below RM 30K',hint:'Each RM 10K cut = RM 500 freed from DSR'},
-      {title:'Wait 3 months for CCRIS to reflect changes',hint:'Banks assess trailing 12-month behaviour'},
-      {title:'Build down payment savings to target amount',hint:'Larger down = lower monthly + better DSR'},
-      {title:'Apply via Maybank RM with relationship flag',hint:'Internal scoring considers payment behaviour'},
-      {title:'Receive and review approval letter',hint:'Check rate, tenure, and lock-in period'},
-    ],
-    car:[
-      {title:'Research OTR prices — check paultan.org',hint:'Compare all-in price across dealers'},
-      {title:'Get HP pre-approval or bank quotation',hint:'Know your ceiling before visiting dealer'},
-      {title:'Test drive at least 2-3 shortlisted models',hint:'Book weekday slots to avoid crowds'},
-      {title:'Negotiate OTR price and free accessories',hint:'Ask for tinting, floor mats, free service'},
-      {title:'Compare insurance quotes on Loanstreet',hint:'Save RM 500-1,500 vs dealer insurance'},
-      {title:'Collect car — verify all documents',hint:'Grant, keys, service book, warranty card'},
-    ],
-    house:[
-      {title:'Define budget, location, and property type',hint:'Max price, area, landed vs high-rise'},
-      {title:'Get home loan pre-approval from bank',hint:'Confirms borrowing limit before viewings'},
-      {title:'View minimum 5 properties before deciding',hint:'Never buy the first one you see'},
-      {title:'Negotiate asking price — counter 5-10% lower',hint:'Most sellers have room to move'},
-      {title:'Appoint conveyancing lawyer for SPA',hint:'Budget RM 3,000-6,000 for legal fees'},
-      {title:'Sign SPA and settle 10% down payment',hint:'Minus booking fee already paid'},
-    ],
-    save:[
-      {title:'Calculate exact monthly savings required',hint:'Target amount ÷ months remaining'},
-      {title:'Open dedicated savings account',hint:'Keep it separate from daily spending'},
-      {title:'Set auto-transfer on salary credit day',hint:'Pay yourself first — non-negotiable'},
-      {title:'Cut one recurring expense and redirect',hint:'Subscriptions, food delivery, or impulse buys'},
-      {title:'Reach 50% of target — halfway checkpoint',hint:'Review if monthly amount is sustainable'},
-      {title:'Final top-up using bonus or extra income',hint:'Close any gap in the last month'},
-    ],
-    debt:[
-      {title:'List all debts — balance, rate, minimum',hint:'Full picture before planning attack'},
-      {title:'Rank by interest rate — target highest first',hint:'Avalanche method saves most money'},
-      {title:'Redirect RM 500+ extra to highest-rate debt',hint:'Pay minimum on all others'},
-      {title:'Clear first target debt — snowball to next',hint:'Redirect freed payment to next debt'},
-      {title:'Reduce credit card limit after clearing',hint:'Prevents re-spending, improves CTOS'},
-      {title:'Declare debt-free milestone',hint:'Calculate total interest saved vs original plan'},
-    ],
-    credit:[
-      {title:'Get CCRIS report — map all balances',hint:'Free at BNM eLINK every 3 months'},
-      {title:'Pay more than minimum on every card',hint:'Minimum payments barely touch principal'},
-      {title:'Call bank — request interest rate reduction',hint:'Loyal customers often get 1-2% off'},
-      {title:'Set up full statement auto-pay',hint:'Eliminates late fees and interest forever'},
-      {title:'Reduce limit after clearing each card',hint:'Improves DSR and CTOS score'},
-      {title:'Close unnecessary cards — keep max 2',hint:'Fewer cards = cleaner credit profile'},
-    ],
-    invest:[
-      {title:'Define goal and risk tolerance clearly',hint:'Capital growth vs income, 5-10 year horizon'},
-      {title:'Open Rakuten Trade or Mplus account',hint:'Low brokerage, good for Malaysian stocks'},
-      {title:'Fund account with initial capital',hint:'Start with amount you can afford to hold'},
-      {title:'Research first 3 stocks or ETFs',hint:'KLCI ETF is a safe beginner starting point'},
-      {title:'Execute first purchase — start small',hint:'RM 1,000-5,000 to learn the process'},
-      {title:'Set up monthly investment plan — DCA',hint:'Dollar cost averaging over 12+ months'},
-    ],
-    share:[
-      {title:'Confirm vesting schedule and exercise price',hint:'Check employment share agreement'},
-      {title:'Understand perquisite tax on exercise gains',hint:'LHDN taxes ESOS gains as employment income'},
-      {title:'Decide: exercise-and-sell vs hold',hint:'Depends on company outlook and your tax rate'},
-      {title:'Exercise vested options via HR/administrator',hint:'Contact stock plan team when vested'},
-      {title:'Transfer proceeds to investment or savings',hint:'Plan use of funds before exercising'},
-      {title:'Declare in tax return under perquisite income',hint:'Required in year of exercise — BE form'},
-    ],
-    travel:[
-      {title:'Lock in destination and travel window',hint:'Check school holidays and peak pricing'},
-      {title:'Set detailed budget — flights, stays, food',hint:'Add 15% buffer for surprises'},
-      {title:'Book flights via Google Flights alerts',hint:'Book 3-6 months ahead for best fares'},
-      {title:'Book accommodation with free cancellation',hint:'Flexibility until 2 weeks before travel'},
-      {title:'Plan itinerary and pre-book key activities',hint:'Popular spots need advance reservation'},
-      {title:'Sort travel insurance and check passport',hint:'6 months validity, visa if required'},
-    ],
-    nz:[
-      {title:'Check NZ visa requirements for Malaysian passport',hint:'Currently visa-free for short visits'},
-      {title:'Book KUL-CHC or KUL-ZQN flights early',hint:'AirAsia or Jetstar via Singapore or Sydney'},
-      {title:'Book Queenstown accommodation',hint:'Prices spike Jun-Aug ski season'},
-      {title:'Book Skyline Gondola and Luge',hint:'Book online — queues are long in season'},
-      {title:'Plan Milford Sound day trip',hint:'Book guided tour — 12 hour return from QT'},
-      {title:'Arrange Wise card for NZD spending',hint:'Best rates, no foreign transaction fee'},
-    ],
-    health:[
-      {title:'Book full medical check-up with blood panel',hint:'Baseline: glucose, cholesterol, BP, BMI'},
-      {title:'Set exercise schedule — 3x per week minimum',hint:'Calendar block it — treat like a meeting'},
-      {title:'Track food intake for 2 weeks',hint:'Awareness alone reduces intake 10-15%'},
-      {title:'Hit 30 consecutive days of exercise',hint:'First month is the hardest — just show up'},
-      {title:'Recheck metrics vs baseline at 3 months',hint:'Compare to check-up results'},
-      {title:'Reach target and shift to maintenance mode',hint:'Goal achieved — build it into lifestyle'},
-    ],
-    career:[
-      {title:'Define target: role, company, salary, date',hint:'Specific goals get specific results'},
-      {title:'Identify top 3 skill gaps to close',hint:'Ask manager or check target job descriptions'},
-      {title:'Complete one certification or course',hint:'Udemy, Coursera, or industry certification'},
-      {title:'Update CV and LinkedIn with achievements',hint:'Metrics-driven bullets, not just duties'},
-      {title:'Apply to 10+ relevant roles or internal posts',hint:'Volume is a legitimate strategy'},
-      {title:'Negotiate and accept target offer',hint:'Always negotiate before verbal acceptance'},
-    ],
-    epf:[
-      {title:'Log in i-Akaun and review current balance',hint:'Check Acc 1, Acc 2, and Acc 3 breakdown'},
-      {title:'Calculate voluntary contribution amount',hint:'Up to RM 100K/year, tax deductible'},
-      {title:'Submit voluntary top-up via i-Akaun',hint:'Instant credit, earns dividend from day one'},
-      {title:'Review EPF dividend declaration for the year',hint:'Typically 5-6% — better than FD'},
-      {title:'Plan Account 2 withdrawal timeline at 50',hint:'Housing, education, health, or investment'},
-    ],
-    retire:[
-      {title:'Calculate retirement number — expenses × 300',hint:'25x annual expenses = financial independence'},
-      {title:'Review EPF projected balance at 55',hint:'Use EPF retirement calculator at kwsp.gov.my'},
-      {title:'Open Private Retirement Scheme (PRS)',hint:'Tax relief up to RM 3,000/year'},
-      {title:'Increase savings rate by 5% of salary',hint:'Small increases compound dramatically'},
-      {title:'Diversify — EPF, PRS, stocks, property',hint:'No single asset class should dominate'},
-    ],
-    Financial:[
-      {title:'Define exact target amount and deadline',hint:'Specific number makes tracking possible'},
-      {title:'Calculate required monthly contribution',hint:'Target ÷ months remaining'},
-      {title:'Open dedicated account for this goal',hint:'Separation prevents accidental spending'},
-      {title:'Automate monthly transfer on salary day',hint:'Remove willpower from the equation'},
-      {title:'Midpoint review — on track?',hint:'Adjust monthly amount if ahead or behind'},
-      {title:'Final top-up and goal completion',hint:'Use bonus or extra income to close gap'},
-    ],
-    Career:[
-      {title:'Write specific success criteria',hint:'Role, company, salary, timeline'},
-      {title:'Identify the single most critical gap',hint:'What is holding you back most'},
-      {title:'Complete one concrete upskilling step',hint:'Course, project, or certification'},
-      {title:'Take the key action most people avoid',hint:'Apply, pitch, present, or ask'},
-      {title:'Achieve goal and document lessons learned',hint:'What worked for replication next time'},
-    ],
-    Life:[
-      {title:'Define what success looks like precisely',hint:'Specific and measurable outcome'},
-      {title:'Research — learn from those who did it',hint:'Books, YouTube, your network'},
-      {title:'Create a step-by-step weekly action plan',hint:'Break the goal into weekly actions'},
-      {title:'Take the first concrete step this week',hint:'Momentum starts with one action'},
-      {title:'Midpoint review — adjust plan if needed',hint:'Stay flexible on method, firm on goal'},
-      {title:'Complete and celebrate the achievement',hint:'You earned it — mark it properly'},
-    ],
-    asb:[
-      {title:'Open ASB account at Maybank or ASNB counter',hint:'Only for Bumiputera — bring IC and birth cert'},
-      {title:'Calculate ASB loan eligibility and quota',hint:'Check current ASB loan interest rate vs dividend'},
-      {title:'Apply for ASB financing at bank',hint:'Maybank, BSN, or Bank Rakyat offer ASB loans'},
-      {title:'Set up monthly ASB top-up via online banking',hint:'Auto-debit from salary account on payday'},
-      {title:'Review annual ASB dividend declaration',hint:'Typically 4-6% — reinvest for compounding'},
-      {title:'Track investment growth vs loan interest cost',hint:'Net gain should be positive each year'},
-    ],
-    amanah:[
-      {title:'Research ASNB unit trust funds available',hint:'ASB, ASB2, ASW 2020, ASGB — check eligibility'},
-      {title:'Open ASNB account online via myASNB app',hint:'myASNB app — quick registration with MyKad'},
-      {title:'Start monthly investment via myASNB',hint:'As low as RM 10/month to start'},
-      {title:'Compare fixed price vs variable price funds',hint:'ASB is fixed price, less volatile'},
-      {title:'Set reinvestment of dividends to compound',hint:'Do not withdraw dividends — let them compound'},
-      {title:'Review portfolio allocation annually',hint:'Rebalance between fixed and variable as needed'},
-    ],
-    tax:[
-      {title:'Gather all income documents by Jan',hint:'Payslips, EA form, freelance invoices, rental income'},
-      {title:'Log in to MyTax portal — mytax.hasil.gov.my',hint:'Use MyKad digital certificate or password'},
-      {title:'Key in all relief claims — maximise deductions',hint:'EPF, insurance, education, lifestyle, parents'},
-      {title:'Check if eligible for PCB rebate or refund',hint:'Compare monthly PCB deducted vs actual tax'},
-      {title:'Submit BE form before 30 April deadline',hint:'Late submission attracts 10% penalty'},
-      {title:'Pay any tax balance due before deadline',hint:'FPX payment via MyTax — instant clearance'},
-    ],
-    business:[
-      {title:'Validate business idea — survey 10 potential customers',hint:'Confirm people will actually pay before building'},
-      {title:'Register SSM — sole proprietor or Sdn Bhd',hint:'Sole prop RM 30-60, Sdn Bhd RM 1,000+'},
-      {title:'Open dedicated business bank account',hint:'Never mix personal and business money'},
-      {title:'Set up simple bookkeeping — income and expenses',hint:'Wave Accounting or simple spreadsheet'},
-      {title:'Get first paying customer — not friends',hint:'Revenue validates the business model'},
-      {title:'Register for Sales Tax if revenue exceeds RM 500K',hint:'Mandatory SST registration threshold'},
-      {title:'File business income in tax return',hint:'Report under B40/B income in LHDN BE form'},
-    ],
-    freelance:[
-      {title:'Define niche and target client clearly',hint:'Specific is better — copywriter vs writer'},
-      {title:'Set up portfolio — Behance, LinkedIn, or own site',hint:'3-5 work samples minimum before pitching'},
-      {title:'Price services — research market rate',hint:'Underpricing is as bad as overpricing'},
-      {title:'Land first paying client — not free work',hint:'Charge from day one to set expectations'},
-      {title:'Register as sole proprietor with SSM',hint:'RM 30/year — legitimises your freelance income'},
-      {title:'Set aside 10-15% of income for LHDN tax',hint:'Freelancers pay tax on net profit annually'},
-      {title:'Build 3 months retainer income — recurring clients',hint:'Retainers beat one-off projects for stability'},
-    ],
-    education:[
-      {title:'Research programme — accreditation and job outcomes',hint:'MQA accreditation is mandatory for recognition'},
-      {title:'Compare top 3 institutions and entry requirements',hint:'Public vs private vs online — cost and quality'},
-      {title:'Apply for PTPTN loan if eligible',hint:'Apply early — disbursement takes 2-3 months'},
-      {title:'Explore scholarship options — JPA, MARA, corporate',hint:'Deadline is usually 6-12 months before intake'},
-      {title:'Enrol and complete orientation',hint:'Connect with seniors — invaluable inside knowledge'},
-      {title:'Maintain CGPA above 3.0 each semester',hint:'Required for PTPTN moratorium and scholarships'},
-      {title:'Graduate and register with professional body',hint:'BEM, MIA, Bar Council etc — start early'},
-    ],
-    wedding:[
-      {title:'Set total wedding budget and guest count',hint:'Decide outdoor vs hall, traditional vs modern'},
-      {title:'Book wedding hall or venue — 12-18 months ahead',hint:'Good venues book out fast'},
-      {title:'Engage photographer and videographer',hint:'Book at least 9-12 months ahead'},
-      {title:'Book catering and confirm per-pax rate',hint:'Get itemised quote — food, serving, setup'},
-      {title:'Organise engagement (bertunang) ceremony',hint:'Agree on hantaran items and count with both families'},
-      {title:'Sort attire — baju pengantin fitting and deposit',hint:'Book 6 months ahead for custom tailoring'},
-      {title:'Apply for marriage certificate at JPN',hint:'Bring IC, birth cert, and witness — RM 30 fee'},
-      {title:'Plan honeymoon and book travel',hint:'Book 3-4 months ahead for best prices'},
-    ],
-    children:[
-      {title:'Open SSPN account for child education savings',hint:'Tax relief up to RM 8,000/year for parents'},
-      {title:'Start monthly SSPN contribution from birth',hint:'18 years of compounding makes a big difference'},
-      {title:'Get child medical insurance early',hint:'Premiums cheapest before pre-existing conditions'},
-      {title:'Research primary and secondary school options',hint:'Registration queues start years early for popular schools'},
-      {title:'Set aside monthly education fund separately',hint:'Target 4 years of local university at RM 40-60K'},
-      {title:'Review SSPN balance and adjust contributions',hint:'Increase as income grows'},
-    ],
-    insurance:[
-      {title:'Calculate income replacement needed',hint:'10x annual income is common rule of thumb'},
-      {title:'Get term life insurance quotes — compare 3',hint:'iMoney or PolicyStreet for online comparison'},
-      {title:'Get medical insurance with lifetime limit',hint:'Avoid annual limit plans — major illness can exceed'},
-      {title:'Add critical illness rider to life policy',hint:'36 critical illnesses covered — lump sum payout'},
-      {title:'Review sum assured every 3 years',hint:'Inflation reduces real value of coverage over time'},
-      {title:'Store all policy documents in one place',hint:'Tell family where policies are kept'},
-    ],
-    reno:[
-      {title:'Define scope and priority rooms for renovation',hint:'Kitchen and bathrooms give best ROI'},
-      {title:'Get 3 contractor quotes — itemised breakdown',hint:'Never accept verbal quotes — get it in writing'},
-      {title:'Check contractor licence on CIDB website',hint:'cidb.gov.my — registered contractors only'},
-      {title:'Agree on payment milestones — not upfront lump sum',hint:'Typical: 10% booking, 30% start, 40% mid, 20% completion'},
-      {title:'Document all work with before and after photos',hint:'Evidence for disputes and insurance claims'},
-      {title:'Snag list inspection before final payment',hint:'Walk through every room, test all fittings'},
-    ],
-    digital:[
-      {title:'Identify top 2 digital skills in demand for your role',hint:'Python, SQL, Power BI, or prompt engineering'},
-      {title:'Complete one structured online course',hint:'Coursera, Udemy, or Google Career Certificates'},
-      {title:'Build a portfolio project using the skill',hint:'Real work beats certificates in interviews'},
-      {title:'Add certification and project to LinkedIn',hint:'Recruiters search for these keywords'},
-      {title:'Apply the skill in your current job',hint:'Volunteer for projects that use it'},
-      {title:'Teach someone else — solidifies mastery',hint:'Internal lunch-and-learn or LinkedIn post'},
-    ],
-    brand:[
-      {title:'Define your professional niche and target audience',hint:'Who do you want to be known by and for what'},
-      {title:'Optimise LinkedIn profile with keyword-rich headline',hint:'Job title + specialty + value proposition'},
-      {title:'Publish first content piece — article or post',hint:'Share one insight from your work this week'},
-      {title:'Engage consistently — 3x per week minimum',hint:'Comment on 5 posts and post 1 per week'},
-      {title:'Reach 500 LinkedIn connections milestone',hint:'Unlocks full search visibility on the platform'},
-      {title:'Get 3 recommendations from colleagues',hint:'Specific skill-based recommendations carry weight'},
-    ],
-    nz:[
-      {title:'Check Malaysia passport NZ entry requirements',hint:'Malaysian passport — visa-free for up to 90 days'},
-      {title:'Register NZeTA (NZ Electronic Travel Authority)',hint:'Required even visa-free — NZD 9, apply at eta.immigration.govt.nz'},
-      {title:'Pay International Visitor Conservation & Tourism Levy',hint:'NZD 35 IVL — paid together with NZeTA'},
-      {title:'Book flights KUL → CHC or AKL → ZQN',hint:'Malaysia Airlines or AirAsia X — compare via Skyscanner'},
-      {title:'Book Queenstown accommodation 3+ months ahead',hint:'Prices double in ski season Jun-Aug and Dec-Jan'},
-      {title:'Get travel insurance covering adventure activities',hint:'Bungy, skiing, jet boat — standard plans exclude these'},
-      {title:'Book Skyline Gondola + Luge in advance',hint:'skyline.co.nz — buy online, queues can be 1hr+'},
-      {title:'Plan Milford Sound day trip from Queenstown',hint:'12hr return drive via Te Anau — book guided tour or self-drive'},
-      {title:'Consider Glenorchy or Wanaka day trips',hint:'Lord of the Rings filming locations — 45 min from QT'},
-      {title:'Get Wise multi-currency card loaded with NZD',hint:'Best exchange rate — no foreign transaction fee'},
-      {title:'Download CamperMate and NZ maps offline',hint:'Cell coverage patchy outside towns — offline maps essential'},
-      {title:'Book return — allow buffer day before KL flight',hint:'Weather delays common — do not cut transit tight'},
-    ],
-  };
-
-  // Score all templates and pick best match
-  const scores={
-    loan:score(['loan','b10','leapmotor','hp ','hire purchase','maybank','ctos','ccris','dsr','approval','finance']),
-    car:score(['car','vehicle','myvi','proton','perodua','axia','honda','toyota','bmw','drive']),
-    house:score(['house','home','property','condo','apartment','landed','terrace','semi','spa','mortgage','buy']),
-    save:score(['save','saving','emergency fund','rainy day','contingency','reserve']),
-    debt:score(['debt','ptptn','outstanding','owe','balance','clear','pay off','settle']),
-    credit:score(['credit card','cc','visa','mastercard','utilisation','limit','interest']),
-    invest:score(['invest','stock','share','portfolio','dividend','bursa','klci','etf','unit trust']),
-    share:score(['share option','esos','rsu','vesting','vest','exercise price','stock option','options']),
-    epf:score(['epf','kwsp','pension','voluntary contribution','i-akaun']),
-    asb:score(['asb','asb2','amanah saham bumiputera','asb loan','asb financing']),
-    amanah:score(['asnb','unit trust','amanah','asw','asgb','myasnb']),
-    tax:score(['tax','lhdn','pcb','be form','mytax','income tax','relief','rebate','filing']),
-    business:score(['business','ssm','sdn bhd','sole proprietor','company','enterprise','startup','sst']),
-    freelance:score(['freelance','side income','gig','client','project','retainer','self-employed']),
-    education:score(['degree','diploma','masters','phd','university','college','ptptn','study','mqa']),
-    wedding:score(['wedding','kahwin','nikah','engagement','bertunang','hantaran','majlis']),
-    children:score(['child','sspn','kids','baby','education fund','school','tuition']),
-    insurance:score(['insurance','takaful','life cover','medical card','critical illness','protection']),
-    reno:score(['renovation','reno','renovate','contractor','kitchen','bathroom','interior']),
-    digital:score(['digital','coding','python','sql','power bi','data','ai','prompt','tech skill']),
-    brand:score(['linkedin','personal brand','content','networking','profile','visibility','following']),
-    travel:score(['travel','trip','holiday','vacation','flight','hotel','tour','overseas']),
-    nz:score(['queenstown','new zealand','nz','nzd','christchurch','milford','fiordland','wanaka','auckland','zqn','chc']),
-    health:score(['health','fit','weight','gym','run','exercise','diet','calories','bmi']),
-    career:score(['career','job','work','position','promotion','salary','increment']),
-    retire:score(['retire','retirement','financial independence','fi','fire','passive income']),
-  };
-
-  // Score all templates and pick best match
-
-  let best=type;let bestScore=0;
-  Object.entries(scores).forEach(([k,v])=>{if(v>bestScore){bestScore=v;best=k;}});
-  let suggestions=(templates[best]||templates[type]||templates.Life).slice();
-
-  // Filter already existing milestones
-  suggestions=suggestions.filter(s=>!existing.some(e=>e.includes(s.title.toLowerCase().slice(0,15))));
-
 window.toggleAiMs=function(i,el){
   aiSuggestSelections[i]=!aiSuggestSelections[i];
   const check=document.getElementById('ai-ms-check-'+i);
@@ -1487,16 +1077,27 @@ function resetClientId(){
   localStorage.removeItem('gToken');
   location.reload();
 }
-function gapiLoaded(){gapi.load('client',async()=>{await gapi.client.init({discoveryDocs:[DISCOVERY]});gapiInited=true;maybeInit();});}
-function gisLoaded(){const cid=getClientId();if(!cid)return;tokenClient=google.accounts.oauth2.initTokenClient({client_id:cid,scope:SCOPES,callback:async resp=>{if(resp.error){return;}localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');await loadData();showApp();}});gisInited=true;maybeInit();}
-function handleSignIn(){
-  if(tokenClient){tokenClient.requestAccessToken({prompt:''});}
-  else{
-    const t=setInterval(()=>{if(tokenClient){clearInterval(t);tokenClient.requestAccessToken({prompt:''});}},100);
-    setTimeout(()=>clearInterval(t),10000);
-  }
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    await gapi.client.init({discoveryDocs:[DISCOVERY]});
+    gapiInited=true;
+    maybeAutoSignIn();
+  });
 }
-function maybeInit(){
+function gisLoaded(){
+  const cid=getClientId();if(!cid)return;
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:cid,scope:SCOPES,
+    callback:async resp=>{
+      if(resp.error){setSyncStatus('err','Auth failed');return;}
+      localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
+      await loadData();showApp();
+    }
+  });
+  gisInited=true;
+  maybeAutoSignIn();
+}
+function maybeAutoSignIn(){
   if(!gapiInited||!gisInited)return;
   const tok=localStorage.getItem('gToken');
   if(tok){
@@ -1504,31 +1105,21 @@ function maybeInit(){
     loadData().then(showApp).catch(()=>{localStorage.removeItem('gToken');});
   }
 }
+function showSignInStep(){
+  const btn=document.getElementById('signInBtn');
+  if(btn)btn.onclick=()=>{
+    if(tokenClient){tokenClient.requestAccessToken({prompt:''});}
+    else{
+      const t=setInterval(()=>{if(tokenClient){clearInterval(t);tokenClient.requestAccessToken({prompt:''});}},100);
+      setTimeout(()=>clearInterval(t),10000);
+    }
+  };
+}
 function setSyncStatus(s,msg){const p=document.getElementById('syncPill');p.className='sync-pill '+s;document.getElementById('syncLbl').textContent=msg;}
 async function findOrCreate(){if(driveFileId)return driveFileId;const r=await gapi.client.drive.files.list({q:`name='${DRIVE_FILE}' and trashed=false`,fields:'files(id)',spaces:'drive'});if(r.result.files.length){driveFileId=r.result.files[0].id;return driveFileId;}const meta={name:DRIVE_FILE,mimeType:'application/json'};const body=JSON.stringify(state);const bnd='---fin_bnd';const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bnd}--`;const cr=await gapi.client.request({path:'/upload/drive/v3/files',method:'POST',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});driveFileId=cr.result.id;return driveFileId;}
-async function loadData(){setSyncStatus('syncing','Loading...');try{const fid=await findOrCreate();const r=await gapi.client.drive.files.get({fileId:fid,alt:'media'});const p=typeof r.result==='string'?JSON.parse(r.result):r.result;state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');setSyncStatus('ok','Synced');render();const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;if(age>3600000)fetchFxRates();else renderFx();}catch(e){if(e&&(e.status===401||e.status===403)){localStorage.removeItem('gToken');setSyncStatus('err','Session expired');setTimeout(()=>{showAuth();},1500);}else{setSyncStatus('err','Load failed');try{const s=localStorage.getItem('fin_v5');if(s){const p=JSON.parse(s);Object.assign(state,p);render();renderFx();}}catch(e2){}}}};
-async function saveData(){
-  setSyncStatus('syncing','Saving...');
-  const payload=JSON.stringify(state,null,2);
-  try{
-    const fid=await findOrCreate();
-    const bnd='---fin_bnd';
-    const meta={name:DRIVE_FILE,mimeType:'application/json'};
-    const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${bnd}--`;
-    await gapi.client.request({path:`/upload/drive/v3/files/${fid}`,method:'PATCH',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});
-    setSyncStatus('ok','Saved '+new Date().toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}));
-    try{localStorage.setItem('fin_v5',payload);}catch(e){}
-  }catch(e){
-    if(e&&(e.status===401||e.status===403)){
-      localStorage.removeItem('gToken');
-      setSyncStatus('err','Session expired — please sign in again');
-      setTimeout(()=>{showAuth();},1500);
-    }else{
-      setSyncStatus('err','Save failed');
-      try{localStorage.setItem('fin_v5',payload);}catch(e2){}
-    }
-  }
-}
+async function loadData(){setSyncStatus('syncing','Loading...');try{const fid=await findOrCreate();const r=await gapi.client.drive.files.get({fileId:fid,alt:'media'});const p=typeof r.result==='string'?JSON.parse(r.result):r.result;state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');setSyncStatus('ok','Synced');render();const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;if(age>3600000)fetchFxRates();else renderFx();}catch(e){setSyncStatus('err','Load failed');tryLocal();}}
+function tryLocal(){try{const s=localStorage.getItem('fin_v5');if(s){const p=JSON.parse(s);Object.assign(state,p);render();renderFx();}}catch(e){}}
+async function saveData(){setSyncStatus('syncing','Saving...');const payload=JSON.stringify(state,null,2);try{const fid=await findOrCreate();const bnd='---fin_bnd';const meta={name:DRIVE_FILE,mimeType:'application/json'};const mp=`--${bnd}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${bnd}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${bnd}--`;await gapi.client.request({path:`/upload/drive/v3/files/${fid}`,method:'PATCH',params:{uploadType:'multipart'},headers:{'Content-Type':`multipart/related; boundary="${bnd}"`},body:mp});setSyncStatus('ok','Saved '+new Date().toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}));try{localStorage.setItem('fin_v5',payload);}catch(e){}}catch(e){setSyncStatus('err','Save failed');try{localStorage.setItem('fin_v5',payload);}catch(e2){}}}
 
 async function fetchFxRates(){try{const r=await fetch('https://api.exchangerate-api.com/v4/latest/MYR');const d=await r.json();state.fxRates=d.rates||{};state.fxLastUpdate=Date.now();renderFx();await saveData();}catch(e){state.fxRates={USD:0.2174,NZD:0.3623,SGD:0.2907,EUR:0.2012,GBP:0.1712,JPY:32.5,AUD:0.338,CNY:1.575};state.fxLastUpdate=Date.now();renderFx();}}
 function renderFx(){const rates=state.fxRates;if(!Object.keys(rates).length)return;const curs=state.fxCurrencies;document.getElementById('fxTickerItems').innerHTML=curs.map(cur=>{const rate=rates[cur]??0;return`<div class="fx-item"><span class="fx-pair">MYR/${cur}</span><span class="fx-rate">${(1/rate).toFixed(4)}</span></div>`;}).join('');const t=state.fxLastUpdate?new Date(state.fxLastUpdate).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}):'—';document.getElementById('fxTime').textContent=t;document.getElementById('fxConvTime').textContent='Rates as of '+t;document.getElementById('fxRatesGrid').innerHTML=curs.map(cur=>{const rate=rates[cur]??0;return`<div class="fx-rate-card"><div class="fx-rate-pair">1 MYR → ${cur}</div><div class="fx-rate-val">${Number(rate).toFixed(4)}</div><div style="font-size:0.65rem;color:var(--t3);margin-top:3px;font-weight:600">1 ${cur} = RM ${(1/rate).toFixed(4)}</div></div>`;}).join('');document.getElementById('fxChips').innerHTML=curs.map(cur=>`<div class="fx-chip">${cur} <button onclick="removeFxCurrency('${cur}')" title="Remove">✕</button></div>`).join('');const populate=id=>{const sel=document.getElementById(id);const cur=sel.value;sel.innerHTML=['MYR',...curs,...ALL_CURRENCIES.filter(c=>!curs.includes(c))].map(c=>`<option${c===cur?' selected':''}>${c}</option>`).join('');};populate('fxFromCur');populate('fxToCur');calcFx();}
@@ -1540,39 +1131,7 @@ document.getElementById('fxRefreshBtn').onclick=fetchFxRates;
 document.getElementById('fxFromAmt').addEventListener('input',calcFx);
 document.addEventListener('change',function(e){if(e.target.id==='fxFromCur'||e.target.id==='fxToCur')calcFx();});
 
-function renderWallets(){
-  const grid=document.getElementById('walletGrid');
-  const assets=state.wallets.filter(w=>!['credit','loan'].includes(w.type));
-  const debts=state.wallets.filter(w=>['credit','loan'].includes(w.type));
-  const totalAssets=assets.reduce((s,w)=>s+Number(w.balance),0);
-  const totalDebt=debts.reduce((s,w)=>s+Number(w.balance),0);
-  const netTotal=totalAssets+totalDebt;
-  grid.innerHTML=state.wallets.length?state.wallets.map((w,i)=>{
-    const isDebt=['credit','loan'].includes(w.type);
-    const bal=Number(w.balance);
-    const balColor=bal<0?'#BF0000':bal===0?'#9A9A9A':'#1A1A1A';
-    const cardBorder=isDebt?'border-top:3px solid #BF0000':'border-top:3px solid #BF0000';
-    return`<div class="wallet-card" style="${isDebt?'border-top-color:#BF0000;':''}">
-      <div class="w-actions"><button class="ic-btn" onclick="editWallet(${i})">✎</button><button class="ic-btn del" onclick="delWallet(${i})">✕</button></div>
-      <div class="w-icon">${W_ICONS[w.type]||'💳'}</div>
-      <div class="w-name">${esc(w.name)}</div>
-      <div class="w-bal" style="color:${balColor}">${fmt(w.balance)}</div>
-      <div class="w-type" style="display:flex;align-items:center;justify-content:space-between">
-        <span>${W_LABELS[w.type]||w.type}</span>
-        ${isDebt?'<span style="font-size:0.6rem;background:#FFEEEE;color:#BF0000;padding:1px 6px;border-radius:10px;font-weight:800">DEBT</span>':''}
-      </div>
-    </div>`;
-  }).join(''):'<div class="empty" style="text-align:left">No accounts yet.</div>';
-  // Show net total with breakdown
-  const totalEl=document.getElementById('walletTotal');
-
-  if(totalEl)totalEl.textContent=fmt(netTotal);
-  if(totalEl)totalEl.style.color=netTotal<0?'#FFB3B3':'white';
-  // Update sub-label if exists
-  const subEl=document.getElementById('walletTotalSub');
-  if(subEl&&debts.length>0)subEl.textContent=`Assets ${fmt(totalAssets)} · Debt ${fmt(Math.abs(totalDebt))}`;
-  const sel=document.getElementById('txWallet');const cur=sel.value;sel.innerHTML='<option value="">— none —</option>';state.wallets.forEach(w=>{const o=document.createElement('option');o.value=w.id;o.textContent=w.name;sel.appendChild(o);});if(cur)sel.value=cur;
-}
+function renderWallets(){const grid=document.getElementById('walletGrid');const total=state.wallets.reduce((s,w)=>s+Number(w.balance),0);grid.innerHTML=state.wallets.length?state.wallets.map((w,i)=>`<div class="wallet-card"><div class="w-actions"><button class="ic-btn" onclick="editWallet(${i})">✎</button><button class="ic-btn del" onclick="delWallet(${i})">✕</button></div><div class="w-icon">${W_ICONS[w.type]||'💳'}</div><div class="w-name">${esc(w.name)}</div><div class="w-bal">${fmt(w.balance)}</div><div class="w-type">${W_LABELS[w.type]||w.type}</div></div>`).join(''):'<div class="empty" style="text-align:left">No accounts yet.</div>';document.getElementById('walletTotal').textContent=fmt(total);const sel=document.getElementById('txWallet');const cur=sel.value;sel.innerHTML='<option value="">— none —</option>';state.wallets.forEach(w=>{const o=document.createElement('option');o.value=w.id;o.textContent=w.name;sel.appendChild(o);});if(cur)sel.value=cur;}
 function updateMetrics(){const txs=monthTx();let inc=0,exp=0,sav=0;txs.forEach(t=>{if(t.type==='income')inc+=Number(t.amount);else if(t.type==='expense')exp+=Number(t.amount);else if(t.type==='savings')sav+=Number(t.amount);});const bal=inc-exp-sav;const pct=inc>0?Math.round((sav/inc)*100):0;const tod=todayStr();const upc=state.futures.filter(f=>f.date>=tod).reduce((s,f)=>s+Number(f.amount),0);document.getElementById('mIncome').textContent=fmtR(inc);document.getElementById('mIncomeSub').textContent=txs.filter(t=>t.type==='income').length+' entries';document.getElementById('mExpense').textContent=fmtR(exp);document.getElementById('mExpSub').textContent=txs.filter(t=>t.type==='expense').length+' entries';document.getElementById('mSaved').textContent=fmtR(sav);document.getElementById('mSavedSub').textContent=pct+'% of income';const mb=document.getElementById('mBalance');mb.textContent=fmtR(bal);mb.style.color=bal>=0?'var(--t1)':'var(--red)';document.getElementById('mUpcoming').textContent='Upcoming: '+fmtR(upc);}
 function renderTxList(elId,txs,limit){const el=document.getElementById(elId);if(!txs.length){el.innerHTML='<div class="empty">No transactions.</div>';return;}const show=limit?txs.slice(0,limit):txs;el.innerHTML=show.map(t=>{const gi=state.transactions.indexOf(t);const cls=t.type==='income'?'in':t.type==='savings'?'sav':'out';const sign=t.type==='income'?'+':'-';const ds=new Date(t.date).toLocaleDateString('en-MY',{day:'numeric',month:'short'});const w=t.walletId?state.wallets.find(w=>w.id==t.walletId):null;return`<div class="tx-item"><div class="tx-emoji">${ce(t.category)}</div><div class="tx-info"><div class="tx-name">${esc(t.description)}</div><div class="tx-meta">${ds}${w?' · '+esc(w.name):''}${t.note?' · '+esc(t.note):''}</div></div><span class="tx-tag">${esc(t.category)}</span><span class="amt ${cls}">${sign}${fmt(t.amount)}</span><button class="ic-btn del" onclick="delTx(${gi})">✕</button></div>`;}).join('');}
 function renderFutureList(elId,limit){const el=document.getElementById(elId);const fs=state.futures.slice().sort((a,b)=>a.date.localeCompare(b.date));if(!fs.length){el.innerHTML='<div class="empty">No upcoming payments.</div>';return;}const show=limit?fs.slice(0,limit):fs;el.innerHTML=show.map(f=>{const d=new Date(f.date);const today=new Date();today.setHours(0,0,0,0);const diff=Math.round((d-today)/86400000);let badge,dl;if(f.paid){badge='<span class="badge" style="background:rgba(0,122,56,0.1);color:var(--green)">✓ Paid</span>';dl='';}else if(diff<0){badge='<span class="badge overdue">Overdue</span>';dl=Math.abs(diff)+'d ago';}else if(diff===0){badge='<span class="badge today">Today</span>';dl='due today';}else if(diff<=7){badge='<span class="badge soon">Soon</span>';dl='in '+diff+'d';}else{badge='<span class="badge upcoming">Upcoming</span>';dl='in '+diff+'d';}const ds=d.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});const ri=state.futures.indexOf(f);const payBtn=f.paid?`<button class="unpay-btn" onclick="togglePaid(${ri})">Undo</button>`:`<button class="pay-btn" onclick="togglePaid(${ri})">✓ Mark paid</button>`;return`<div class="fut-item${f.paid?' paid':''}"><div class="tx-emoji">${ce(f.category)}</div><div class="fut-info"><div class="fut-name">${esc(f.description)}</div><div class="fut-meta">${ds} · ${esc(f.recurrence)}</div></div><div class="fut-r">${badge}<span style="font-family:var(--mono);font-size:0.72rem;color:var(--t2);font-weight:700">${fmt(f.amount)}</span>${dl?`<span style="font-size:0.65rem;color:var(--t4);font-weight:600">${dl}</span>`:''}</div>${payBtn}<button class="ic-btn del" onclick="delFuture(${ri})">✕</button></div>`;}).join('');}
@@ -1878,175 +1437,7 @@ function switchAppTab(name){
   else if(name==='goals')renderGoalPlans();
   else render();
 }
-function renderBalanceSheet(){
-  // Only render if balance sheet tab elements exist in DOM
-  if(!document.getElementById('bsNetWorth'))return;
-  const debts=state.debts||[];
-
-  // Separate assets vs liabilities
-  const assetTypes=['bank','ewallet','cash','savings','investment'];
-  const liabilityTypes=['credit','loan'];
-  const assets=wallets.filter(w=>assetTypes.includes(w.type));
-  const liabilities=wallets.filter(w=>liabilityTypes.includes(w.type));
-
-  const totalAssets=assets.reduce((s,w)=>s+Number(w.balance),0);
-  const totalLiabilities=Math.abs(liabilities.reduce((s,w)=>s+Number(w.balance),0));
-  const netWorth=totalAssets-totalLiabilities;
-
-  // NET WORTH hero
-  setEl('bsNetWorth',fmt(netWorth));
-  const nwEl=document.getElementById('bsNetWorth');
-  if(nwEl)nwEl.style.color=netWorth>=0?'#4AE09A':'#FF6B6B';
-  setEl('bsNetWorthSub',netWorth>=0?'✓ Positive net worth — assets exceed liabilities':'⚠ Liabilities exceed assets — focus on debt reduction');
-
-  // Summary tiles
-  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  setEl('bsTotalAssets',fmt(totalAssets));
-  setEl('bsAssetCount',assets.length+' account'+(assets.length!==1?'s':''));
-  setEl('bsTotalLiabilities',fmt(totalLiabilities));
-  setEl('bsLiabilityCount',liabilities.length+' account'+(liabilities.length!==1?'s':''));
-  setEl('bsAssetTotal2',fmt(totalAssets));
-  setEl('bsLiabilityTotal2',fmt(totalLiabilities));
-
-  // Type labels and icons for grouping
-  const typeOrder={bank:'🏦 Bank accounts',ewallet:'📱 E-wallets & digital',cash:'💵 Cash',savings:'🐖 Savings accounts',investment:'📈 Investments'};
-  const liabOrder={credit:'💳 Credit cards',loan:'🏷️ Loans & BNPL'};
-
-  // ASSETS breakdown
-  const aEl=document.getElementById('bsAssetsList');
-  if(aEl){
-    if(!assets.length){aEl.innerHTML='<div class="empty">No asset accounts added yet.</div>';}
-    else{
-      // Group by type
-      const grouped={};
-      assets.forEach(w=>{if(!grouped[w.type])grouped[w.type]=[];grouped[w.type].push(w);});
-      aEl.innerHTML=Object.entries(typeOrder).filter(([t])=>grouped[t]).map(([t,label])=>`
-        <div style="margin-bottom:12px">
-          <div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">${label}</div>
-          ${grouped[t].map(w=>`
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
-              <span style="font-size:0.82rem;font-weight:600;color:#1A1A1A">${esc(w.name)}</span>
-              <span style="font-family:var(--mono);font-size:0.85rem;font-weight:700;color:#007A38">${fmt(w.balance)}</span>
-            </div>`).join('')}
-          <div style="display:flex;justify-content:flex-end;padding:5px 0;font-size:0.72rem;font-weight:700;color:#9A9A9A">
-            Subtotal: ${fmt(grouped[t].reduce((s,w)=>s+Number(w.balance),0))}
-          </div>
-        </div>`).join('');
-    }
-  }
-
-  // LIABILITIES breakdown
-  const lEl=document.getElementById('bsLiabilitiesList');
-  if(lEl){
-    if(!liabilities.length){lEl.innerHTML='<div class="empty">No liability accounts added yet.<br><span style="font-size:0.72rem;color:#9A9A9A">Add a Credit Card or Loan account type to track debts.</span></div>';}
-    else{
-      const grouped={};
-      liabilities.forEach(w=>{if(!grouped[w.type])grouped[w.type]=[];grouped[w.type].push(w);});
-      lEl.innerHTML=Object.entries(liabOrder).filter(([t])=>grouped[t]).map(([t,label])=>`
-        <div style="margin-bottom:12px">
-          <div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">${label}</div>
-          ${grouped[t].map(w=>{
-            const bal=Math.abs(Number(w.balance));
-            return`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
-              <span style="font-size:0.82rem;font-weight:600;color:#1A1A1A">${esc(w.name)}</span>
-              <span style="font-family:var(--mono);font-size:0.85rem;font-weight:700;color:#BF0000">${fmt(bal)}</span>
-            </div>`;
-          }).join('')}
-          <div style="display:flex;justify-content:flex-end;padding:5px 0;font-size:0.72rem;font-weight:700;color:#9A9A9A">
-            Subtotal: ${fmt(grouped[t].reduce((s,w)=>s+Math.abs(Number(w.balance)),0))}
-          </div>
-        </div>`).join('');
-    }
-  }
-
-  // DEBT PAYDOWN TRACKER — from state.debts
-  const dtEl=document.getElementById('bsDebtTracker');
-  if(dtEl){
-    if(!debts.length&&!liabilities.length){dtEl.innerHTML='<div class="empty">No loans or debts tracked.<br><span style="font-size:0.72rem;color:#9A9A9A">Add debts in the Budget tab or add Credit Card / Loan accounts.</span></div>';}
-    else{
-      let html='';
-      // From debt tracker
-      if(debts.length){
-        html+=debts.map((d,i)=>{
-          const pct=d.total>0?Math.min(100,Math.round((d.paid/d.total)*100)):0;
-          const rem=Math.max(0,d.total-d.paid);
-          const monthsLeft=d.monthly>0?Math.ceil(rem/d.monthly):null;
-          return`<div style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.07)">
-            <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-              <span style="font-size:0.85rem;font-weight:700;color:#1A1A1A">${esc(d.name)}</span>
-              <div style="text-align:right">
-                <span style="font-size:0.72rem;font-family:var(--mono);color:#BF0000;font-weight:700">${fmt(rem)} left</span>
-                ${d.rate?`<span style="font-size:0.65rem;color:#C06000;font-weight:700;margin-left:6px">${d.rate}% p.a.</span>`:''}
-              </div>
-            </div>
-            <div style="height:6px;background:#F5F5F5;border-radius:3px;overflow:hidden;margin-bottom:5px">
-              <div style="width:${pct}%;height:100%;background:#007A38;border-radius:3px;transition:width 0.5s"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#9A9A9A;font-weight:600">
-              <span>${fmt(d.paid)} paid of ${fmt(d.total)} (${pct}% done)</span>
-              <span>${monthsLeft?monthsLeft+' months remaining at '+fmt(d.monthly)+'/mo':''}</span>
-            </div>
-          </div>`;
-        }).join('');
-      }
-      // From wallet liabilities
-      if(liabilities.length){
-        html+=liabilities.map(w=>{
-          const bal=Math.abs(Number(w.balance));
-          return`<div style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.07)">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:0.85rem;font-weight:700;color:#1A1A1A">${esc(w.name)}</span>
-              <span style="font-size:0.85rem;font-family:var(--mono);color:#BF0000;font-weight:800">${fmt(bal)} outstanding</span>
-            </div>
-            <div style="font-size:0.68rem;color:#9A9A9A;margin-top:3px;font-weight:600">${W_LABELS[w.type]||w.type} — update balance regularly to track paydown</div>
-          </div>`;
-        }).join('');
-      }
-      dtEl.innerHTML=html||'<div class="empty">No debts.</div>';
-    }
-  }
-
-  // FINANCIAL RATIOS
-  const rEl=document.getElementById('bsRatios');
-  if(rEl&&(assets.length||liabilities.length)){
-    const debtToAsset=totalAssets>0?((totalLiabilities/totalAssets)*100).toFixed(1):null;
-    const monthlyIncome=state.transactions.filter(t=>{const d=new Date(t.date);return d.getFullYear()===viewYear&&d.getMonth()===viewMonth&&t.type==='income';}).reduce((s,t)=>s+Number(t.amount),0);
-    const monthlyExp=state.transactions.filter(t=>{const d=new Date(t.date);return d.getFullYear()===viewYear&&d.getMonth()===viewMonth&&t.type==='expense';}).reduce((s,t)=>s+Number(t.amount),0);
-    const savingsRate=monthlyIncome>0?(((monthlyIncome-monthlyExp)/monthlyIncome)*100).toFixed(1):null;
-    const liquidAssets=wallets.filter(w=>['bank','ewallet','cash'].includes(w.type)).reduce((s,w)=>s+Number(w.balance),0);
-    const monthlyCommit=(state.futures||[]).filter(f=>f.recurrence==='monthly').reduce((s,f)=>s+Number(f.amount),0);
-    const liquidCoverage=monthlyCommit>0?(liquidAssets/monthlyCommit).toFixed(1):null;
-
-    const ratioRow=(label,value,good,warn,tip,unit='')=>{
-      if(!value)return`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06)"><span style="font-size:0.82rem;color:#9A9A9A;font-weight:600">${label}</span><span style="font-size:0.78rem;color:#C8C8C8;font-weight:600">No data</span></div>`;
-      const num=parseFloat(value);
-      const color=num<=good?'#007A38':num<=warn?'#C06000':'#BF0000';
-      const status=num<=good?'✓ Good':num<=warn?'⚠ Fair':'✕ High';
-      return`<div style="padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-          <span style="font-size:0.82rem;font-weight:700;color:#1A1A1A">${label}</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--mono);font-size:0.88rem;font-weight:800;color:${color}">${value}${unit}</span>
-            <span style="font-size:0.65rem;font-weight:800;color:${color}">${status}</span>
-          </div>
-        </div>
-        <div style="font-size:0.68rem;color:#9A9A9A;font-weight:500">${tip}</div>
-      </div>`;
-    };
-
-    rEl.innerHTML=`
-      ${ratioRow('Debt-to-Asset ratio',debtToAsset,30,60,'Target below 30% — your liabilities vs total assets','%')}
-      ${savingsRate!==null?ratioRow('Monthly savings rate',savingsRate,20,10,'Target above 20% of income — higher is better','%'):''}
-      ${liquidCoverage!==null?ratioRow('Liquid coverage ratio',liquidCoverage,6,3,'How many months of bills your liquid assets cover',' months'):''}
-      <div style="font-size:0.68rem;color:#9A9A9A;margin-top:10px;font-weight:500;line-height:1.6">
-        Ratios are calculated from your current account balances and this month's transactions.
-        Update account balances regularly for accurate readings.
-      </div>`;
-  }else if(rEl){
-    rEl.innerHTML='<div class="empty">Add accounts to see financial ratios.</div>';
-  }
-}
-function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');if(name==='balance')renderBalanceSheet();}
+function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
 function showAuth(){document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none';}
 
@@ -2126,6 +1517,8 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 };
 
 (function init(){
+  // Client ID is hardcoded — always go straight to sign in
+  showSignInStep();
   const s1=document.createElement('script');s1.src='https://apis.google.com/js/api.js';s1.onload=gapiLoaded;document.head.appendChild(s1);
   const s2=document.createElement('script');s2.src='https://accounts.google.com/gsi/client';s2.onload=gisLoaded;document.head.appendChild(s2);
 })();
