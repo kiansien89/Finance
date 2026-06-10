@@ -1498,42 +1498,83 @@ function resetClientId(){
   localStorage.removeItem('gToken');
   location.reload();
 }
+function setSignInBtn(text,enabled){
+  const btn=document.getElementById('signInBtn');
+  if(!btn)return;
+  const inner=btn.querySelector('span')||btn;
+  // Update text node (last child)
+  const nodes=[...btn.childNodes];
+  const textNode=nodes.find(n=>n.nodeType===3&&n.textContent.trim());
+  if(textNode)textNode.textContent=' '+text;
+  else btn.lastChild.textContent=' '+text;
+  btn.style.opacity=enabled?'1':'0.6';
+  btn.style.cursor=enabled?'pointer':'not-allowed';
+}
 function gapiLoaded(){
   gapi.load('client',async()=>{
-    await gapi.client.init({discoveryDocs:[DISCOVERY]});
-    gapiInited=true;
-    maybeAutoSignIn();
+    try{
+      await gapi.client.init({discoveryDocs:[DISCOVERY]});
+      gapiInited=true;
+      maybeAutoSignIn();
+    }catch(e){
+      setSignInBtn('Loading failed — refresh page',false);
+    }
   });
 }
 function gisLoaded(){
   const cid=getClientId();if(!cid)return;
-  tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:cid,scope:SCOPES,
-    callback:async resp=>{
-      if(resp.error){setSyncStatus('err','Auth failed');return;}
-      localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
-      await loadData();showApp();
-    }
-  });
-  gisInited=true;
-  maybeAutoSignIn();
+  try{
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:cid,scope:SCOPES,
+      callback:async resp=>{
+        if(resp.error){
+          setSignInBtn('Sign in with Google',true);
+          console.error('Auth error:',resp.error);
+          return;
+        }
+        localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
+        await loadData();showApp();
+      }
+    });
+    gisInited=true;
+    maybeAutoSignIn();
+  }catch(e){
+    setSignInBtn('Auth init failed — refresh',false);
+  }
 }
 function maybeAutoSignIn(){
   if(!gapiInited||!gisInited)return;
+  // Both APIs ready — update button
+  setSignInBtn('Sign in with Google',true);
   const tok=localStorage.getItem('gToken');
   if(tok){
+    setSignInBtn('Loading your data...',false);
     gapi.client.setToken({access_token:tok});
-    loadData().then(showApp).catch(()=>{localStorage.removeItem('gToken');});
+    loadData().then(showApp).catch(()=>{
+      localStorage.removeItem('gToken');
+      setSignInBtn('Sign in with Google',true);
+    });
   }
 }
 function showSignInStep(){
+  // Show loading state initially
+  setSignInBtn('Connecting to Google...',false);
   const btn=document.getElementById('signInBtn');
   if(btn)btn.onclick=()=>{
-    if(tokenClient){tokenClient.requestAccessToken({prompt:''});}
-    else{
-      const t=setInterval(()=>{if(tokenClient){clearInterval(t);tokenClient.requestAccessToken({prompt:''});}},100);
-      setTimeout(()=>clearInterval(t),10000);
+    if(!gapiInited||!gisInited){
+      setSignInBtn('Still loading, please wait...',false);
+      // Retry after APIs load
+      const t=setInterval(()=>{
+        if(gapiInited&&gisInited){
+          clearInterval(t);
+          setSignInBtn('Sign in with Google',true);
+          tokenClient.requestAccessToken({prompt:''});
+        }
+      },200);
+      setTimeout(()=>{clearInterval(t);setSignInBtn('Sign in with Google',true);},15000);
+      return;
     }
+    if(tokenClient){tokenClient.requestAccessToken({prompt:''});}
   };
 }
 function setSyncStatus(s,msg){const p=document.getElementById('syncPill');p.className='sync-pill '+s;document.getElementById('syncLbl').textContent=msg;}
