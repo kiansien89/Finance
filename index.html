@@ -596,7 +596,6 @@ input,select,button,textarea{font-family:var(--sans)}
         <button class="tab" onclick="switchTab('fx')">Currency</button>
         <button class="tab" onclick="switchTab('report')">Report</button>
         <button class="tab" onclick="switchTab('balance')">Balance Sheet</button>
-        <button class="tab" onclick="switchTab('balance')">Balance Sheet</button>
       </div>
 
       <div class="tab-page active" id="tab-overview">
@@ -731,45 +730,6 @@ input,select,button,textarea{font-family:var(--sans)}
         </div>
         <!-- RATIO ANALYSIS -->
         <div style="background:#FFFFFF;border-radius:var(--rl);box-shadow:var(--shadow);padding:18px;border:1px solid rgba(0,0,0,0.08)">
-          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">📊 Financial ratios</div>
-          <div id="bsRatios"><div class="empty">Add accounts to see ratios.</div></div>
-        </div>
-      </div>
-      <div class="tab-page" id="tab-balance">
-        <div style="background:linear-gradient(135deg,#1A1A2E,#16213E,#0F3460);border-radius:14px;padding:20px 24px;margin-bottom:1rem;box-shadow:0 8px 32px rgba(0,0,0,0.25)">
-          <div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);margin-bottom:6px">NET WORTH</div>
-          <div style="font-family:var(--mono);font-size:2rem;font-weight:800;color:white" id="bsNetWorth">RM 0.00</div>
-          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;font-weight:600" id="bsNetWorthSub">Total assets minus total liabilities</div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
-          <div style="background:#FFFFFF;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:16px;border-top:4px solid #007A38">
-            <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#007A38;margin-bottom:8px">📈 Total Assets</div>
-            <div style="font-family:var(--mono);font-size:1.4rem;font-weight:800;color:#007A38" id="bsTotalAssets">RM 0.00</div>
-            <div style="font-size:0.72rem;color:#9A9A9A;margin-top:4px;font-weight:600" id="bsAssetCount">0 accounts</div>
-          </div>
-          <div style="background:#FFFFFF;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:16px;border-top:4px solid #BF0000">
-            <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#BF0000;margin-bottom:8px">📉 Total Liabilities</div>
-            <div style="font-family:var(--mono);font-size:1.4rem;font-weight:800;color:#BF0000" id="bsTotalLiabilities">RM 0.00</div>
-            <div style="font-size:0.72rem;color:#9A9A9A;margin-top:4px;font-weight:600" id="bsLiabilityCount">0 accounts</div>
-          </div>
-        </div>
-        <div style="background:#FFFFFF;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
-          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">📈 Assets breakdown</div>
-          <div id="bsAssetsList"><div class="empty">No asset accounts added yet.</div></div>
-          <div style="border-top:1px solid rgba(0,0,0,0.08);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between">
-            <span style="font-size:0.78rem;font-weight:800;color:#1A1A1A">Total assets</span>
-            <span style="font-family:var(--mono);font-size:0.95rem;font-weight:800;color:#007A38" id="bsAssetTotal2">RM 0.00</span>
-          </div>
-        </div>
-        <div style="background:#FFFFFF;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:18px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.08)">
-          <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">📉 Liabilities breakdown</div>
-          <div id="bsLiabilitiesList"><div class="empty">No liability accounts yet.<br><span style="font-size:0.72rem;color:#9A9A9A">Add a Credit Card or Loan account to track debts.</span></div></div>
-          <div style="border-top:1px solid rgba(0,0,0,0.08);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between">
-            <span style="font-size:0.78rem;font-weight:800;color:#1A1A1A">Total liabilities</span>
-            <span style="font-family:var(--mono);font-size:0.95rem;font-weight:800;color:#BF0000" id="bsLiabilityTotal2">RM 0.00</span>
-          </div>
-        </div>
-        <div style="background:#FFFFFF;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:18px;border:1px solid rgba(0,0,0,0.08)">
           <div style="font-size:0.82rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">📊 Financial ratios</div>
           <div id="bsRatios"><div class="empty">Add accounts to see ratios.</div></div>
         </div>
@@ -1807,69 +1767,6 @@ window.openEditTask=function(id){
 };
 window.setTodoFilter=function(f,btn){todoFilter=f;document.querySelectorAll('.todo-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTodos();};
 
-function renderBalanceSheet(){
-  if(!document.getElementById('bsNetWorth'))return;
-  const wallets=state.wallets||[];
-  const assetTypes=['bank','ewallet','cash','savings','investment'];
-  const liabilityTypes=['credit','loan'];
-  const assets=wallets.filter(w=>assetTypes.includes(w.type));
-  const liabilities=wallets.filter(w=>liabilityTypes.includes(w.type));
-  const totalAssets=assets.reduce((s,w)=>s+Number(w.balance),0);
-  const totalLiabilities=Math.abs(liabilities.reduce((s,w)=>s+Number(w.balance),0));
-  const netWorth=totalAssets-totalLiabilities;
-  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  setEl('bsNetWorth',fmt(netWorth));
-  const nwEl=document.getElementById('bsNetWorth');
-  if(nwEl)nwEl.style.color=netWorth>=0?'#4AE09A':'#FF6B6B';
-  setEl('bsNetWorthSub',netWorth>=0?'✓ Positive — assets exceed liabilities':'⚠ Liabilities exceed assets');
-  setEl('bsTotalAssets',fmt(totalAssets));
-  setEl('bsAssetCount',assets.length+' account'+(assets.length!==1?'s':''));
-  setEl('bsTotalLiabilities',fmt(totalLiabilities));
-  setEl('bsLiabilityCount',liabilities.length+' account'+(liabilities.length!==1?'s':''));
-  setEl('bsAssetTotal2',fmt(totalAssets));
-  setEl('bsLiabilityTotal2',fmt(totalLiabilities));
-  const typeLabels={bank:'🏦 Bank accounts',ewallet:'📱 E-wallets',cash:'💵 Cash',savings:'🐖 Savings',investment:'📈 Investments'};
-  const liabLabels={credit:'💳 Credit cards',loan:'🏷️ Loans & BNPL'};
-  const aEl=document.getElementById('bsAssetsList');
-  if(aEl){
-    if(!assets.length){aEl.innerHTML='<div class="empty">No asset accounts yet.</div>';}
-    else{
-      const grouped={};assets.forEach(w=>{if(!grouped[w.type])grouped[w.type]=[];grouped[w.type].push(w);});
-      aEl.innerHTML=Object.entries(typeLabels).filter(([t])=>grouped[t]).map(([t,label])=>
-        '<div style="margin-bottom:12px"><div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">'+label+'</div>'+
-        grouped[t].map(w=>'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)"><span style="font-size:0.82rem;font-weight:600;color:#1A1A1A">'+esc(w.name)+'</span><span style="font-family:var(--mono);font-size:0.85rem;font-weight:700;color:#007A38">'+fmt(w.balance)+'</span></div>').join('')+
-        '<div style="text-align:right;font-size:0.72rem;color:#9A9A9A;padding:4px 0">Subtotal: '+fmt(grouped[t].reduce((s,w)=>s+Number(w.balance),0))+'</div></div>'
-      ).join('');
-    }
-  }
-  const lEl=document.getElementById('bsLiabilitiesList');
-  if(lEl){
-    if(!liabilities.length){lEl.innerHTML='<div class="empty">No liability accounts yet.<br><span style="font-size:0.72rem;color:#9A9A9A">Add a Credit Card or Loan account to track debts.</span></div>';}
-    else{
-      const grouped={};liabilities.forEach(w=>{if(!grouped[w.type])grouped[w.type]=[];grouped[w.type].push(w);});
-      lEl.innerHTML=Object.entries(liabLabels).filter(([t])=>grouped[t]).map(([t,label])=>
-        '<div style="margin-bottom:12px"><div style="font-size:0.68rem;font-weight:800;color:#9A9A9A;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">'+label+'</div>'+
-        grouped[t].map(w=>'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06)"><span style="font-size:0.82rem;font-weight:600;color:#1A1A1A">'+esc(w.name)+'</span><span style="font-family:var(--mono);font-size:0.85rem;font-weight:700;color:#BF0000">'+fmt(Math.abs(Number(w.balance)))+'</span></div>').join('')+
-        '<div style="text-align:right;font-size:0.72rem;color:#9A9A9A;padding:4px 0">Subtotal: '+fmt(grouped[t].reduce((s,w)=>s+Math.abs(Number(w.balance)),0))+'</div></div>'
-      ).join('');
-    }
-  }
-  const rEl=document.getElementById('bsRatios');
-  if(rEl&&(assets.length||liabilities.length)){
-    const dta=totalAssets>0?((totalLiabilities/totalAssets)*100).toFixed(1):null;
-    const txs=state.transactions.filter(t=>{const d=new Date(t.date);return d.getFullYear()===viewYear&&d.getMonth()===viewMonth;});
-    const inc=txs.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
-    const exp=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
-    const sr=inc>0?(((inc-exp)/inc)*100).toFixed(1):null;
-    const row=(lbl,val,good,warn,tip,unit)=>{
-      if(!val)return'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06)"><span style="font-size:0.82rem;color:#9A9A9A">'+lbl+'</span><span style="font-size:0.78rem;color:#C8C8C8">No data</span></div>';
-      const n=parseFloat(val);const c=n<=good?'#007A38':n<=warn?'#C06000':'#BF0000';
-      return'<div style="padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06)"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:0.82rem;font-weight:700;color:#1A1A1A">'+lbl+'</span><span style="font-family:var(--mono);font-size:0.88rem;font-weight:800;color:'+c+'">'+val+(unit||'')+'</span></div><div style="font-size:0.68rem;color:#9A9A9A">'+tip+'</div></div>';
-    };
-    rEl.innerHTML=row('Debt-to-Asset ratio',dta,30,60,'Target below 30% — liabilities vs total assets','%')+
-      row('Monthly savings rate',sr,20,10,'Target above 20% of income','%');
-  }else if(rEl){rEl.innerHTML='<div class="empty">Add accounts to see ratios.</div>';}
-}
 function render(){
   document.getElementById('monthLbl').textContent=MONTHS[viewMonth]+' '+viewYear;
   renderWallets();updateMetrics();
