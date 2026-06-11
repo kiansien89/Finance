@@ -32,6 +32,10 @@ input,select,button,textarea{font-family:var(--sans)}
 #wallpaper svg{width:100%;height:100%;object-fit:cover}
 #wallpaper-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;background:rgba(20,8,0,0.38)}
 #authScreen,#appScreen{position:relative;z-index:2}
+.wp-btn{position:fixed;bottom:16px;right:16px;z-index:60;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:rgba(15,10,8,0.55);backdrop-filter:blur(10px);color:white;font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.35);transition:transform 0.15s;line-height:1}
+.wp-btn:hover{transform:scale(1.1)}
+.wp-name{position:fixed;bottom:25px;right:68px;z-index:60;background:rgba(15,10,8,0.75);color:#fff;font-size:0.68rem;font-weight:700;padding:6px 12px;border-radius:20px;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.wp-name.show{opacity:1}
 
 /* AUTH */
 #authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1.5rem;text-align:center;padding:2rem}
@@ -529,6 +533,8 @@ input,select,button,textarea{font-family:var(--sans)}
 </svg>
 </div>
 <div id="wallpaper-overlay"></div>
+<button class="wp-btn" onclick="cycleWallpaper()" title="Switch New Zealand wallpaper">🏔</button>
+<div class="wp-name" id="wpName"></div>
 
 <!-- AUTH -->
 <div id="authScreen">
@@ -595,6 +601,7 @@ input,select,button,textarea{font-family:var(--sans)}
         <button class="tab" onclick="switchTab('goals')">Goals</button>
         <button class="tab" onclick="switchTab('fx')">Currency</button>
         <button class="tab" onclick="switchTab('report')">Report</button>
+        <button class="tab" onclick="switchTab('balance')">Balance Sheet</button>
       </div>
 
       <div class="tab-page active" id="tab-overview">
@@ -684,6 +691,24 @@ input,select,button,textarea{font-family:var(--sans)}
           <div class="panel"><div class="ph"><div class="pt">🏆 Top expenses</div></div><div id="topExpenses"><div class="empty">No data.</div></div></div>
         </div>
       </div>
+
+      <div class="tab-page" id="tab-balance">
+        <div class="summary-grid">
+          <div class="summary-card"><div class="summary-icon">🏦</div><div class="summary-lbl">Total assets</div><div class="summary-val" id="bsTotAssets" style="color:var(--green)">RM 0</div></div>
+          <div class="summary-card"><div class="summary-icon">💳</div><div class="summary-lbl">Total liabilities</div><div class="summary-val" id="bsTotLiab" style="color:var(--red)">RM 0</div></div>
+          <div class="summary-card"><div class="summary-icon">⚖️</div><div class="summary-lbl">Net worth</div><div class="summary-val" id="bsNetWorth">RM 0</div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">⚖️ Asset vs liability mix</div><span id="bsNetSub" style="font-size:0.68rem;color:var(--t3);font-weight:700">—</span></div>
+          <div class="debt-track"><div class="debt-fill" id="bsBarFill" style="background:var(--green);width:50%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--t4);font-weight:700;margin-top:4px"><span>Assets</span><span>Liabilities</span></div>
+        </div>
+        <div class="two-col">
+          <div class="panel"><div class="ph"><div class="pt">🏦 Assets</div><button class="add-btn" id="openBsAsset">+ Add asset</button></div><div id="bsAssetList"><div class="empty">No assets yet.</div></div></div>
+          <div class="panel"><div class="ph"><div class="pt">💳 Liabilities</div><button class="add-btn" id="openBsLiab">+ Add liability</button></div><div id="bsLiabList"><div class="empty">No liabilities.</div></div></div>
+        </div>
+        <div class="panel"><div style="font-size:0.68rem;color:var(--t3);line-height:1.5">🔄 = synced automatically from your wallet accounts and tracked debts. Add manual items for EPF, ASB/ASNB, property, vehicles, or loans not tracked elsewhere.</div></div>
+      </div>
     </div>
 
     <!-- ══ TODO PAGE ══ -->
@@ -756,6 +781,7 @@ input,select,button,textarea{font-family:var(--sans)}
 <div class="modal-overlay" id="goalOverlay"><div class="modal"><h3 id="goalModalTitle">Add savings goal</h3><div class="field"><label>Goal name</label><input type="text" id="gName" placeholder="e.g. Emergency fund, Holiday"></div><div class="field"><label>Emoji icon</label><input type="text" id="gIcon" placeholder="🎯" maxlength="2" value="🎯"></div><div class="field"><label>Target amount (RM)</label><input type="number" id="gTarget" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Current saved (RM)</label><input type="number" id="gSaved" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Target date (optional)</label><input type="date" id="gDate"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelGoal">Cancel</button><button class="btn btn-red" id="saveGoal">Save</button></div></div></div>
 <div class="modal-overlay" id="debtOverlay"><div class="modal"><h3 id="debtModalTitle">Add debt / loan</h3><div class="field"><label>Name</label><input type="text" id="dName" placeholder="e.g. PTPTN, Car loan, Credit card"></div><div class="field"><label>Total amount (RM)</label><input type="number" id="dTotal" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Amount paid so far (RM)</label><input type="number" id="dPaid" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Monthly payment (RM)</label><input type="number" id="dMonthly" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Interest rate % (optional)</label><input type="number" id="dRate" step="0.01" min="0" placeholder="e.g. 3.5"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelDebt">Cancel</button><button class="btn btn-red" id="saveDebt">Save</button></div></div></div>
 <div class="modal-overlay" id="budgetOverlay"><div class="modal"><h3>Set budget target</h3><div class="field"><label>Category</label><select id="budgetCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Other</option></select></div><div class="field"><label>Monthly limit (RM)</label><input type="number" id="budgetAmt" step="0.01" min="0" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelBudget">Cancel</button><button class="btn btn-red" id="saveBudget">Save</button></div></div></div>
+<div class="modal-overlay" id="bsOverlay"><div class="modal"><h3 id="bsModalTitle">Add asset</h3><div class="field"><label>Name</label><input type="text" id="bsName" placeholder="e.g. EPF Account 1"></div><div class="field"><label>Category</label><select id="bsCat"></select></div><div class="field"><label>Current value (RM)</label><input type="number" id="bsVal" step="0.01" min="0" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelBs">Cancel</button><button class="btn btn-red" id="saveBs">Save</button></div></div></div>
 
 <!-- TODO MODAL -->
 <div class="modal-overlay" id="taskOverlay">
@@ -806,11 +832,111 @@ const CAT_EMOJI={'Food & drink':'🍜','Transport':'🚗','Groceries':'🛒','Ut
 const CAT_COLORS=['#BF0000','#0055AA','#007A38','#C06000','#7A50C8','#C04878','#4A9820','#0088AA'];
 const W_ICONS={bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈'};
 const W_LABELS={bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment'};
+
+// ── WALLPAPERS (New Zealand scenes) ──────────────────
+const WALLPAPERS=[
+ {name:'Queenstown · Golden Hour',overlay:'rgba(20,8,0,0.38)',svg:null},
+ {name:'Lake Wānaka · Dawn',overlay:'rgba(6,12,26,0.30)',svg:`<svg width="100%" height="100%" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="nsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#101E3E"/><stop offset="32%" stop-color="#26477C"/><stop offset="48%" stop-color="#4A6FA8"/><stop offset="56%" stop-color="#8E96C0"/><stop offset="62%" stop-color="#D8A0AC"/><stop offset="68%" stop-color="#F4BCA0"/><stop offset="100%" stop-color="#F8D8B4"/></linearGradient>
+<linearGradient id="nmtnfar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3A4A72"/><stop offset="100%" stop-color="#1C2848"/></linearGradient>
+<linearGradient id="nmtnmid" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#222F52"/><stop offset="100%" stop-color="#121C36"/></linearGradient>
+<linearGradient id="nlake" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8B8A8"/><stop offset="14%" stop-color="#B093A8"/><stop offset="38%" stop-color="#5E7AA8"/><stop offset="75%" stop-color="#2A4068"/><stop offset="100%" stop-color="#16243E"/></linearGradient>
+<linearGradient id="nrefl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F8D0A8" stop-opacity="0.5"/><stop offset="100%" stop-color="#F8D0A8" stop-opacity="0"/></linearGradient>
+<linearGradient id="nfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10182C"/><stop offset="100%" stop-color="#080C18"/></linearGradient>
+<radialGradient id="nhalo" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FCE0B8" stop-opacity="0.8"/><stop offset="100%" stop-color="#F4BCA0" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="680" height="420" fill="url(#nsky)"/>
+<circle cx="120" cy="48" r="1.2" fill="white" opacity="0.8"/><circle cx="220" cy="30" r="0.9" fill="white" opacity="0.6"/><circle cx="480" cy="42" r="1.1" fill="white" opacity="0.7"/><circle cx="560" cy="78" r="0.8" fill="white" opacity="0.5"/><circle cx="60" cy="96" r="0.9" fill="white" opacity="0.55"/><circle cx="380" cy="62" r="0.8" fill="white" opacity="0.5"/>
+<polygon points="0,268 0,228 40,206 80,226 120,194 165,216 205,184 245,206 285,176 325,200 365,170 405,194 445,166 485,190 525,172 565,196 605,180 645,200 680,186 680,268" fill="url(#nmtnfar)"/>
+<polygon points="357,175 365,170 373,175 369,180 361,180" fill="#E8E8F4" opacity="0.7"/>
+<polygon points="437,171 445,166 453,171 449,176 441,176" fill="#E8E8F4" opacity="0.6"/>
+<polygon points="278,181 285,176 292,181 288,185 282,185" fill="#E8E8F4" opacity="0.5"/>
+<polygon points="0,272 0,244 35,226 70,246 105,216 145,240 185,210 225,234 265,205 305,230 345,202 385,226 425,200 465,224 505,206 545,228 585,212 625,232 660,218 680,228 680,272" fill="url(#nmtnmid)"/>
+<rect x="0" y="262" width="680" height="100" fill="url(#nlake)"/>
+<rect x="0" y="265" width="680" height="1.2" fill="#F8D0A8" opacity="0.55"/>
+<rect x="80" y="284" width="170" height="0.8" fill="#E8D0D8" opacity="0.25"/>
+<rect x="430" y="300" width="190" height="0.8" fill="#C8D0E0" opacity="0.2"/>
+<rect x="250" y="316" width="150" height="0.8" fill="#C8D0E0" opacity="0.15"/>
+<g>
+<path d="M296 312 C295 298 294 286 293 276 C292.5 270 292 266 293 262" stroke="#0A1020" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+<path d="M293 274 C288 269 282 266 276 265" stroke="#0A1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M293 266 C299 261 306 258 312 257" stroke="#0A1020" stroke-width="2" fill="none" stroke-linecap="round"/>
+<ellipse cx="278" cy="254" rx="16" ry="9" fill="#121E38"/>
+<ellipse cx="308" cy="250" rx="18" ry="10" fill="#121E38"/>
+<ellipse cx="293" cy="245" rx="22" ry="11" fill="#15223E"/>
+<ellipse cx="270" cy="248" rx="11" ry="6" fill="#1A2A4A"/>
+<ellipse cx="298" cy="238" rx="14" ry="7" fill="#1E3052"/>
+<ellipse cx="316" cy="246" rx="10" ry="5.5" fill="#1A2A4A"/>
+</g>
+<ellipse cx="295" cy="315" rx="26" ry="4" fill="#0A1020" opacity="0.45"/>
+<ellipse cx="295" cy="326" rx="34" ry="10" fill="#121E38" opacity="0.25"/>
+<polygon points="0,420 0,354 60,346 140,354 230,344 320,352 420,344 520,352 600,344 680,350 680,420" fill="url(#nfg)"/>
+<text x="340" y="398" text-anchor="middle" fill="#C9A8B4" font-family="Georgia, serif" font-size="12" opacity="0.45" letter-spacing="7">LAKE WANAKA · NEW ZEALAND</text>
+</svg>`},
+ {name:'Lake Tekapo · Starry Night',overlay:'rgba(4,8,18,0.25)',svg:`<svg width="100%" height="100%" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="tsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#060A1A"/><stop offset="45%" stop-color="#0E1832"/><stop offset="80%" stop-color="#1E3050"/><stop offset="100%" stop-color="#2E4868"/></linearGradient>
+<linearGradient id="tmtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#141E36"/><stop offset="100%" stop-color="#0A101E"/></linearGradient>
+<linearGradient id="tlake" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2A5868"/><stop offset="50%" stop-color="#1A3848"/><stop offset="100%" stop-color="#0C1C28"/></linearGradient>
+<linearGradient id="tfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0C1220"/><stop offset="100%" stop-color="#060A12"/></linearGradient>
+<radialGradient id="tmilky" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#C8D8F8" stop-opacity="0.30"/><stop offset="55%" stop-color="#9AB0E0" stop-opacity="0.14"/><stop offset="100%" stop-color="#9AB0E0" stop-opacity="0"/></radialGradient>
+<radialGradient id="twin" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F8D080" stop-opacity="0.9"/><stop offset="100%" stop-color="#F8D080" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="680" height="420" fill="url(#tsky)"/>
+<ellipse cx="420" cy="130" rx="300" ry="90" fill="url(#tmilky)" transform="rotate(-28 420 130)"/>
+<ellipse cx="380" cy="160" rx="180" ry="40" fill="url(#tmilky)" transform="rotate(-28 380 160)" opacity="0.8"/>
+<g fill="white"><circle cx="60" cy="40" r="1.3" opacity="0.9"/><circle cx="110" cy="78" r="0.8" opacity="0.6"/><circle cx="160" cy="32" r="1.0" opacity="0.8"/><circle cx="205" cy="98" r="0.7" opacity="0.5"/><circle cx="250" cy="55" r="1.2" opacity="0.85"/><circle cx="300" cy="120" r="0.8" opacity="0.6"/><circle cx="335" cy="40" r="1.0" opacity="0.75"/><circle cx="380" cy="85" r="1.3" opacity="0.9"/><circle cx="425" cy="140" r="0.7" opacity="0.55"/><circle cx="455" cy="50" r="1.1" opacity="0.8"/><circle cx="500" cy="105" r="0.9" opacity="0.65"/><circle cx="545" cy="30" r="1.2" opacity="0.85"/><circle cx="585" cy="80" r="0.8" opacity="0.6"/><circle cx="630" cy="48" r="1.0" opacity="0.75"/><circle cx="660" cy="115" r="0.8" opacity="0.55"/><circle cx="35" cy="130" r="0.9" opacity="0.6"/><circle cx="90" cy="160" r="0.7" opacity="0.5"/><circle cx="280" cy="20" r="0.9" opacity="0.7"/><circle cx="520" cy="160" r="0.8" opacity="0.5"/><circle cx="610" cy="140" r="0.7" opacity="0.5"/><circle cx="150" cy="135" r="0.8" opacity="0.55"/><circle cx="475" cy="22" r="0.9" opacity="0.7"/></g>
+<circle cx="380" cy="85" r="2.6" fill="white" opacity="0.25"/><circle cx="545" cy="30" r="2.4" fill="white" opacity="0.2"/>
+<polygon points="0,248 0,212 45,192 90,212 135,182 185,206 235,176 285,200 335,172 385,196 435,170 485,194 535,176 585,198 635,182 680,196 680,248" fill="url(#tmtn)"/>
+<polygon points="320,200 334,180 348,198 362,176 376,194" fill="#C8D8F0" opacity="0.18"/>
+<rect x="0" y="240" width="680" height="92" fill="url(#tlake)"/>
+<rect x="0" y="243" width="680" height="1" fill="#5A88A0" opacity="0.4"/>
+<rect x="200" y="258" width="220" height="0.8" fill="#7AA8C0" opacity="0.22"/>
+<rect x="430" y="276" width="160" height="0.8" fill="#7AA8C0" opacity="0.18"/>
+<g opacity="0.55" fill="#C8D8F0"><rect x="180" y="246" width="1" height="30" opacity="0.10"/><rect x="380" y="246" width="1.5" height="40" opacity="0.12"/><rect x="540" y="246" width="1" height="26" opacity="0.10"/></g>
+<polygon points="0,420 0,322 70,314 160,322 250,312 350,320 460,312 560,320 640,314 680,318 680,420" fill="url(#tfg)"/>
+<g transform="translate(0,42)">
+<rect x="430" y="270" width="58" height="38" fill="#0A0E18"/>
+<polygon points="424,270 459,250 494,270" fill="#0A0E18"/>
+<rect x="488" y="262" width="14" height="46" fill="#0A0E18"/>
+<polygon points="486,262 495,252 504,262" fill="#0A0E18"/>
+<rect x="493" y="244" width="3.5" height="10" fill="#0A0E18"/><rect x="489.5" y="247" width="10.5" height="3" fill="#0A0E18"/>
+<ellipse cx="452" cy="292" rx="6" ry="8" fill="url(#twin)"/>
+<rect x="448" y="285" width="8" height="13" rx="4" fill="#F8D080" opacity="0.85"/>
+<ellipse cx="452" cy="312" rx="20" ry="4" fill="#F8D080" opacity="0.12"/>
+</g>
+<g stroke-linecap="round">
+<g stroke="#7A4A9A" stroke-width="3" opacity="0.85"><line x1="80" y1="356" x2="80" y2="330"/><line x1="120" y1="362" x2="120" y2="334"/><line x1="600" y1="358" x2="600" y2="332"/></g>
+<g stroke="#B868A8" stroke-width="3" opacity="0.85"><line x1="100" y1="360" x2="100" y2="336"/><line x1="640" y1="362" x2="640" y2="336"/><line x1="200" y1="364" x2="200" y2="342"/></g>
+<g stroke="#5878C8" stroke-width="3" opacity="0.8"><line x1="60" y1="364" x2="60" y2="342"/><line x1="160" y1="366" x2="160" y2="344"/><line x1="620" y1="366" x2="620" y2="344"/></g>
+<g stroke="#2A4A2A" stroke-width="1.5" opacity="0.7"><line x1="80" y1="356" x2="80" y2="368"/><line x1="100" y1="360" x2="100" y2="370"/><line x1="120" y1="362" x2="120" y2="372"/><line x1="600" y1="358" x2="600" y2="370"/><line x1="640" y1="362" x2="640" y2="372"/></g>
+</g>
+<text x="340" y="402" text-anchor="middle" fill="#7AA8C0" font-family="Georgia, serif" font-size="12" opacity="0.42" letter-spacing="7">LAKE TEKAPO · NEW ZEALAND</text>
+</svg>`}
+];
+function applyWallpaper(i,showToast){
+  const w=document.getElementById('wallpaper');const o=document.getElementById('wallpaper-overlay');
+  const wp=WALLPAPERS[i];if(!w||!wp||!wp.svg)return;
+  w.innerHTML=wp.svg;if(o)o.style.background=wp.overlay;
+  window._wpIdx=i;try{localStorage.setItem('wpIdx',String(i));}catch(e){}
+  if(showToast){const n=document.getElementById('wpName');if(n){n.textContent=wp.name;n.classList.add('show');clearTimeout(window._wpT);window._wpT=setTimeout(()=>n.classList.remove('show'),1800);}}
+}
+window.cycleWallpaper=function(){applyWallpaper(((window._wpIdx||0)+1)%WALLPAPERS.length,true);};
+(function(){
+  try{
+    const w=document.getElementById('wallpaper');if(w)WALLPAPERS[0].svg=w.innerHTML;
+    let i=parseInt(localStorage.getItem('wpIdx')||'0',10);
+    if(isNaN(i)||i<0||i>=WALLPAPERS.length)i=0;
+    window._wpIdx=i;
+    if(i!==0)applyWallpaper(i,false);
+  }catch(e){console.error('wallpaper init',e);}
+})();
 const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY','KRW','NZD','PHP','SAR','SGD','THB','TWD','USD'];
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
 
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[]};
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[]};
 let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
@@ -1436,7 +1562,7 @@ async function loadData(){
     state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
     state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
     state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
-    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];
+    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
     const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
@@ -1689,7 +1815,49 @@ function render(){
   renderTxList('txListOv',txs,5);renderFutureList('futureListOv',4);renderFutureList('futureListFull',0);
   renderGoalList('goalListOv');renderGoalList('goalListFull');renderDebtList();renderBudgetList();
   renderCatBreak('catBreakOv');renderReport();renderFilteredTx();renderTodos();renderGoalPlans();renderSnapshot();
+  try{renderBalanceSheet();}catch(e){console.error('balance sheet render',e);}
 }
+
+// ── BALANCE SHEET ─────────────────────────────────────
+function renderBalanceSheet(){
+  const elA=document.getElementById('bsAssetList'),elL=document.getElementById('bsLiabList');
+  const tA=document.getElementById('bsTotAssets'),tL=document.getElementById('bsTotLiab'),tN=document.getElementById('bsNetWorth');
+  if(!elA||!elL||!tA||!tL||!tN)return; // null-guard: never crash init
+  const items=Array.isArray(state.bsItems)?state.bsItems:[];
+  const autoA=(state.wallets||[]).map(w=>({name:w.name,cat:W_LABELS[w.type]||w.type,value:Number(w.balance)||0,auto:true}));
+  const manA=items.map((it,i)=>({...it,idx:i})).filter(it=>it.kind==='asset');
+  const autoL=(state.debts||[]).map(d=>({name:d.name,cat:'Tracked debt',value:Math.max(0,(Number(d.total)||0)-(Number(d.paid)||0)),auto:true}));
+  const manL=items.map((it,i)=>({...it,idx:i})).filter(it=>it.kind==='liability');
+  const totA=[...autoA,...manA].reduce((s,x)=>s+(Number(x.value)||0),0);
+  const totL=[...autoL,...manL].reduce((s,x)=>s+(Number(x.value)||0),0);
+  const net=totA-totL;
+  tA.textContent=fmt(totA);tL.textContent=fmt(totL);
+  tN.textContent=fmt(net);tN.style.color=net>=0?'var(--green)':'var(--red)';
+  const sub=document.getElementById('bsNetSub');
+  if(sub)sub.textContent=totA>0?'Debt ratio: '+Math.round((totL/totA)*100)+'% of assets':'—';
+  const bar=document.getElementById('bsBarFill');
+  if(bar)bar.style.width=(totA+totL>0?Math.round(totA/(totA+totL)*100):50)+'%';
+  const row=x=>`<div class="report-row"><span class="report-lbl">${x.auto?'🔄 ':''}${esc(x.name)} <span style="font-size:0.62rem;color:var(--t4)">${esc(x.cat||'')}</span></span><span style="display:flex;align-items:center;gap:6px"><span class="report-val" style="font-family:var(--mono)">${fmt(x.value)}</span>${x.auto?'':`<button class="ic-btn" onclick="editBs(${x.idx})">✎</button><button class="ic-btn del" onclick="delBs(${x.idx})">✕</button>`}</span></div>`;
+  const aAll=[...autoA,...manA];
+  elA.innerHTML=aAll.length?aAll.map(row).join(''):'<div class="empty">No assets yet. Wallet accounts sync here automatically.</div>';
+  const lAll=[...autoL,...manL];
+  elL.innerHTML=lAll.length?lAll.map(row).join(''):'<div class="empty">No liabilities. Tracked debts sync here automatically.</div>';
+}
+const BS_CATS={asset:['Cash','EPF','ASB / ASNB','Unit trust','Stocks','Crypto','Property','Vehicle','Insurance (cash value)','Other asset'],liability:['Credit card','Car loan','Home loan','PTPTN','Personal loan','BNPL','Family loan','Other liability']};
+let editBsIdx=-1,bsKind='asset';
+function openBsModal(kind,idx){
+  bsKind=kind;editBsIdx=(typeof idx==='number')?idx:-1;
+  const sel=document.getElementById('bsCat');if(!sel)return;
+  sel.innerHTML=BS_CATS[kind].map(c=>`<option>${c}</option>`).join('');
+  const it=editBsIdx>=0?state.bsItems[editBsIdx]:null;
+  document.getElementById('bsName').value=it?it.name:'';
+  document.getElementById('bsVal').value=it?it.value:'';
+  if(it&&it.cat)sel.value=it.cat;
+  document.getElementById('bsModalTitle').textContent=(it?'Edit ':'Add ')+(kind==='asset'?'asset':'liability');
+  const ov=document.getElementById('bsOverlay');if(ov)ov.classList.add('open');
+}
+window.editBs=i=>{const it=state.bsItems[i];if(it)openBsModal(it.kind,i);};
+window.delBs=async i=>{state.bsItems.splice(i,1);render();await saveData();};
 
 // ── CRUD ──────────────────────────────────────────────
 window.togglePaid=async function(i){
@@ -1793,7 +1961,7 @@ function switchAppTab(name){
   else if(name==='goals')renderGoalPlans();
   else render();
 }
-function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
+function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
 function showAuth(){document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none';}
 
@@ -1812,6 +1980,10 @@ document.getElementById('openWallet').onclick=()=>{editWalletIdx=-1;document.get
 const openGoal=()=>{editGoalIdx=-1;document.getElementById('gName').value='';document.getElementById('gIcon').value='🎯';document.getElementById('gTarget').value='';document.getElementById('gSaved').value='';document.getElementById('gDate').value='';document.getElementById('goalModalTitle').textContent='Add goal';gOv.classList.add('open');};
 document.getElementById('openGoalOv').onclick=openGoal;document.getElementById('openGoalFull').onclick=openGoal;
 document.getElementById('openDebt').onclick=()=>{editDebtIdx=-1;document.getElementById('dName').value='';document.getElementById('dTotal').value='';document.getElementById('dPaid').value='';document.getElementById('dMonthly').value='';document.getElementById('dRate').value='';document.getElementById('debtModalTitle').textContent='Add debt';dOv.classList.add('open');};
+const bsOv=modal('bsOverlay','cancelBs');
+document.getElementById('openBsAsset').onclick=()=>openBsModal('asset');
+document.getElementById('openBsLiab').onclick=()=>openBsModal('liability');
+document.getElementById('saveBs').onclick=async function(){const name=document.getElementById('bsName').value.trim();const value=parseFloat(document.getElementById('bsVal').value);if(!name||isNaN(value)||value<0){alert('Fill name and value.');return;}const it={name,cat:document.getElementById('bsCat').value,value,kind:bsKind,id:editBsIdx>=0?state.bsItems[editBsIdx].id:Date.now()};if(editBsIdx>=0)state.bsItems[editBsIdx]=it;else state.bsItems.push(it);bsOv.classList.remove('open');render();await saveData();};
 document.getElementById('openBudget').onclick=()=>bOv.classList.add('open');
 document.getElementById('openTaskModal').onclick=()=>{editTaskId=null;document.getElementById('taskTitle').value='';document.getElementById('taskNote').value='';document.getElementById('taskCat').value='Work';document.getElementById('taskPriority').value='medium';document.getElementById('taskDue').value='';document.getElementById('taskRecur').value='none';document.getElementById('taskModalTitle').textContent='Add task';taskOv.classList.add('open');};
 
