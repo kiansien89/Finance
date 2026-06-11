@@ -36,6 +36,25 @@ input,select,button,textarea{font-family:var(--sans)}
 .wp-btn:hover{transform:scale(1.1)}
 .wp-name{position:fixed;bottom:25px;right:68px;z-index:60;background:rgba(15,10,8,0.75);color:#fff;font-size:0.68rem;font-weight:700;padding:6px 12px;border-radius:20px;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
 .wp-name.show{opacity:1}
+.trv-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.trv-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.trv-chip{padding:6px 11px;border-radius:20px;border:1.5px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.6);font-size:0.72rem;font-weight:700;cursor:pointer;color:var(--t2);transition:all 0.12s;user-select:none}
+.trv-chip.on{background:var(--red);color:white;border-color:var(--red);box-shadow:0 2px 6px rgba(191,0,0,0.3)}
+.trv-day{background:var(--glass);border-radius:var(--rl);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.1);border-left:3px solid var(--blue);padding:12px 14px;margin-bottom:8px}
+.trv-day-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.trv-day-num{font-size:0.82rem;font-weight:800;color:var(--t1)}
+.trv-day-date{font-size:0.66rem;color:var(--t3);font-weight:700}
+.trv-day-title{font-size:0.68rem;color:var(--blue);font-weight:800;background:var(--blue-light);padding:2px 9px;border-radius:20px}
+.trv-slot{display:flex;gap:9px;padding:6px 0;font-size:0.78rem;color:var(--t2);align-items:flex-start;border-top:1px solid rgba(0,0,0,0.05);line-height:1.4}
+.trv-slot:first-child{border-top:none}
+.trv-slot-time{font-size:0.58rem;font-weight:800;color:var(--t4);text-transform:uppercase;min-width:50px;padding-top:3px;letter-spacing:0.04em}
+.trv-slot-ico{font-size:0.95rem;line-height:1.2}
+.trv-saved-card{background:var(--glass);border-radius:var(--rl);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.1);padding:13px 15px;margin-bottom:8px;border-top:3px solid var(--blue)}
+.trv-saved-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.trv-saved-name{font-size:0.86rem;font-weight:800;color:var(--t1)}
+.trv-saved-meta{font-size:0.68rem;color:var(--t3);font-weight:700;margin-top:2px}
+.trv-saved-cost{font-family:var(--mono);font-weight:800;color:var(--red);font-size:0.82rem}
+.trv-cost-note{font-size:0.66rem;color:var(--t4);line-height:1.5;margin-top:8px}
 
 /* AUTH */
 #authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1.5rem;text-align:center;padding:2rem}
@@ -579,6 +598,9 @@ input,select,button,textarea{font-family:var(--sans)}
     <button class="app-top-tab" id="topTabGoals" onclick="switchAppTab('goals')">
       <div class="app-top-tab-inner">🗺️ Goals</div>
     </button>
+    <button class="app-top-tab" id="topTabTravel" onclick="switchAppTab('travel')">
+      <div class="app-top-tab-inner">✈️ Travel</div>
+    </button>
   </div>
 
   <div class="content">
@@ -770,6 +792,30 @@ input,select,button,textarea{font-family:var(--sans)}
       <div id="goalsTimeline"><div class="todo-empty">No goals yet — tap Add goal to start your path.</div></div>
     </div>
 
+    <!-- ══ TRAVEL PAGE ══ -->
+    <div class="app-page" id="page-travel">
+      <div class="panel">
+        <div class="ph"><div class="pt">✈️ Trip generator</div></div>
+        <div class="trv-form-grid">
+          <div class="field" style="margin:0"><label>Destination</label><input type="text" id="trvDest" placeholder="e.g. Queenstown, Tokyo, Bali"></div>
+          <div class="field" style="margin:0"><label>Number of days</label><input type="number" id="trvDays" min="1" max="30" value="8"></div>
+          <div class="field" style="margin:0"><label>Start date (optional)</label><input type="date" id="trvStart"></div>
+          <div class="field" style="margin:0"><label>Travellers (pax)</label><input type="number" id="trvPax" min="1" max="20" value="2"></div>
+          <div class="field" style="margin:0"><label>Style</label><select id="trvTier"><option value="budget">💵 Budget</option><option value="mid" selected>💳 Mid-range</option><option value="luxury">💎 Luxury</option></select></div>
+          <div class="field" style="margin:0"><label>Departure</label><input type="text" id="trvOrigin" value="Kuala Lumpur" placeholder="from"></div>
+        </div>
+        <div class="field" style="margin:6px 0 0"><label>Interests (tap to select)</label>
+          <div class="trv-chips" id="trvChips"></div>
+        </div>
+        <button class="btn btn-red" id="trvGenBtn" style="width:100%;margin-top:12px">✨ Generate trip plan</button>
+      </div>
+      <div id="trvResult"></div>
+      <div class="panel" id="trvSavedPanel">
+        <div class="ph"><div class="pt">📁 Saved trips</div></div>
+        <div id="trvSaved"><div class="empty">No saved trips yet.</div></div>
+      </div>
+    </div>
+
     <div class="footer">Data saved to <strong>finance_dashboard_data.json</strong> in your Google Drive · Auto-syncs on every change</div>
   </div>
 </div>
@@ -936,7 +982,7 @@ const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
 
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[]};
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[]};
 let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
@@ -1562,7 +1608,7 @@ async function loadData(){
     state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
     state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
     state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
-    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];
+    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
     const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
@@ -1818,6 +1864,207 @@ function render(){
   try{renderBalanceSheet();}catch(e){console.error('balance sheet render',e);}
 }
 
+
+// ── TRAVEL PLAN GENERATOR (self-contained, no external calls) ──
+const TRV_INTERESTS=[
+ {key:'nature',label:'🏔 Nature & scenery'},
+ {key:'adventure',label:'🪂 Adventure'},
+ {key:'food',label:'🍜 Food & drink'},
+ {key:'culture',label:'🏛 Culture & history'},
+ {key:'relax',label:'🧘 Relax & wellness'},
+ {key:'shopping',label:'🛍 Shopping'},
+ {key:'nightlife',label:'🌃 Nightlife'},
+ {key:'family',label:'👨‍👩‍👧 Family'},
+];
+const TRV_ACTS={
+ nature:[{i:'🥾',t:'Scenic hike with panoramic views over {d}'},{i:'🏞',t:'Explore the most famous lake or national park near {d}'},{i:'🌅',t:'Sunrise viewpoint & photography spot'},{i:'🚠',t:'Cable car / gondola to a summit lookout'},{i:'🌲',t:'Forest walk and nature reserve'},{i:'⭐',t:'Stargazing at a dark-sky spot'},{i:'💧',t:'Chase a waterfall on a half-day trail'}],
+ adventure:[{i:'🪂',t:'Adrenaline activity — zipline, paraglide or skydive'},{i:'🚤',t:'Jet boat or white-water rafting'},{i:'🚵',t:'Mountain biking on a downhill trail'},{i:'🧗',t:'Rock climbing / via ferrata experience'},{i:'🛶',t:'Kayaking on the lake or coast'},{i:'🎿',t:'Seasonal thrill — ski, snowboard or sandboard'}],
+ food:[{i:'🍜',t:'Try the signature local dish of {d}'},{i:'☕',t:'Café-hop the best brunch spots'},{i:'🍷',t:'Winery / brewery tour and tasting'},{i:'🥟',t:'Street-food market crawl'},{i:'🍽',t:'Dinner at a top-rated restaurant'},{i:'🧺',t:'Local produce market & picnic lunch'}],
+ culture:[{i:'🏛',t:'Main museum or historic district of {d}'},{i:'⛪',t:'Iconic landmark & architecture tour'},{i:'🎭',t:'Local performance or cultural show'},{i:'🖼',t:'Art gallery and creative quarter'},{i:'🏰',t:'Heritage site / old-town walking tour'},{i:'🧭',t:'Guided cultural walking tour'}],
+ relax:[{i:'🧖',t:'Spa, hot springs or thermal pools'},{i:'🏖',t:'Beach or lakeside relaxation day'},{i:'🧘',t:'Morning yoga / wellness session'},{i:'📖',t:'Slow café afternoon — no agenda'},{i:'🌸',t:'Botanical gardens stroll'}],
+ shopping:[{i:'🛍',t:'Main shopping street / mall in {d}'},{i:'🧶',t:'Local crafts & souvenir hunting'},{i:'🏬',t:'Outlet or designer shopping'},{i:'🎁',t:'Boutique & concept stores'}],
+ nightlife:[{i:'🍸',t:'Rooftop bar with a skyline view'},{i:'🌃',t:'Explore the nightlife district of {d}'},{i:'🎶',t:'Live music venue'},{i:'🍻',t:'Local pub / izakaya crawl'}],
+ family:[{i:'🎡',t:'Theme park or family attraction'},{i:'🐧',t:'Zoo, aquarium or wildlife park'},{i:'🎨',t:'Hands-on museum or workshop'},{i:'🍦',t:'Easy day — park, ice cream & playground'}],
+};
+const TRV_DEST=[
+ {keys:['queenstown','wanaka','new zealand','nz','south island','milford','fiordland','zqn'],region:'nz',hl:[{i:'🚠',t:'Skyline Gondola + luge at Bob\'s Peak'},{i:'⛰',t:'Full-day Milford Sound cruise through Fiordland'},{i:'🚤',t:'Shotover Jet thrill ride through the canyon'},{i:'🍔',t:'Fergburger + Patagonia chocolate by the lake'},{i:'🍇',t:'Gibbston Valley wine tour'},{i:'🏘',t:'Historic Arrowtown gold-mining village'},{i:'🌉',t:'Kawarau Bridge — birthplace of bungy'},{i:'🛥',t:'TSS Earnslaw vintage steamship on Lake Wakatipu'},{i:'🏔',t:'Day trip to Wānaka & the famous lone tree'}]},
+ {keys:['japan','tokyo','osaka','kyoto','hokkaido','jp'],region:'jp',hl:[{i:'⛩',t:'Fushimi Inari shrine & temple district'},{i:'🍣',t:'Sushi breakfast at a fish market'},{i:'🗼',t:'City tower / observation deck at night'},{i:'🌸',t:'Garden & old-town stroll'},{i:'🚄',t:'Day trip by shinkansen'},{i:'🏮',t:'Izakaya alley food crawl'},{i:'♨️',t:'Onsen hot-spring afternoon'}]},
+ {keys:['bali','indonesia','ubud','jakarta'],region:'sea',hl:[{i:'🛕',t:'Ubud temples & rice-terrace walk'},{i:'🏄',t:'Surf lesson / beach club day'},{i:'🐒',t:'Sacred Monkey Forest sanctuary'},{i:'🌋',t:'Sunrise Mount Batur trek'},{i:'💆',t:'Balinese spa & massage'},{i:'🍤',t:'Jimbaran seafood sunset dinner'}]},
+ {keys:['thailand','bangkok','phuket','chiang mai','krabi'],region:'sea',hl:[{i:'🛕',t:'Grand Palace & Wat temples'},{i:'🛶',t:'Floating market boat tour'},{i:'🏝',t:'Island-hopping speedboat day'},{i:'🍲',t:'Thai cooking class'},{i:'🌃',t:'Night market & rooftop bar'},{i:'🐘',t:'Ethical elephant sanctuary'}]},
+ {keys:['korea','seoul','busan','jeju'],region:'kr',hl:[{i:'🏯',t:'Gyeongbokgung palace & hanbok'},{i:'🛍',t:'Myeongdong shopping & street food'},{i:'🗼',t:'N Seoul Tower at sunset'},{i:'🍖',t:'Korean BBQ & pojangmacha crawl'},{i:'⛰',t:'Bukhansan hike or DMZ day trip'}]},
+ {keys:['australia','sydney','melbourne','gold coast','perth','au'],region:'au',hl:[{i:'🌉',t:'Harbour & iconic landmarks tour'},{i:'🏖',t:'Famous beach & coastal walk'},{i:'🦘',t:'Wildlife park encounter'},{i:'🍷',t:'Wine region day trip'},{i:'☕',t:'Laneway café & brunch culture'}]},
+ {keys:['europe','paris','london','rome','swiss','switzerland','italy','france','spain','barcelona'],region:'eu',hl:[{i:'🏛',t:'Old town & landmark walking tour'},{i:'🖼',t:'World-class museum / gallery'},{i:'🚆',t:'Scenic regional train day trip'},{i:'🥐',t:'Local market & café culture'},{i:'⛪',t:'Historic cathedral & viewpoint'}]},
+ {keys:['usa','america','new york','los angeles','san francisco','vegas','us'],region:'us',hl:[{i:'🏙',t:'Downtown landmarks & skyline'},{i:'🗽',t:'Iconic monument / observation deck'},{i:'🍔',t:'Classic American diner & food hall'},{i:'🛍',t:'Outlet & flagship shopping'},{i:'🌆',t:'Nightlife & entertainment district'}]},
+];
+// per-person-per-day base costs (RM), region multiplier, return flight from MY (RM)
+const TRV_COST={budget:{accom:80,food:50,transport:30,act:40},mid:{accom:200,food:120,transport:60,act:100},luxury:{accom:600,food:300,transport:160,act:260}};
+const TRV_REGION={sea:{m:0.7,fly:650},kr:{m:1.2,fly:1900},jp:{m:1.4,fly:2200},au:{m:1.5,fly:2000},nz:{m:1.6,fly:3500},us:{m:1.6,fly:4500},eu:{m:1.7,fly:3800},def:{m:1.0,fly:1500}};
+let trvSelected=['nature','food','culture','adventure'];
+let trvCurrent=null;
+function trvRenderChips(){
+  const el=document.getElementById('trvChips');if(!el)return;
+  el.innerHTML=TRV_INTERESTS.map(o=>`<span class="trv-chip${trvSelected.includes(o.key)?' on':''}" onclick="trvToggleChip('${o.key}')">${o.label}</span>`).join('');
+}
+window.trvToggleChip=function(k){
+  const i=trvSelected.indexOf(k);
+  if(i>=0){if(trvSelected.length>1)trvSelected.splice(i,1);}else trvSelected.push(k);
+  trvRenderChips();
+};
+function trvMatchDest(dest){
+  const d=(dest||'').toLowerCase();
+  for(const e of TRV_DEST){if(e.keys.some(k=>d.includes(k)))return e;}
+  return {region:'def',hl:[]};
+}
+function trvBuild(){
+  const dest=(document.getElementById('trvDest').value||'').trim();
+  const days=Math.max(1,Math.min(30,parseInt(document.getElementById('trvDays').value)||1));
+  const pax=Math.max(1,Math.min(20,parseInt(document.getElementById('trvPax').value)||1));
+  const tier=document.getElementById('trvTier').value||'mid';
+  const startStr=document.getElementById('trvStart').value||'';
+  const origin=(document.getElementById('trvOrigin').value||'Kuala Lumpur').trim();
+  if(!dest){alert('Enter a destination first.');return null;}
+  const match=trvMatchDest(dest);
+  const ints=trvSelected.length?trvSelected.slice():['nature','food','culture'];
+  // build a shuffled-ish pool of named highlights
+  const hl=match.hl.slice();
+  // counters to rotate through activity pools without immediate repeats
+  const idx={};ints.forEach(k=>idx[k]=0);
+  const pick=(cats)=>{
+    for(let n=0;n<cats.length;n++){
+      const k=cats[(trvDayCounter+n)%cats.length];
+      const pool=TRV_ACTS[k];if(!pool||!pool.length)continue;
+      const a=pool[idx[k]%pool.length];idx[k]=(idx[k]||0)+1;
+      return {i:a.i,t:a.t.replace(/\{d\}/g,dest)};
+    }
+    const a=TRV_ACTS.nature[0];return {i:a.i,t:a.t.replace(/\{d\}/g,dest)};
+  };
+  const morningCats=ints.filter(k=>['nature','relax','culture','family'].includes(k));
+  const eveningCats=ints.filter(k=>['food','nightlife','relax'].includes(k));
+  const dayCats=ints.filter(k=>['adventure','culture','shopping','nature','family'].includes(k));
+  const mC=morningCats.length?morningCats:['nature'];
+  const eC=eveningCats.length?eveningCats:['food'];
+  const dC=dayCats.length?dayCats:['culture'];
+  const itinerary=[];
+  const base=startStr?new Date(startStr+'T00:00:00'):null;
+  let trvDayCounterLocal=0;
+  for(let day=1;day<=days;day++){
+    trvDayCounter=day-1;
+    let dateLbl='';
+    if(base){const dt=new Date(base);dt.setDate(dt.getDate()+(day-1));dateLbl=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});}
+    let title,slots;
+    if(day===1){
+      title='Arrival';
+      slots=[
+        {time:'Day',i:'✈️',t:`Fly ${origin} → ${dest}, transfer to accommodation`},
+        {time:'PM',i:'🧳',t:'Check in, settle, easy stroll around the neighbourhood'},
+        {time:'Evening',i:'🍽',t:`Welcome dinner — first taste of ${dest}`},
+      ];
+    }else if(day===days&&days>1){
+      title='Departure';
+      slots=[
+        {time:'AM',i:'☕',t:'Relaxed breakfast & last-minute photos'},
+        {time:'Late AM',i:'🛍',t:'Pick up souvenirs / pack up'},
+        {time:'PM',i:'✈️',t:`Check out and fly ${dest} → ${origin}`},
+      ];
+    }else{
+      // pick a main highlight for the afternoon if available
+      let main;
+      if(hl.length){const h=hl.shift();main={time:'Afternoon',i:h.i,t:h.t};}
+      else main=Object.assign({time:'Afternoon'},pick(dC));
+      const m=pick(mC),e=pick(eC);
+      title=['Explore','Adventure','Discover','Highlights','Wander','Day out'][(day-2)%6];
+      slots=[
+        {time:'Morning',i:m.i,t:m.t},
+        main,
+        {time:'Evening',i:e.i,t:e.t},
+      ];
+    }
+    itinerary.push({day,date:dateLbl,title,slots});
+  }
+  // costs
+  const c=TRV_COST[tier],rg=TRV_REGION[match.region]||TRV_REGION.def;
+  const nights=Math.max(1,days-1);
+  const accom=Math.round(c.accom*rg.m*nights);
+  const food=Math.round(c.food*rg.m*days);
+  const transport=Math.round(c.transport*rg.m*days);
+  const act=Math.round(c.act*rg.m*days);
+  const flights=Math.round(rg.fly);
+  const perPerson=accom+food+transport+act+flights;
+  const total=perPerson*pax;
+  return {id:Date.now(),dest,days,pax,tier,origin,startStr,interests:ints,itinerary,
+    cost:{flights,accom,food,transport,act,perPerson,total,nights},region:match.region,createdAt:Date.now()};
+}
+let trvDayCounter=0;
+function trvCostRow(label,val){return `<div class="report-row"><span class="report-lbl">${label}</span><span class="report-val" style="font-family:var(--mono)">${fmt(val)}</span></div>`;}
+function renderTravelResult(p){
+  const el=document.getElementById('trvResult');if(!el||!p)return;
+  const c=p.cost;
+  const tierLbl={budget:'Budget',mid:'Mid-range',luxury:'Luxury'}[p.tier]||p.tier;
+  const perDay=Math.round(c.total/p.days);
+  el.innerHTML=`
+   <div class="summary-grid">
+     <div class="summary-card"><div class="summary-icon">👤</div><div class="summary-lbl">Per person</div><div class="summary-val" style="font-size:1rem">${fmt(c.perPerson)}</div></div>
+     <div class="summary-card"><div class="summary-icon">💰</div><div class="summary-lbl">Total (${p.pax} pax)</div><div class="summary-val" style="font-size:1rem;color:var(--red)">${fmt(c.total)}</div></div>
+     <div class="summary-card"><div class="summary-icon">📅</div><div class="summary-lbl">Per day</div><div class="summary-val" style="font-size:1rem">${fmt(perDay)}</div></div>
+   </div>
+   <div class="two-col">
+     <div class="panel"><div class="ph"><div class="pt">💸 Cost breakdown <span style="font-size:0.62rem;color:var(--t3);font-weight:700">${tierLbl} · ${p.days}d</span></div></div>
+       ${trvCostRow('✈️ Flights ×'+p.pax,c.flights*p.pax)}
+       ${trvCostRow('🏨 Stay ('+c.nights+' nights) ×'+p.pax,c.accom*p.pax)}
+       ${trvCostRow('🍽 Food ×'+p.pax,c.food*p.pax)}
+       ${trvCostRow('🚕 Local transport ×'+p.pax,c.transport*p.pax)}
+       ${trvCostRow('🎟 Activities ×'+p.pax,c.act*p.pax)}
+       <div class="report-row" style="border-top:2px solid rgba(0,0,0,0.1);margin-top:4px"><span class="report-lbl" style="font-weight:800">Total</span><span class="report-val" style="font-family:var(--mono);font-weight:800;color:var(--red)">${fmt(c.total)}</span></div>
+       <div class="trv-cost-note">Estimates in RM — regional + ${tierLbl.toLowerCase()} pricing. Flights, visas & shopping vary; treat as a planning baseline.</div>
+     </div>
+     <div class="panel"><div class="ph"><div class="pt">🎯 Trip summary</div></div>
+       <div class="report-row"><span class="report-lbl">Destination</span><span class="report-val">${esc(p.dest)}</span></div>
+       <div class="report-row"><span class="report-lbl">Duration</span><span class="report-val">${p.days} days / ${c.nights} nights</span></div>
+       <div class="report-row"><span class="report-lbl">Travellers</span><span class="report-val">${p.pax} pax</span></div>
+       <div class="report-row"><span class="report-lbl">From</span><span class="report-val">${esc(p.origin)}</span></div>
+       <div class="report-row"><span class="report-lbl">Interests</span><span class="report-val" style="text-align:right;max-width:55%">${p.interests.map(k=>(TRV_INTERESTS.find(o=>o.key===k)||{label:k}).label.replace(/^\S+\s/,'')).join(', ')}</span></div>
+       <div style="display:flex;gap:6px;margin-top:10px">
+         <button class="btn btn-red" style="flex:1" onclick="trvSavePlan()">📁 Save trip</button>
+         <button class="btn" style="flex:1;background:white;border:1.5px solid rgba(0,0,0,0.15);color:var(--t1);font-weight:700" onclick="trvSaveGoal()">🎯 As savings goal</button>
+       </div>
+     </div>
+   </div>
+   <div class="panel"><div class="ph"><div class="pt">🗓 ${p.days}-day itinerary — ${esc(p.dest)}</div></div>
+     ${p.itinerary.map(d=>`<div class="trv-day"><div class="trv-day-hdr"><div><span class="trv-day-num">Day ${d.day}</span>${d.date?` <span class="trv-day-date">${d.date}</span>`:''}</div><span class="trv-day-title">${d.title}</span></div>${d.slots.map(s=>`<div class="trv-slot"><span class="trv-slot-time">${s.time}</span><span class="trv-slot-ico">${s.i}</span><span>${esc(s.t)}</span></div>`).join('')}</div>`).join('')}
+   </div>`;
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+window.trvSavePlan=async function(){
+  if(!trvCurrent)return;
+  if(!Array.isArray(state.travelPlans))state.travelPlans=[];
+  // avoid dup of same id
+  if(!state.travelPlans.some(x=>x.id===trvCurrent.id))state.travelPlans.unshift(trvCurrent);
+  renderTravelPlans();await saveData();
+  const b=document.getElementById('trvGenBtn');if(b){const o=b.textContent;b.textContent='✓ Trip saved';setTimeout(()=>b.textContent=o,1500);}
+};
+window.trvSaveGoal=async function(){
+  if(!trvCurrent)return;
+  if(!Array.isArray(state.goals))state.goals=[];
+  state.goals.push({name:'Trip: '+trvCurrent.dest,icon:'✈️',target:trvCurrent.cost.total,saved:0,date:trvCurrent.startStr||'',id:Date.now()});
+  await saveData();
+  const b=document.getElementById('trvGenBtn');if(b){const o=b.textContent;b.textContent='✓ Added to savings goals';setTimeout(()=>b.textContent=o,1600);}
+};
+window.trvView=function(i){const p=state.travelPlans[i];if(p){trvCurrent=p;renderTravelResult(p);}};
+window.trvDel=async function(i){state.travelPlans.splice(i,1);renderTravelPlans();await saveData();};
+function renderTravelPlans(){
+  trvRenderChips();
+  const el=document.getElementById('trvSaved');if(!el)return;
+  const plans=Array.isArray(state.travelPlans)?state.travelPlans:[];
+  el.innerHTML=plans.length?plans.map((p,i)=>`<div class="trv-saved-card"><div class="trv-saved-hdr"><div><div class="trv-saved-name">✈️ ${esc(p.dest)}</div><div class="trv-saved-meta">${p.days} days · ${p.pax} pax · ${({budget:'Budget',mid:'Mid-range',luxury:'Luxury'}[p.tier]||p.tier)}</div></div><div style="text-align:right"><div class="trv-saved-cost">${fmt(p.cost&&p.cost.total||0)}</div><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:4px"><button class="ic-btn" title="View" onclick="trvView(${i})">👁</button><button class="ic-btn del" title="Delete" onclick="trvDel(${i})">✕</button></div></div></div></div>`).join(''):'<div class="empty">No saved trips yet. Generate one above and tap Save.</div>';
+}
+(function(){
+  try{
+    trvRenderChips();
+    const gb=document.getElementById('trvGenBtn');
+    if(gb)gb.onclick=function(){const p=trvBuild();if(p){trvCurrent=p;renderTravelResult(p);}};
+  }catch(e){console.error('travel init',e);}
+})();
+
 // ── BALANCE SHEET ─────────────────────────────────────
 function renderBalanceSheet(){
   const elA=document.getElementById('bsAssetList'),elL=document.getElementById('bsLiabList');
@@ -1943,7 +2190,7 @@ window.editDebt=i=>{editDebtIdx=i;const d=state.debts[i];document.getElementById
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
   // Use explicit add/remove instead of toggle for reliability
-  ['finance','todo','goals'].forEach(n=>{
+  ['finance','todo','goals','travel'].forEach(n=>{
     const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
     const page=document.getElementById('page-'+n);
     if(n===name){
@@ -1959,6 +2206,7 @@ function switchAppTab(name){
   // Re-render target tab content
   if(name==='todo')renderTodos();
   else if(name==='goals')renderGoalPlans();
+  else if(name==='travel'){try{renderTravelPlans();}catch(e){console.error('travel render',e);}}
   else render();
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
