@@ -36,6 +36,17 @@ input,select,button,textarea{font-family:var(--sans)}
 .wp-btn:hover{transform:scale(1.1)}
 .wp-name{position:fixed;bottom:25px;right:68px;z-index:60;background:rgba(15,10,8,0.75);color:#fff;font-size:0.68rem;font-weight:700;padding:6px 12px;border-radius:20px;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
 .wp-name.show{opacity:1}
+.tr-plan{background:var(--glass);border-radius:var(--rl);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.1);border-left:3px solid var(--amber);padding:13px 15px;margin-bottom:9px}
+.tr-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.tr-name{font-size:0.86rem;font-weight:800;color:var(--t1)}
+.tr-badge{font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:20px;background:var(--amber-light);color:var(--amber);white-space:nowrap}
+.tr-meta{font-size:0.68rem;color:var(--t3);font-weight:700;margin-top:3px;line-height:1.5}
+.tr-track{height:7px;background:rgba(0,0,0,0.07);border-radius:5px;overflow:hidden;margin-top:8px}
+.tr-fill{height:100%;background:var(--green);border-radius:5px;transition:width 0.25s}
+.tr-months{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.tr-mchip{font-size:0.6rem;font-weight:800;padding:4px 9px;border-radius:14px;border:1.5px solid rgba(0,0,0,0.12);cursor:pointer;color:var(--t3);background:rgba(255,255,255,0.6);user-select:none;transition:all 0.1s}
+.tr-mchip.paid{background:var(--green);border-color:var(--green);color:white}
+.tr-mchip.due{border-color:var(--red);color:var(--red);background:rgba(191,0,0,0.06)}
 .trv-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
 .trv-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .trv-chip{padding:6px 11px;border-radius:20px;border:1.5px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.6);font-size:0.72rem;font-weight:700;cursor:pointer;color:var(--t2);transition:all 0.12s;user-select:none}
@@ -624,6 +635,7 @@ input,select,button,textarea{font-family:var(--sans)}
         <button class="tab" onclick="switchTab('fx')">Currency</button>
         <button class="tab" onclick="switchTab('report')">Report</button>
         <button class="tab" onclick="switchTab('balance')">Balance Sheet</button>
+        <button class="tab" onclick="switchTab('transfers')">Transfers</button>
       </div>
 
       <div class="tab-page active" id="tab-overview">
@@ -731,6 +743,19 @@ input,select,button,textarea{font-family:var(--sans)}
         </div>
         <div class="panel"><div style="font-size:0.68rem;color:var(--t3);line-height:1.5">🔄 = synced automatically from your wallet accounts and tracked debts. Add manual items for EPF, ASB/ASNB, property, vehicles, or loans not tracked elsewhere.</div></div>
       </div>
+
+      <div class="tab-page" id="tab-transfers">
+        <div class="summary-grid">
+          <div class="summary-card"><div class="summary-icon">🔁</div><div class="summary-lbl">Active plans</div><div class="summary-val" id="trActive">0</div></div>
+          <div class="summary-card"><div class="summary-icon">📅</div><div class="summary-lbl">This month due</div><div class="summary-val" id="trMonthly" style="font-size:1rem;color:var(--amber)">RM 0</div></div>
+          <div class="summary-card"><div class="summary-icon">⏳</div><div class="summary-lbl">Total remaining</div><div class="summary-val" id="trRemain" style="font-size:1rem;color:var(--red)">RM 0</div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">🔁 Monthly transfer schedules</div><button class="add-btn" id="openTransfer">+ Add plan</button></div>
+          <div id="trList"><div class="empty">No transfer plans yet.</div></div>
+          <div style="font-size:0.66rem;color:var(--t4);line-height:1.5;margin-top:8px">Tap a month chip to mark it paid/transferred. Red chips are due or overdue. Works for credit-card balance transfer installments, loan repayment schedules, and recurring savings transfers (e.g. salary → ASB monthly). Marking paid here does not create a transaction — log actual money movement in Transactions if needed.</div>
+        </div>
+      </div>
     </div>
 
     <!-- ══ TODO PAGE ══ -->
@@ -828,6 +853,7 @@ input,select,button,textarea{font-family:var(--sans)}
 <div class="modal-overlay" id="debtOverlay"><div class="modal"><h3 id="debtModalTitle">Add debt / loan</h3><div class="field"><label>Name</label><input type="text" id="dName" placeholder="e.g. PTPTN, Car loan, Credit card"></div><div class="field"><label>Total amount (RM)</label><input type="number" id="dTotal" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Amount paid so far (RM)</label><input type="number" id="dPaid" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Monthly payment (RM)</label><input type="number" id="dMonthly" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Interest rate % (optional)</label><input type="number" id="dRate" step="0.01" min="0" placeholder="e.g. 3.5"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelDebt">Cancel</button><button class="btn btn-red" id="saveDebt">Save</button></div></div></div>
 <div class="modal-overlay" id="budgetOverlay"><div class="modal"><h3>Set budget target</h3><div class="field"><label>Category</label><select id="budgetCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Other</option></select></div><div class="field"><label>Monthly limit (RM)</label><input type="number" id="budgetAmt" step="0.01" min="0" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelBudget">Cancel</button><button class="btn btn-red" id="saveBudget">Save</button></div></div></div>
 <div class="modal-overlay" id="bsOverlay"><div class="modal"><h3 id="bsModalTitle">Add asset</h3><div class="field"><label>Name</label><input type="text" id="bsName" placeholder="e.g. EPF Account 1"></div><div class="field"><label>Category</label><select id="bsCat"></select></div><div class="field"><label>Current value (RM)</label><input type="number" id="bsVal" step="0.01" min="0" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelBs">Cancel</button><button class="btn btn-red" id="saveBs">Save</button></div></div></div>
+<div class="modal-overlay" id="trOverlay"><div class="modal"><h3 id="trModalTitle">Add transfer plan</h3><div class="field"><label>Plan name</label><input type="text" id="trName" placeholder="e.g. CIMB BT, Salary → ASB"></div><div class="field"><label>Type</label><select id="trType"><option value="bt">💳 Credit card balance transfer</option><option value="loan">🏦 Loan / installment</option><option value="recurring">🔁 Recurring savings transfer</option></select></div><div class="field"><label>Total amount (RM)</label><input type="number" id="trTotal" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Upfront fee / interest % (optional)</label><input type="number" id="trFee" step="0.01" min="0" placeholder="e.g. 3"></div><div class="field"><label>Number of months</label><input type="number" id="trMonths" min="1" max="120" placeholder="12"></div><div class="field"><label>Start month</label><input type="month" id="trStart"></div><div class="field"><label>From → To (optional)</label><input type="text" id="trFromTo" placeholder="e.g. Maybank → CIMB"></div><div style="font-size:0.68rem;color:var(--t3);font-weight:700;margin-bottom:10px" id="trCalc">Monthly: —</div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTr">Cancel</button><button class="btn btn-red" id="saveTr">Save</button></div></div></div>
 
 <!-- TODO MODAL -->
 <div class="modal-overlay" id="taskOverlay">
@@ -959,6 +985,119 @@ const WALLPAPERS=[
 <g stroke="#2A4A2A" stroke-width="1.5" opacity="0.7"><line x1="80" y1="356" x2="80" y2="368"/><line x1="100" y1="360" x2="100" y2="370"/><line x1="120" y1="362" x2="120" y2="372"/><line x1="600" y1="358" x2="600" y2="370"/><line x1="640" y1="362" x2="640" y2="372"/></g>
 </g>
 <text x="340" y="402" text-anchor="middle" fill="#7AA8C0" font-family="Georgia, serif" font-size="12" opacity="0.42" letter-spacing="7">LAKE TEKAPO · NEW ZEALAND</text>
+</svg>`},
+ {name:'Milford Sound · Misty Fiord',overlay:'rgba(8,14,18,0.25)',svg:`<svg width="100%" height="100%" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="msky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2A3A48"/><stop offset="45%" stop-color="#4A6070"/><stop offset="70%" stop-color="#7A9098"/><stop offset="100%" stop-color="#A8B8B0"/></linearGradient>
+<linearGradient id="mpeak" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3A4A52"/><stop offset="100%" stop-color="#1A262E"/></linearGradient>
+<linearGradient id="mfar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5A7078"/><stop offset="100%" stop-color="#3A4E56"/></linearGradient>
+<linearGradient id="mnear" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22323A"/><stop offset="100%" stop-color="#101A20"/></linearGradient>
+<linearGradient id="mwater" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6A8088"/><stop offset="35%" stop-color="#3A525C"/><stop offset="100%" stop-color="#16242C"/></linearGradient>
+<linearGradient id="mmist" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C8D4D0" stop-opacity="0"/><stop offset="50%" stop-color="#C8D4D0" stop-opacity="0.35"/><stop offset="100%" stop-color="#C8D4D0" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="680" height="420" fill="url(#msky)"/>
+<polygon points="420,278 500,120 540,170 580,140 640,210 680,190 680,278" fill="url(#mfar)"/>
+<polygon points="430,278 480,180 520,225 560,195 620,255 680,235 680,278" fill="url(#mpeak)" opacity="0.8"/>
+<polygon points="140,278 255,55 305,160 340,120 400,278" fill="url(#mpeak)"/>
+<polygon points="245,75 255,55 268,82 260,95 250,90" fill="#D8E0DC" opacity="0.55"/>
+<polygon points="0,278 0,160 60,130 120,200 180,170 250,278" fill="url(#mnear)"/>
+<rect x="0" y="195" width="680" height="26" fill="url(#mmist)"/>
+<rect x="180" y="165" width="320" height="20" fill="url(#mmist)" opacity="0.7"/>
+<path d="M86 162 C87 185 85 210 88 240 C89 256 87 266 88 276" stroke="#E8F0EC" stroke-width="2.2" fill="none" opacity="0.7"/>
+<path d="M88 240 C90 252 89 264 90 276" stroke="#E8F0EC" stroke-width="1.2" fill="none" opacity="0.5"/>
+<ellipse cx="89" cy="278" rx="10" ry="2.5" fill="#E8F0EC" opacity="0.4"/>
+<rect x="0" y="276" width="680" height="144" fill="url(#mwater)"/>
+<polygon points="140,276 255,330 400,276" fill="#10181E" opacity="0.45"/>
+<polygon points="0,276 60,318 250,276" fill="#0C141A" opacity="0.5"/>
+<rect x="0" y="277" width="680" height="1" fill="#A8B8B0" opacity="0.5"/>
+<rect x="280" y="300" width="180" height="0.8" fill="#A8C0B8" opacity="0.25"/>
+<rect x="100" y="330" width="220" height="0.8" fill="#A8C0B8" opacity="0.2"/>
+<rect x="460" y="348" width="160" height="0.8" fill="#A8C0B8" opacity="0.18"/>
+<ellipse cx="89" cy="280" rx="14" ry="2" fill="#E8F0EC" opacity="0.25"/>
+<text x="340" y="400" text-anchor="middle" fill="#A8B8B0" font-family="Georgia, serif" font-size="12" opacity="0.5" letter-spacing="7">MILFORD SOUND · NEW ZEALAND</text>
+</svg>`},
+ {name:'Dunedin · Railway Dusk',overlay:'rgba(10,6,16,0.28)',svg:`<svg width="100%" height="100%" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A1430"/><stop offset="40%" stop-color="#3A2A52"/><stop offset="65%" stop-color="#7A4868"/><stop offset="82%" stop-color="#C87858"/><stop offset="100%" stop-color="#E8A868"/></linearGradient>
+<linearGradient id="dhill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2A2240"/><stop offset="100%" stop-color="#181228"/></linearGradient>
+<linearGradient id="dgnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#16101F"/><stop offset="100%" stop-color="#0A0712"/></linearGradient>
+<radialGradient id="dwin" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#F8C870" stop-opacity="0.95"/><stop offset="100%" stop-color="#F8C870" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="680" height="420" fill="url(#dsky)"/>
+<circle cx="90" cy="60" r="1.1" fill="white" opacity="0.7"/><circle cx="190" cy="40" r="0.9" fill="white" opacity="0.6"/><circle cx="560" cy="55" r="1.0" fill="white" opacity="0.65"/><circle cx="630" cy="95" r="0.8" fill="white" opacity="0.5"/><circle cx="320" cy="35" r="0.8" fill="white" opacity="0.55"/>
+<polygon points="0,300 0,250 70,228 150,252 230,232 320,256 680,256 680,300" fill="url(#dhill)"/>
+<polygon points="380,300 460,238 560,262 640,242 680,252 680,300" fill="url(#dhill)" opacity="0.85"/>
+<g>
+<rect x="250" y="218" width="180" height="86" fill="#1E1426"/>
+<rect x="250" y="212" width="180" height="8" fill="#2A1C34"/>
+<polygon points="246,212 340,196 434,212" fill="#241830"/>
+<rect x="316" y="148" width="48" height="156" fill="#241830"/>
+<rect x="312" y="142" width="56" height="8" fill="#302040"/>
+<polygon points="312,142 340,118 368,142" fill="#2A1C38"/>
+<rect x="336" y="124" width="8" height="14" fill="#302040"/>
+<circle cx="340" cy="160" r="11" fill="#0E0A16"/><circle cx="340" cy="160" r="9" fill="#F0E0C0" opacity="0.9"/>
+<line x1="340" y1="160" x2="340" y2="154" stroke="#241830" stroke-width="1.6"/><line x1="340" y1="160" x2="344" y2="162" stroke="#241830" stroke-width="1.6"/>
+<rect x="262" y="232" width="13" height="20" rx="6" fill="#F8C870" opacity="0.8"/><rect x="284" y="232" width="13" height="20" rx="6" fill="#F0B860" opacity="0.7"/><rect x="306" y="232" width="13" height="20" rx="6" fill="#F8C870" opacity="0.75"/>
+<rect x="361" y="232" width="13" height="20" rx="6" fill="#F0B860" opacity="0.75"/><rect x="383" y="232" width="13" height="20" rx="6" fill="#F8C870" opacity="0.7"/><rect x="405" y="232" width="13" height="20" rx="6" fill="#F0B860" opacity="0.8"/>
+<rect x="262" y="262" width="13" height="18" rx="6" fill="#E8A858" opacity="0.6"/><rect x="306" y="262" width="13" height="18" rx="6" fill="#F8C870" opacity="0.65"/><rect x="361" y="262" width="13" height="18" rx="6" fill="#E8A858" opacity="0.6"/><rect x="405" y="262" width="13" height="18" rx="6" fill="#F8C870" opacity="0.6"/>
+<rect x="330" y="252" width="20" height="52" rx="9" fill="#F8C870" opacity="0.85"/>
+<rect x="244" y="218" width="10" height="86" fill="#2A1C34"/><rect x="426" y="218" width="10" height="86" fill="#2A1C34"/>
+<rect x="244" y="210" width="10" height="8" fill="#342444"/><rect x="426" y="210" width="10" height="8" fill="#342444"/>
+</g>
+<ellipse cx="340" cy="306" rx="120" ry="10" fill="url(#dwin)" opacity="0.4"/>
+<rect x="0" y="300" width="680" height="120" fill="url(#dgnd)"/>
+<rect x="0" y="318" width="680" height="2" fill="#241830"/>
+<rect x="60" y="316" width="3" height="10" fill="#100A1A"/><rect x="160" y="316" width="3" height="10" fill="#100A1A"/><rect x="520" y="316" width="3" height="10" fill="#100A1A"/><rect x="620" y="316" width="3" height="10" fill="#100A1A"/>
+<text x="340" y="398" text-anchor="middle" fill="#C89878" font-family="Georgia, serif" font-size="12" opacity="0.45" letter-spacing="7">DUNEDIN · NEW ZEALAND</text>
+</svg>`},
+ {name:'Christchurch · Avon River',overlay:'rgba(20,24,12,0.30)',svg:`<svg width="100%" height="100%" viewBox="0 0 680 420" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="csky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7AA8C8"/><stop offset="50%" stop-color="#B8CCD8"/><stop offset="78%" stop-color="#E8D8B8"/><stop offset="100%" stop-color="#F4E0A8"/></linearGradient>
+<linearGradient id="chill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8A98A8"/><stop offset="100%" stop-color="#6A7C90"/></linearGradient>
+<linearGradient id="cgrass" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5A7A3A"/><stop offset="100%" stop-color="#3A5424"/></linearGradient>
+<linearGradient id="criver" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C8D4C0"/><stop offset="40%" stop-color="#8AA888"/><stop offset="100%" stop-color="#4A6850"/></linearGradient>
+<linearGradient id="cwillow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A6A2E"/><stop offset="100%" stop-color="#2E481C"/></linearGradient>
+</defs>
+<rect width="680" height="420" fill="url(#csky)"/>
+<ellipse cx="140" cy="70" rx="46" ry="13" fill="white" opacity="0.65"/><ellipse cx="178" cy="62" rx="34" ry="10" fill="white" opacity="0.55"/>
+<ellipse cx="520" cy="48" rx="52" ry="14" fill="white" opacity="0.6"/><ellipse cx="560" cy="40" rx="34" ry="10" fill="white" opacity="0.5"/>
+<polygon points="0,250 0,216 60,200 130,222 200,204 280,226 360,208 440,228 520,210 600,230 680,214 680,250" fill="url(#chill)" opacity="0.8"/>
+<rect x="0" y="244" width="680" height="50" fill="url(#cgrass)"/>
+<g>
+<ellipse cx="120" cy="216" rx="52" ry="42" fill="url(#cwillow)"/>
+<ellipse cx="92" cy="226" rx="26" ry="24" fill="#3E5C26"/>
+<ellipse cx="148" cy="222" rx="28" ry="26" fill="#3E5C26"/>
+<rect x="115" y="248" width="9" height="26" fill="#3A2A18"/>
+<path d="M84 232 C82 248 83 260 85 270" stroke="#4A6A2E" stroke-width="2" fill="none" opacity="0.85"/>
+<path d="M104 244 C103 258 104 268 106 276" stroke="#4A6A2E" stroke-width="2" fill="none" opacity="0.85"/>
+<path d="M138 246 C138 260 139 270 141 278" stroke="#4A6A2E" stroke-width="2" fill="none" opacity="0.85"/>
+<path d="M158 234 C158 250 160 262 162 272" stroke="#4A6A2E" stroke-width="2" fill="none" opacity="0.85"/>
+</g>
+<g>
+<ellipse cx="565" cy="222" rx="44" ry="36" fill="url(#cwillow)"/>
+<ellipse cx="540" cy="232" rx="22" ry="20" fill="#3E5C26"/>
+<rect x="560" y="250" width="8" height="22" fill="#3A2A18"/>
+<path d="M532 240 C531 254 532 264 534 272" stroke="#4A6A2E" stroke-width="2" fill="none" opacity="0.85"/>
+<path d="M590 238 C590 252 592 262 594 270" stroke="#4A6A2E" stroke-width="2" fill="none" opacity="0.85"/>
+</g>
+<rect x="0" y="282" width="680" height="138" fill="url(#criver)"/>
+<rect x="0" y="284" width="680" height="1" fill="#E8E8D0" opacity="0.5"/>
+<rect x="120" y="300" width="180" height="0.9" fill="#E8F0E0" opacity="0.3"/>
+<rect x="380" y="320" width="200" height="0.9" fill="#E8F0E0" opacity="0.25"/>
+<rect x="60" y="345" width="160" height="0.9" fill="#E8F0E0" opacity="0.2"/>
+<g>
+<path d="M300 332 L420 332 L408 346 L314 346 Z" fill="#5A3A1E"/>
+<path d="M300 332 L420 332 L416 338 L305 338 Z" fill="#6E4826"/>
+<rect x="394" y="296" width="5" height="36" fill="#4A3018"/>
+<circle cx="396" cy="290" r="7" fill="#E8C898"/>
+<path d="M390 297 C386 306 387 318 390 326 L402 326 C405 316 404 305 401 297 Z" fill="#8A4838"/>
+<path d="M388 326 L386 332 M404 326 L405 332" stroke="#2A1C10" stroke-width="3"/>
+<line x1="412" y1="282" x2="404" y2="338" stroke="#C8A868" stroke-width="2.6"/>
+<ellipse cx="340" cy="338" rx="9" ry="5" fill="#A8784A"/><ellipse cx="362" cy="338" rx="9" ry="5" fill="#8A623E"/>
+</g>
+<ellipse cx="360" cy="352" rx="70" ry="5" fill="#2E4838" opacity="0.4"/>
+<g fill="#D8C880"><circle cx="60" cy="266" r="2.4"/><circle cx="74" cy="272" r="2"/><circle cx="640" cy="268" r="2.4"/><circle cx="624" cy="274" r="2"/><circle cx="230" cy="270" r="2"/></g>
+<text x="340" y="400" text-anchor="middle" fill="#3A5424" font-family="Georgia, serif" font-size="12" opacity="0.5" letter-spacing="7">CHRISTCHURCH · NEW ZEALAND</text>
 </svg>`}
 ];
 function applyWallpaper(i,showToast){
@@ -982,7 +1121,7 @@ const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
 
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[]};
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[]};
 let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
@@ -1608,7 +1747,7 @@ async function loadData(){
     state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
     state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
     state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
-    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];
+    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
     const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
@@ -1862,6 +2001,7 @@ function render(){
   renderGoalList('goalListOv');renderGoalList('goalListFull');renderDebtList();renderBudgetList();
   renderCatBreak('catBreakOv');renderReport();renderFilteredTx();renderTodos();renderGoalPlans();renderSnapshot();
   try{renderBalanceSheet();}catch(e){console.error('balance sheet render',e);}
+  try{renderTransfers();}catch(e){console.error('transfers render',e);}
 }
 
 
@@ -2065,6 +2205,76 @@ function renderTravelPlans(){
   }catch(e){console.error('travel init',e);}
 })();
 
+// ── TRANSFER SCHEDULES ────────────────────────────────
+function trCalcMonthly(total,fee,months){if(!total||!months)return 0;return Math.round(total*(1+(fee||0)/100)/months*100)/100;}
+function trMonthAt(startStr,i){const[y,m]=(startStr||'2026-01').split('-').map(Number);const t=(m-1)+i;return{y:y+Math.floor(t/12),m:t%12};}
+function trMonthLbl(startStr,i){const d=trMonthAt(startStr,i);return MONTHS[d.m].slice(0,3)+" '"+String(d.y).slice(2);}
+function renderTransfers(){
+  const list=document.getElementById('trList'),elA=document.getElementById('trActive'),elM=document.getElementById('trMonthly'),elR=document.getElementById('trRemain');
+  if(!list||!elA||!elM||!elR)return; // null-guard
+  const plans=Array.isArray(state.transfers)?state.transfers:[];
+  const now=new Date();const curVal=now.getFullYear()*12+now.getMonth();
+  let active=0,monthlyDue=0,remainAll=0;
+  const TYPE_LBL={bt:'💳 Balance transfer',loan:'🏦 Loan / installment',recurring:'🔁 Recurring transfer'};
+  list.innerHTML=plans.length?plans.map((p,pi)=>{
+    const monthly=trCalcMonthly(p.total,p.fee,p.months);
+    const eff=Math.round((p.total*(1+(p.fee||0)/100))*100)/100;
+    const paid=p.paid||{};
+    const paidCount=Object.keys(paid).filter(k=>paid[k]).length;
+    const remain=Math.max(0,Math.round((eff-paidCount*monthly)*100)/100);
+    const done=paidCount>=p.months;
+    if(!done){active++;remainAll+=remain;
+      for(let i=0;i<p.months;i++){const d=trMonthAt(p.start,i);if(d.y*12+d.m===curVal&&!paid[i]){monthlyDue+=monthly;break;}}
+    }
+    const endD=trMonthAt(p.start,p.months-1);
+    const pct=p.months>0?Math.round(paidCount/p.months*100):0;
+    const chips=Array.from({length:p.months},(_,i)=>{
+      const d=trMonthAt(p.start,i);const v=d.y*12+d.m;
+      const cls=paid[i]?'paid':(v<=curVal?'due':'');
+      return `<span class="tr-mchip ${cls}" onclick="toggleTrMonth(${pi},${i})">${trMonthLbl(p.start,i)}</span>`;
+    }).join('');
+    return `<div class="tr-plan${done?'" style="border-left-color:var(--green)"':'"'}>
+      <div class="tr-hdr"><div><div class="tr-name">${done?'✅ ':''}${esc(p.name)}</div>
+      <div class="tr-meta">${fmt(monthly)}/mo × ${p.months} · ${p.fee?`fee ${p.fee}% · `:''}total ${fmt(eff)} · remaining <strong>${fmt(remain)}</strong>${p.fromTo?` · ${esc(p.fromTo)}`:''} · ends ${MONTHS[endD.m].slice(0,3)} ${endD.y}</div></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="tr-badge">${TYPE_LBL[p.type]||p.type}</span><button class="ic-btn" onclick="editTransfer(${pi})">✎</button><button class="ic-btn del" onclick="delTransfer(${pi})">✕</button></div></div>
+      <div class="tr-track"><div class="tr-fill" style="width:${pct}%"></div></div>
+      <div class="tr-months">${chips}</div></div>`;
+  }).join(''):'<div class="empty">No transfer plans yet. Tap + Add plan to create a monthly schedule.</div>';
+  elA.textContent=active;
+  elM.textContent=fmt(monthlyDue);
+  elR.textContent=fmt(remainAll);
+}
+let editTrIdx=-1;
+function trUpdateCalc(){
+  const el=document.getElementById('trCalc');if(!el)return;
+  const t=parseFloat(document.getElementById('trTotal').value)||0;
+  const f=parseFloat(document.getElementById('trFee').value)||0;
+  const m=parseInt(document.getElementById('trMonths').value)||0;
+  el.textContent=(t&&m)?`Monthly: ${fmt(trCalcMonthly(t,f,m))} × ${m} months = ${fmt(Math.round(t*(1+f/100)*100)/100)} total`:'Monthly: —';
+}
+function openTransferModal(idx){
+  editTrIdx=(typeof idx==='number')?idx:-1;
+  const p=editTrIdx>=0?state.transfers[editTrIdx]:null;
+  document.getElementById('trName').value=p?p.name:'';
+  document.getElementById('trType').value=p?p.type:'bt';
+  document.getElementById('trTotal').value=p?p.total:'';
+  document.getElementById('trFee').value=p&&p.fee?p.fee:'';
+  document.getElementById('trMonths').value=p?p.months:'';
+  document.getElementById('trStart').value=p?p.start:new Date().toISOString().slice(0,7);
+  document.getElementById('trFromTo').value=p&&p.fromTo?p.fromTo:'';
+  document.getElementById('trModalTitle').textContent=p?'Edit transfer plan':'Add transfer plan';
+  trUpdateCalc();
+  const ov=document.getElementById('trOverlay');if(ov)ov.classList.add('open');
+}
+window.editTransfer=i=>openTransferModal(i);
+window.delTransfer=async i=>{if(!confirm('Delete this transfer plan?'))return;state.transfers.splice(i,1);renderTransfers();await saveData();};
+window.toggleTrMonth=async function(pi,mi){
+  const p=state.transfers[pi];if(!p)return;
+  if(!p.paid)p.paid={};
+  p.paid[mi]=!p.paid[mi];
+  renderTransfers();await saveData();
+};
+
 // ── BALANCE SHEET ─────────────────────────────────────
 function renderBalanceSheet(){
   const elA=document.getElementById('bsAssetList'),elL=document.getElementById('bsLiabList');
@@ -2209,7 +2419,7 @@ function switchAppTab(name){
   else if(name==='travel'){try{renderTravelPlans();}catch(e){console.error('travel render',e);}}
   else render();
 }
-function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
+function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance','transfers'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
 function showAuth(){document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none';}
 
@@ -2232,6 +2442,18 @@ const bsOv=modal('bsOverlay','cancelBs');
 document.getElementById('openBsAsset').onclick=()=>openBsModal('asset');
 document.getElementById('openBsLiab').onclick=()=>openBsModal('liability');
 document.getElementById('saveBs').onclick=async function(){const name=document.getElementById('bsName').value.trim();const value=parseFloat(document.getElementById('bsVal').value);if(!name||isNaN(value)||value<0){alert('Fill name and value.');return;}const it={name,cat:document.getElementById('bsCat').value,value,kind:bsKind,id:editBsIdx>=0?state.bsItems[editBsIdx].id:Date.now()};if(editBsIdx>=0)state.bsItems[editBsIdx]=it;else state.bsItems.push(it);bsOv.classList.remove('open');render();await saveData();};
+const trOv=modal('trOverlay','cancelTr');
+document.getElementById('openTransfer').onclick=()=>openTransferModal();
+['trTotal','trFee','trMonths'].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=trUpdateCalc;});
+document.getElementById('saveTr').onclick=async function(){
+  const name=document.getElementById('trName').value.trim();
+  const total=parseFloat(document.getElementById('trTotal').value);
+  const months=parseInt(document.getElementById('trMonths').value);
+  const start=document.getElementById('trStart').value;
+  if(!name||!total||total<=0||!months||months<1||!start){alert('Fill name, total amount, months, and start month.');return;}
+  const p={name,type:document.getElementById('trType').value,total,fee:parseFloat(document.getElementById('trFee').value)||0,months,start,fromTo:document.getElementById('trFromTo').value.trim(),paid:editTrIdx>=0?(state.transfers[editTrIdx].paid||{}):{},id:editTrIdx>=0?state.transfers[editTrIdx].id:Date.now()};
+  if(editTrIdx>=0)state.transfers[editTrIdx]=p;else state.transfers.push(p);
+  trOv.classList.remove('open');renderTransfers();await saveData();};
 document.getElementById('openBudget').onclick=()=>bOv.classList.add('open');
 document.getElementById('openTaskModal').onclick=()=>{editTaskId=null;document.getElementById('taskTitle').value='';document.getElementById('taskNote').value='';document.getElementById('taskCat').value='Work';document.getElementById('taskPriority').value='medium';document.getElementById('taskDue').value='';document.getElementById('taskRecur').value='none';document.getElementById('taskModalTitle').textContent='Add task';taskOv.classList.add('open');};
 
