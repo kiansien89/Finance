@@ -47,6 +47,12 @@ input,select,button,textarea{font-family:var(--sans)}
 .tr-mchip{font-size:0.6rem;font-weight:800;padding:4px 9px;border-radius:14px;border:1.5px solid rgba(0,0,0,0.12);cursor:pointer;color:var(--t3);background:rgba(255,255,255,0.6);user-select:none;transition:all 0.1s}
 .tr-mchip.paid{background:var(--green);border-color:var(--green);color:white}
 .tr-mchip.due{border-color:var(--red);color:var(--red);background:rgba(191,0,0,0.06)}
+.sc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px}
+@media(max-width:640px){.sc-grid{grid-template-columns:1fr 1fr}}
+.sc-chart-wrap{width:100%;overflow:hidden}
+.sc-chart-wrap svg{width:100%;height:auto;display:block}
+.sc-hint{font-size:0.66rem;color:var(--t4);font-weight:700;margin-top:3px}
+.sc-hint a{color:var(--blue);cursor:pointer;text-decoration:underline}
 .trv-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
 .trv-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .trv-chip{padding:6px 11px;border-radius:20px;border:1.5px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.6);font-size:0.72rem;font-weight:700;cursor:pointer;color:var(--t2);transition:all 0.12s;user-select:none}
@@ -636,6 +642,7 @@ input,select,button,textarea{font-family:var(--sans)}
         <button class="tab" onclick="switchTab('report')">Report</button>
         <button class="tab" onclick="switchTab('balance')">Balance Sheet</button>
         <button class="tab" onclick="switchTab('transfers')">Transfers</button>
+        <button class="tab" onclick="switchTab('planner')">Planner</button>
       </div>
 
       <div class="tab-page active" id="tab-overview">
@@ -754,6 +761,37 @@ input,select,button,textarea{font-family:var(--sans)}
           <div class="ph"><div class="pt">🔁 Monthly transfer schedules</div><button class="add-btn" id="openTransfer">+ Add plan</button></div>
           <div id="trList"><div class="empty">No transfer plans yet.</div></div>
           <div style="font-size:0.66rem;color:var(--t4);line-height:1.5;margin-top:8px">Tap a month chip to mark it paid/transferred. Red chips are due or overdue. Works for credit-card balance transfer installments, loan repayment schedules, and recurring savings transfers (e.g. salary → ASB monthly). Marking paid here does not create a transaction — log actual money movement in Transactions if needed.</div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="tab-planner">
+        <div class="panel">
+          <div class="ph"><div class="pt">🔮 Scenario inputs</div><button class="add-btn" id="scSaveBtn">💾 Save scenario</button></div>
+          <div class="sc-grid">
+            <div class="field" style="margin:0"><label>Starting net worth (RM)</label><input type="number" id="scStart" step="100"><div class="sc-hint" id="scStartHint"></div></div>
+            <div class="field" style="margin:0"><label>Monthly saving (RM)</label><input type="number" id="scMonthly" step="50" value="1000"><div class="sc-hint" id="scAvgHint"></div></div>
+            <div class="field" style="margin:0"><label>Annual return %</label><input type="number" id="scRet" step="0.1" value="4"><div class="sc-hint">EPF ~5.5% · ASB ~5% · FD ~3.5%</div></div>
+            <div class="field" style="margin:0"><label>Horizon (years)</label><input type="number" id="scYears" min="1" max="40" value="10"></div>
+            <div class="field" style="margin:0"><label>Target amount (RM, optional)</label><input type="number" id="scTarget" step="1000" placeholder="e.g. 500000"></div>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-card"><div class="summary-icon">🏁</div><div class="summary-lbl" id="scFinalLbl">Net worth at horizon</div><div class="summary-val" id="scFinal" style="font-size:1rem;color:var(--green)">—</div></div>
+          <div class="summary-card"><div class="summary-icon">🎯</div><div class="summary-lbl">Target reached</div><div class="summary-val" id="scWhen" style="font-size:0.95rem">—</div></div>
+          <div class="summary-card"><div class="summary-icon">📈</div><div class="summary-lbl">Needed /month for target</div><div class="summary-val" id="scNeed" style="font-size:0.95rem;color:var(--amber)">—</div></div>
+        </div>
+        <div class="panel"><div class="ph"><div class="pt">📈 Projection</div><span id="scChartSub" style="font-size:0.66rem;color:var(--t3);font-weight:700"></span></div><div class="sc-chart-wrap" id="scChart"></div></div>
+        <div class="two-col">
+          <div class="panel"><div class="ph"><div class="pt">📌 One-off events</div><button class="add-btn" id="scImportTravel">✈️ Import trips</button></div>
+            <div id="scEvList"><div class="empty">No events. Add planned big expenses (− ) or windfalls (+).</div></div>
+            <div class="trv-form-grid" style="margin-top:10px;grid-template-columns:1fr 1fr">
+              <div class="field" style="margin:0"><label>Month</label><input type="month" id="scEvMonth"></div>
+              <div class="field" style="margin:0"><label>Amount (− = expense)</label><input type="number" id="scEvAmt" step="100" placeholder="-18000"></div>
+            </div>
+            <div class="field" style="margin:6px 0 0"><label>Label</label><input type="text" id="scEvLbl" placeholder="e.g. House down payment, Bonus"></div>
+            <button class="btn btn-ghost" id="scEvAdd" style="width:100%;margin-top:8px">+ Add event</button>
+          </div>
+          <div class="panel"><div class="ph"><div class="pt">🗓 Year by year</div></div><div id="scTable"><div class="empty">—</div></div></div>
         </div>
       </div>
     </div>
@@ -1121,7 +1159,7 @@ const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
 
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[]};
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[],scenario:null};
 let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
@@ -1747,7 +1785,7 @@ async function loadData(){
     state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
     state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
     state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
-    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];
+    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];state.scenario=p.scenario||null;
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
     const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
@@ -2002,6 +2040,7 @@ function render(){
   renderCatBreak('catBreakOv');renderReport();renderFilteredTx();renderTodos();renderGoalPlans();renderSnapshot();
   try{renderBalanceSheet();}catch(e){console.error('balance sheet render',e);}
   try{renderTransfers();}catch(e){console.error('transfers render',e);}
+  try{renderPlanner();}catch(e){console.error('planner render',e);}
 }
 
 
@@ -2204,6 +2243,132 @@ function renderTravelPlans(){
     if(gb)gb.onclick=function(){const p=trvBuild();if(p){trvCurrent=p;renderTravelResult(p);}};
   }catch(e){console.error('travel init',e);}
 })();
+
+// ── SCENARIO PLANNER ──────────────────────────────────
+let scCfg=null,scInit=false;
+function scDefaults(){return {start:null,monthly:1000,ret:4,years:10,target:'',events:[]};}
+function scNetWorthNow(){
+  let a=(state.wallets||[]).reduce((s,w)=>s+(Number(w.balance)||0),0);
+  let l=(state.debts||[]).reduce((s,d)=>s+Math.max(0,(Number(d.total)||0)-(Number(d.paid)||0)),0);
+  (Array.isArray(state.bsItems)?state.bsItems:[]).forEach(it=>{const v=Number(it.value)||0;if(it.kind==='asset')a+=v;else if(it.kind==='liability')l+=v;});
+  return Math.round((a-l)*100)/100;
+}
+function scAvgSavings(){ // average net (income - expense) of last 3 complete months
+  const now=new Date();const keys=[];
+  for(let k=1;k<=3;k++){const d=new Date(now.getFullYear(),now.getMonth()-k,1);keys.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+  let tot=0,have=false;
+  keys.forEach(key=>{let inc=0,exp=0;(state.transactions||[]).forEach(t=>{if((t.date||'').slice(0,7)===key){if(t.type==='income')inc+=Number(t.amount)||0;else if(t.type==='expense')exp+=Number(t.amount)||0;have=true;}});tot+=inc-exp;});
+  return have?Math.round(tot/3):null;
+}
+function scNum(id,fb){const el=document.getElementById(id);if(!el)return fb;const v=parseFloat(el.value);return isNaN(v)?fb:v;}
+function scProject(cfg,startNW){
+  const n=Math.max(12,Math.min(480,Math.round(cfg.years*12)));
+  const i=(cfg.ret||0)/100/12;
+  const evMap={};(cfg.events||[]).forEach(e=>{if(e.ym)evMap[e.ym]=(evMap[e.ym]||0)+(Number(e.amount)||0);});
+  const now=new Date();let y=now.getFullYear(),m=now.getMonth();
+  let nw=startNW;const pts=[{k:0,y,m,v:nw}];let hit=null;
+  const tgt=cfg.target?Number(cfg.target):null;
+  if(tgt&&nw>=tgt)hit={k:0,y,m};
+  for(let k=1;k<=n;k++){
+    m++;if(m>11){m=0;y++;}
+    nw=nw*(1+i)+(Number(cfg.monthly)||0);
+    const key=y+'-'+String(m+1).padStart(2,'0');
+    if(evMap[key])nw+=evMap[key];
+    pts.push({k,y,m,v:nw});
+    if(tgt&&hit===null&&nw>=tgt)hit={k,y,m};
+  }
+  // required monthly to reach target at horizon end (numeric, accounts for events)
+  let need=null;
+  if(tgt){
+    const fvNoM=(()=>{let v=startNW;let yy=now.getFullYear(),mm=now.getMonth();for(let k=1;k<=n;k++){mm++;if(mm>11){mm=0;yy++;}v=v*(1+i);const key=yy+'-'+String(mm+1).padStart(2,'0');if(evMap[key])v+=evMap[key];}return v;})();
+    const ratio=i>0?((Math.pow(1+i,n)-1)/i):n;
+    need=(tgt-fvNoM)/ratio;
+  }
+  return {pts,hit,need,n};
+}
+function scChartSVG(pts,target){
+  if(!pts||pts.length<2)return '';
+  const W=640,H=230,P={l:8,r:8,t:14,b:26};
+  const vals=pts.map(p=>p.v);
+  let lo=Math.min(0,...vals),hi=Math.max(...vals,target||0);
+  if(hi===lo)hi=lo+1;
+  const X=k=>P.l+(W-P.l-P.r)*k/(pts.length-1);
+  const Y=v=>P.t+(H-P.t-P.b)*(1-(v-lo)/(hi-lo));
+  const line=pts.map((p,j)=>(j?'L':'M')+X(p.k).toFixed(1)+' '+Y(p.v).toFixed(1)).join('');
+  // area fill
+  const area=line+'L'+X(pts[pts.length-1].k).toFixed(1)+' '+Y(Math.max(lo,0)).toFixed(1)+'L'+X(0).toFixed(1)+' '+Y(Math.max(lo,0)).toFixed(1)+'Z';
+  // year ticks
+  let ticks='';
+  pts.forEach(p=>{if(p.m===0&&p.k>0){const x=X(p.k).toFixed(1);ticks+=`<line x1="${x}" y1="${P.t}" x2="${x}" y2="${H-P.b}" stroke="rgba(0,0,0,0.06)"/><text x="${x}" y="${H-8}" text-anchor="middle" font-size="9" fill="#9A8A7A" font-weight="700">${p.y}</text>`;}});
+  const zero=lo<0?`<line x1="${P.l}" y1="${Y(0)}" x2="${W-P.r}" y2="${Y(0)}" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>`:'';
+  const tline=target?`<line x1="${P.l}" y1="${Y(target).toFixed(1)}" x2="${W-P.r}" y2="${Y(target).toFixed(1)}" stroke="#0055AA" stroke-width="1.4" stroke-dasharray="5 4"/><text x="${W-P.r}" y="${(Y(target)-5).toFixed(1)}" text-anchor="end" font-size="10" fill="#0055AA" font-weight="800">Target ${fmt(target)}</text>`:'';
+  const last=pts[pts.length-1];
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+   ${ticks}${zero}
+   <path d="${area}" fill="rgba(191,0,0,0.08)"/>
+   <path d="${line}" fill="none" stroke="#BF0000" stroke-width="2.4" stroke-linejoin="round"/>
+   ${tline}
+   <circle cx="${X(last.k)}" cy="${Y(last.v)}" r="3.5" fill="#BF0000"/>
+   <text x="${X(last.k)-6}" y="${(Y(last.v)-8)}" text-anchor="end" font-size="11" fill="#BF0000" font-weight="800">${fmt(last.v)}</text>
+   <text x="${P.l+2}" y="${(Y(pts[0].v)-8)}" font-size="10" fill="#6A5A4A" font-weight="800">${fmt(pts[0].v)}</text>
+  </svg>`;
+}
+function scReadInputs(){
+  if(!scCfg)scCfg=Object.assign(scDefaults(),state.scenario||{});
+  scCfg.start=scNum('scStart',null);
+  scCfg.monthly=scNum('scMonthly',0);
+  scCfg.ret=scNum('scRet',0);
+  scCfg.years=Math.max(1,Math.min(40,scNum('scYears',10)));
+  const t=scNum('scTarget',null);scCfg.target=(t&&t>0)?t:'';
+}
+function scRecalc(){
+  scReadInputs();
+  const startNW=(scCfg.start===null||isNaN(scCfg.start))?scNetWorthNow():scCfg.start;
+  const r=scProject(scCfg,startNW);
+  const elF=document.getElementById('scFinal'),elW=document.getElementById('scWhen'),elN=document.getElementById('scNeed'),elC=document.getElementById('scChart'),elT=document.getElementById('scTable'),elS=document.getElementById('scChartSub'),elFL=document.getElementById('scFinalLbl');
+  if(!elF||!elC)return;
+  const last=r.pts[r.pts.length-1];
+  elF.textContent=fmt(last.v);
+  elF.style.color=last.v>=0?'var(--green)':'var(--red)';
+  if(elFL)elFL.textContent='Net worth in '+scCfg.years+(scCfg.years>1?' years':' year');
+  if(elW)elW.textContent=scCfg.target?(r.hit?MONTHS[r.hit.m].slice(0,3)+' '+r.hit.y:'Not within horizon'):'—';
+  if(elN)elN.textContent=(scCfg.target&&r.need!==null)?(r.need<=0?'Already on track ✓':fmt(Math.ceil(r.need/10)*10)):'—';
+  elC.innerHTML=scChartSVG(r.pts,scCfg.target?Number(scCfg.target):null);
+  if(elS)elS.textContent=fmt(startNW)+' start · '+fmt(scCfg.monthly)+'/mo · '+scCfg.ret+'% p.a.';
+  if(elT){
+    let rows='';let prev=r.pts[0].v;
+    r.pts.forEach(p=>{if(p.m===11||p.k===r.pts.length-1){if(p.k===0)return;rows+=`<div class="report-row"><span class="report-lbl">${MONTHS[p.m].slice(0,3)} ${p.y}</span><div style="text-align:right"><span class="report-val" style="font-family:var(--mono)">${fmt(p.v)}</span><div style="font-size:0.62rem;color:${p.v-prev>=0?'var(--green)':'var(--red)'};font-family:var(--mono);font-weight:800">${p.v-prev>=0?'+':''}${fmt(p.v-prev)}</div></div></div>`;prev=p.v;}});
+    elT.innerHTML=rows||'<div class="empty">—</div>';
+  }
+  const evEl=document.getElementById('scEvList');
+  if(evEl){const evs=scCfg.events||[];
+    evEl.innerHTML=evs.length?evs.map((e,i)=>`<div class="report-row"><span class="report-lbl">${esc(e.ym||'')} · ${esc(e.label||'Event')}</span><span style="display:flex;align-items:center;gap:6px"><span class="report-val" style="font-family:var(--mono);color:${(e.amount||0)>=0?'var(--green)':'var(--red)'}">${(e.amount||0)>=0?'+':''}${fmt(e.amount||0)}</span><button class="ic-btn del" onclick="scDelEvent(${i})">✕</button></span></div>`).join(''):'<div class="empty">No events. Add planned big expenses (−) or windfalls (+).</div>';
+  }
+}
+function renderPlanner(){
+  const sEl=document.getElementById('scStart');
+  if(!sEl)return; // null-guard
+  if(!scCfg)scCfg=Object.assign(scDefaults(),state.scenario||{});
+  if(!scInit){
+    scInit=true;
+    document.getElementById('scMonthly').value=scCfg.monthly;
+    document.getElementById('scRet').value=scCfg.ret;
+    document.getElementById('scYears').value=scCfg.years;
+    document.getElementById('scTarget').value=scCfg.target||'';
+    if(scCfg.start!==null&&scCfg.start!==undefined&&scCfg.start!=='')sEl.value=scCfg.start;
+  }
+  const nwNow=scNetWorthNow();
+  if(sEl.value==='')sEl.value=nwNow;
+  const hint=document.getElementById('scStartHint');
+  if(hint)hint.innerHTML='Balance sheet now: '+fmt(nwNow)+' <a onclick="scUseNW()">use</a>';
+  const avg=scAvgSavings();
+  const ah=document.getElementById('scAvgHint');
+  if(ah)ah.innerHTML=avg!==null?('Avg net last 3 mo: '+fmt(avg)+' <a onclick="scUseAvg('+avg+')">use</a>'):'';
+  scRecalc();
+}
+window.scUseNW=function(){const el=document.getElementById('scStart');if(el){el.value=scNetWorthNow();scRecalc();}};
+window.scUseAvg=function(v){const el=document.getElementById('scMonthly');if(el){el.value=v;scRecalc();}};
+window.scDelEvent=function(i){if(scCfg&&scCfg.events){scCfg.events.splice(i,1);scRecalc();}};
 
 // ── TRANSFER SCHEDULES ────────────────────────────────
 function trCalcMonthly(total,fee,months){if(!total||!months)return 0;return Math.round(total*(1+(fee||0)/100)/months*100)/100;}
@@ -2419,7 +2584,7 @@ function switchAppTab(name){
   else if(name==='travel'){try{renderTravelPlans();}catch(e){console.error('travel render',e);}}
   else render();
 }
-function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance','transfers'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
+function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance','transfers','planner'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
 function showAuth(){document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none';}
 
@@ -2443,6 +2608,11 @@ document.getElementById('openBsAsset').onclick=()=>openBsModal('asset');
 document.getElementById('openBsLiab').onclick=()=>openBsModal('liability');
 document.getElementById('saveBs').onclick=async function(){const name=document.getElementById('bsName').value.trim();const value=parseFloat(document.getElementById('bsVal').value);if(!name||isNaN(value)||value<0){alert('Fill name and value.');return;}const it={name,cat:document.getElementById('bsCat').value,value,kind:bsKind,id:editBsIdx>=0?state.bsItems[editBsIdx].id:Date.now()};if(editBsIdx>=0)state.bsItems[editBsIdx]=it;else state.bsItems.push(it);bsOv.classList.remove('open');render();await saveData();};
 const trOv=modal('trOverlay','cancelTr');
+['scStart','scMonthly','scRet','scYears','scTarget'].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=scRecalc;});
+document.getElementById('scSaveBtn').onclick=async function(){scReadInputs();state.scenario={start:scCfg.start,monthly:scCfg.monthly,ret:scCfg.ret,years:scCfg.years,target:scCfg.target,events:scCfg.events||[]};await saveData();const b=this;const o=b.textContent;b.textContent='\u2713 Saved';setTimeout(()=>b.textContent=o,1400);};
+document.getElementById('scEvAdd').onclick=function(){const ym=document.getElementById('scEvMonth').value;const amt=parseFloat(document.getElementById('scEvAmt').value);const lbl=document.getElementById('scEvLbl').value.trim();if(!ym||isNaN(amt)||amt===0){alert('Fill month and a non-zero amount (negative = expense).');return;}if(!scCfg)scCfg=Object.assign(scDefaults(),state.scenario||{});if(!scCfg.events)scCfg.events=[];scCfg.events.push({ym,amount:amt,label:lbl||'Event'});document.getElementById('scEvAmt').value='';document.getElementById('scEvLbl').value='';scRecalc();};
+document.getElementById('scImportTravel').onclick=function(){const plans=Array.isArray(state.travelPlans)?state.travelPlans:[];if(!plans.length){alert('No saved trips yet. Save a trip in the Travel tab first.');return;}if(!scCfg)scCfg=Object.assign(scDefaults(),state.scenario||{});if(!scCfg.events)scCfg.events=[];let added=0,skipped=0;plans.forEach(p=>{const lbl='Trip: '+p.dest;if(scCfg.events.some(e=>e.label===lbl)){return;}let ym=p.startStr?p.startStr.slice(0,7):'';if(!ym){skipped++;return;}scCfg.events.push({ym,amount:-Math.abs(p.cost&&p.cost.total||0),label:lbl});added++;});scRecalc();alert(added+' trip(s) imported as expenses.'+(skipped?(' '+skipped+' skipped (no start date set).'):''));};
+
 document.getElementById('openTransfer').onclick=()=>openTransferModal();
 ['trTotal','trFee','trMonths'].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=trUpdateCalc;});
 document.getElementById('saveTr').onclick=async function(){
