@@ -53,6 +53,28 @@ input,select,button,textarea{font-family:var(--sans)}
 .sc-chart-wrap svg{width:100%;height:auto;display:block}
 .sc-hint{font-size:0.66rem;color:var(--t4);font-weight:700;margin-top:3px}
 .sc-hint a{color:var(--blue);cursor:pointer;text-decoration:underline}
+.shu-input-row{display:flex;gap:8px;align-items:flex-end}
+.shu-input-row .field{flex:1;margin:0}
+.shu-big{text-align:center;padding:18px 0 6px}
+.shu-num{font-size:3.2rem;font-weight:900;line-height:1;font-family:var(--mono)}
+.shu-orig{font-size:0.72rem;color:var(--t3);font-weight:700;margin-top:6px}
+.shu-name{font-size:1.15rem;font-weight:800;margin-top:10px;color:var(--t1)}
+.shu-badge{display:inline-block;font-size:0.82rem;font-weight:900;padding:5px 18px;border-radius:24px;margin-top:10px;letter-spacing:0.08em}
+.shu-dj{background:rgba(0,150,70,0.14);color:#00873C}
+.shu-j{background:rgba(0,120,90,0.12);color:#0A7A5A}
+.shu-bj{background:rgba(200,140,0,0.14);color:#B07800}
+.shu-x{background:rgba(191,0,0,0.10);color:#BF0000}
+.shu-dx{background:rgba(140,0,0,0.16);color:#8A0000}
+.shu-num.c-dj,.shu-num.c-j{color:#00873C}
+.shu-num.c-bj{color:#B07800}
+.shu-num.c-x{color:#BF0000}
+.shu-num.c-dx{color:#8A0000}
+.shu-desc{font-size:0.86rem;color:var(--t2);line-height:1.7;margin-top:14px;text-align:left;padding:0 4px}
+.shu-use{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;justify-content:center}
+.shu-use span{font-size:0.66rem;font-weight:700;padding:4px 10px;border-radius:16px;background:rgba(0,0,0,0.05);color:var(--t3)}
+.shu-saved-card{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 13px;border-radius:var(--rl);background:var(--glass);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.1);margin-bottom:7px}
+.shu-saved-num{font-family:var(--mono);font-weight:900;font-size:1.1rem;min-width:34px;text-align:center}
+.shu-mini-badge{font-size:0.58rem;font-weight:800;padding:2px 7px;border-radius:12px}
 .trv-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
 .trv-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .trv-chip{padding:6px 11px;border-radius:20px;border:1.5px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.6);font-size:0.72rem;font-weight:700;cursor:pointer;color:var(--t2);transition:all 0.12s;user-select:none}
@@ -618,6 +640,9 @@ input,select,button,textarea{font-family:var(--sans)}
     <button class="app-top-tab" id="topTabTravel" onclick="switchAppTab('travel')">
       <div class="app-top-tab-inner">✈️ Travel</div>
     </button>
+    <button class="app-top-tab" id="topTabShuli" onclick="switchAppTab('shuli')">
+      <div class="app-top-tab-inner">🔢 数理</div>
+    </button>
   </div>
 
   <div class="content">
@@ -876,6 +901,23 @@ input,select,button,textarea{font-family:var(--sans)}
       <div class="panel" id="trvSavedPanel">
         <div class="ph"><div class="pt">📁 Saved trips</div></div>
         <div id="trvSaved"><div class="empty">No saved trips yet.</div></div>
+      </div>
+    </div>
+
+    <!-- ══ 数理 PAGE ══ -->
+    <div class="app-page" id="page-shuli">
+      <div class="panel">
+        <div class="ph"><div class="pt">🔢 81数理吉凶分析器</div></div>
+        <div class="shu-input-row">
+          <div class="field"><label>输入号码（地址 / 电话 / 车牌 / 银行尾号）</label><input type="number" id="shuNum" placeholder="例如 1168" min="1"></div>
+          <button class="btn btn-red" id="shuGo" style="white-space:nowrap">分析</button>
+        </div>
+        <div class="sc-hint" style="margin-top:6px">超过 81 自动化简（减 80 的倍数）落入 1–81 再对照吉凶表。</div>
+      </div>
+      <div class="panel" id="shuResult" style="display:none"></div>
+      <div class="panel">
+        <div class="ph"><div class="pt">📁 已保存号码</div></div>
+        <div id="shuSaved"><div class="empty">尚未保存任何号码。分析后点「保存」即可记录。</div></div>
       </div>
     </div>
 
@@ -1159,7 +1201,7 @@ const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
 
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[],scenario:null};
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[],scenario:null,shuliSaved:[]};
 let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
@@ -1785,7 +1827,7 @@ async function loadData(){
     state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
     state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
     state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
-    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];state.scenario=p.scenario||null;
+    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];state.scenario=p.scenario||null;state.shuliSaved=p.shuliSaved||[];
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
     const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
@@ -2244,6 +2286,51 @@ function renderTravelPlans(){
   }catch(e){console.error('travel init',e);}
 })();
 
+const SHU_TABLE={1:["dj","太极之数","宇宙起源，天地开泰。繁荣发达，可获名利，享受天赋幸福，是为最大吉数。"],2:["x","分离之数","混沌未定，进退失据。孤独离散，志望难达，基础虚弱，万事不如意。"],3:["dj","名利之数","阴阳调和，天地人和。智达明敏，意志坚定，可成就大业，名利双收。"],4:["x","破败之数","万物枯凋，破败凶变。辛苦困难，病弱遭难，常陷逆境，事难有成。"],5:["dj","福寿之数","阴阳和合，精神愉快。荣誉达利，一门兴隆，福寿绵长，富贵繁荣。"],6:["dj","安稳之数","万宝集门，天德地祥。福禄寿长，家门余庆，安稳吉庆，繁荣昌隆。"],7:["j","刚毅之数","精力旺盛，头脑明敏。排除万难，必获成功；惟过刚需养柔和之德。"],8:["j","发达之数","意志刚健，勤勉发展。能耐艰苦，贯彻志望，克服困难，终获成功。"],9:["dx","穷迫之数","虽抱大才，时运不济。陷于困境，穷迫不遇，多遭意外，先荣后辱。"],10:["dx","空虚之数","万事终局，充满损耗。如入暗夜，孤立无援，进退失据，事难成功。"],11:["dj","旱苗逢雨之数","草木逢春，枝叶沾露。稳健着实，挽回家运，富贵荣达，必得人望。"],12:["x","薄弱之数","意志薄弱，孤立无援。家庭寂寞，难酬志向，常陷逆境，劳而无功。"],13:["dj","智略之数","天赋吉运，能得人望。善用智谋，处事有方，可成大业，博得名利。"],14:["x","破兆之数","家庭缘薄，孤独遭难。谋事不达，悲叹失意，沉浮不定，事多挫折。"],15:["dj","福寿之数","福寿圆满，富贵荣誉。涵养雅量，德高望重，慈祥有德，繁荣至上。"],16:["dj","厚重之数","贵人相助，可获成功。名利双收，集众望于一身，能成大事大业。"],17:["bj","刚强之数","权威刚强，排除万难。意志坚定，如能容忍，必获成功；惟刚过则折。"],18:["bj","铁镜重磨之数","有志竟成，内外有运。排除障碍，博得名利；须养雅量，戒固执。"],19:["dx","多难之数","虽有智能，风云蔽月。虽得一时，终难持久，多遭挫折，内外不和。"],20:["dx","屋下藏金之数","非业破运，灾难重重。进退维谷，万事不振，事与愿违，沉浮多端。"],21:["dj","明月中天之数","光风霁月，万物确立。官运亨通，名利俱全，独立权威，大博名利。"],22:["x","秋草逢霜之数","秋草逢霜，怀才不遇。忧愁怨苦，事不如意，半途中折，劳而无功。"],23:["dj","壮丽之数","旭日东升，壮丽果敢。权威旺盛，功名荣达，发育旺盛，终成大业。"],24:["dj","掘藏得金之数","家门余庆，金钱丰盈。白手成家，财源广进，缔造大业，子孙繁荣。"],25:["bj","荣俊之数","资性英敏，才能奇特。惟言行须慎，克服傲慢，否则反招失败。"],26:["dx","变怪之数","英雄运数，波澜重叠。变怪百出，诽谤攻击，虽有才能，终多波折。"],27:["bj","增长之数","欲望无止，自我强烈。诽谤攻击，中年易招失败；须慎言行，方保平安。"],28:["dx","阔水浮萍之数","遭难之数，豪杰气概。四海风波，徒劳无功，家亲缘薄，沉浮不定。"],29:["bj","智谋之数","智谋优秀，财力归集。名闻海内，成就大业；惟贪欲难足，须知节制。"],30:["x","非运之数","沉浮不定，吉凶难变。绝处或可逢生，亦易陷于失败，成败难料。"],31:["dj","春日花开之数","智勇得志，博得名利。统领众人，繁荣富贵，意志坚固，必得人和。"],32:["dj","侥幸之数","侥幸多望，财源若泉。得贵人助，意外成功，惟须守正，方能长保。"],33:["dj","旭日升天之数","才德兼备，鸾凤相会。名闻天下，隆昌至极；惟过刚则折，宜养柔德。"],34:["dx","破家亡身之数","破家亡身，见识短小。辛苦遭难，凶祸频来，灾难不绝，事多破败。"],35:["j","高楼望月之数","温和平静，智达通畅。文昌技艺，奏功洋洋，宜文不宜武，最适才艺。"],36:["x","波澜重叠之数","波澜重叠，侠义薄运。辛苦不绝，旧难重叠，英雄气概，惟终多波折。"],37:["dj","猛虎出林之数","权威显达，热诚忠信。宜着先鞭，大业可成，独立独行，享天赋幸福。"],38:["bj","文艺之数","意志稍弱，难望大业。然长于艺术技能，专心致志，小有所成，名扬一方。"],39:["dj","富贵荣华之数","云开见月，富贵荣华。权威显达，财帛丰盈；惟数过盛，刚中需柔。"],40:["bj","退安之数","智谋胆略，知进知退。如能守安，可保平安；若强进取，恐招失败。"],41:["dj","有德之数","纯阳独秀，德望兼备。胆力才略，继续努力，前途无限，名实两全。"],42:["bj","寒蝉在柳之数","博识多能，精通世情。如能专心一艺，尚可成功；惟博而不精，反致失败。"],43:["x","散财破产之数","雨夜之花，外祥内苦。意志薄弱，散财破产；须忍耐自重，方转凶为吉。"],44:["dx","烦闷之数","愁眉难展，破家亡身。逆境难酬，凶祸交至，事多障碍，难得平安。"],45:["dj","顺风扬帆之数","新生泰和，顺风扬帆。智谋经纶，克服难关，可成大志，名利双收。"],46:["x","罗网之数","罗网系身，载宝沉舟。辛苦遭难，孤立无援；若无毅力，难望成功。"],47:["dj","点石成金之数","花开之象，贵人相助。可成大业，圆满成功，子孙繁荣，万事如意。"],48:["dj","古松立鹤之数","才略兼备，足智多谋。德望兼备，堪当顾问，名利俱全，享尽幸福。"],49:["x","转变之数","吉凶难分，逢吉则吉。遇凶则凶，临机应变，须慎处事，方保平安。"],50:["x","小舟入海之数","吉凶参半，成败相伴。先成后败，五分吉凶；一成一败，难期长久。"],51:["bj","沉浮之数","盛衰交加，沉浮不定。先苦后甘，一盛一衰；晚景须防，宜守成业。"],52:["dj","达眼之数","卓识达眼，先见之明。茂如春竹，把握良机，投机有得，名利双收。"],53:["x","曲卷之数","外祥内患，盛衰参半。前半生幸，后半生苦；或先贫后富，吉凶难定。"],54:["dx","石上栽花之数","石上栽花，难望开果。辛惨困苦，绝望失意，多灾多难，事难有成。"],55:["bj","善恶之数","外美内苦，五数之极。先苦后甘，若能克服困难，始保成功，否则失败。"],56:["x","浪里行舟之数","浪里行舟，内外不和。缺乏勇气，进取不足，事难成功，损耗渐至。"],57:["j","日照春松之数","寒雪青松，夜莺鸣春。虽遇一过，繁荣自来，富贵荣达，福寿绵长。"],58:["bj","晚行遇月之数","浮沉多端，晚行遇月。先苦后甘，历尽艰辛，终见光明，繁荣自来。"],59:["x","寒蝉悲风之数","遇事犹疑，缺乏勇气。难望成功，逐渐没落，意志不坚，事多挫折。"],60:["dx","黑暗无光之数","黑暗无光，出尔反尔。摇动不安，难定方针，刑罚灾祸，事多破败。"],61:["j","牡丹芙蓉之数","名利双收，繁荣富贵。须讲信用，自重自爱，否则内部不和，以免后悔。"],62:["x","衰败之数","基础虚弱，内外不和。信用缺乏，渐自衰退，志望难达，事多障碍。"],63:["dj","富贵荣华之数","万物化育，繁荣之象。身心安泰，雨露惠泽，富贵长寿，子孙繁荣。"],64:["dx","非命之数","骨肉分离，孤独悲愁。浮沉破灭，徒劳无功，灾祸频来，事难有成。"],65:["dj","富贵长寿之数","天赋幸运，家运隆昌。事事如意，富贵荣华，福寿双全，万事亨通。"],66:["x","内外不和之数","内外不和，进退维谷。失利损财，艰难不堪，灾祸接踵，事多破败。"],67:["dj","通达之数","利路亨通，家道兴隆。事事如意，得贵人助，万商云集，繁荣昌盛。"],68:["dj","兴家立业之数","思虑周详，意志坚定。能向目标，创业兴家，发明智达，富贵荣达。"],69:["dx","非业之数","动摇不安，常陷穷迫。病弱遭难，不安挫折，逆境难酬，事多破败。"],70:["dx","残菊逢霜之数","惨淡经营，难免空虚。惨苦不绝，晚景凄凉，灾祸频至，事难有成。"],71:["bj","石上金花之数","内心劳苦，缺乏实行。如能贯彻始终，可得成功；惟须坚毅，否则半途而废。"],72:["x","劳苦之数","外观幸福，内隐祸患。凶藏吉内，吉藏凶内，先甘后苦，晚景堪忧。"],73:["j","无勇之数","志高力微，徒有理想。然安享天赋之福，平安无事，平稳度日。"],74:["x","残菊逢霜之数","无能为力，坐食山空。沉沦逆境，辛苦繁多，智弱无谋，事多挫折。"],75:["bj","退守之数","守则可安，进则危险。如能慎重守成，自能吉祥；若贸然进取，恐招失败。"],76:["dx","倾覆离散之数","倾覆离散，内外不和。先苦后甜，历尽艰辛；惟须坚忍，方保平安。"],77:["bj","半吉半凶之数","家庭有悦，半吉半凶。先苦后甜，前半生幸，后半生苦；或先苦后甘。"],78:["bj","晚境凄凉之数","祸福参半，先甘后苦。中年成功，晚景凄凉；智能虽具，惟难持久。"],79:["x","云头望月之数","身疲力尽，穷迫不伸。精神不安，易陷穷迫，志望难达，事多波折。"],80:["bj","遁世隐居之数","凶星入度，辛苦无尽。如能遁世隐居，可保平安；若强求名利，反招灾祸。"],81:["dj","万物回春之数","还本归元，最极之数。还元复始，富贵荣华，万物回春，吉庆有余。"]};
+// ── 81数理 GENERATOR ──────────────────────────────────
+const SHU_CLASS={dj:["大吉","shu-dj","c-dj"],j:["吉","shu-j","c-j"],bj:["半吉","shu-bj","c-bj"],x:["凶","shu-x","c-x"],dx:["大凶","shu-dx","c-dx"]};
+const SHU_USE={dj:["🏠 门牌住宅","📱 电话尾号","🚗 车牌","🏦 银行账号","🏢 公司编号"],j:["🏠 门牌住宅","📱 电话尾号","🚗 车牌","🏦 银行账号"],bj:["🏠 可用（宜配合）","📱 可用","🚗 可用"],x:["⚠️ 不建议长期使用","⚠️ 宜避开重要用途"],dx:["❌ 建议避免","❌ 不宜门牌/车牌"]};
+function shuReduce(n){n=Math.floor(Math.abs(n));if(n<1)return null;if(n<=81)return n;let r=n%80;return r===0?80:r;}
+function renderShuResult(orig){
+  const el=document.getElementById('shuResult');if(!el)return;
+  const num=shuReduce(orig);
+  if(!num||!SHU_TABLE[num]){el.style.display='none';return;}
+  const[g,name,desc]=SHU_TABLE[num];
+  const[lbl,bcls,ncls]=SHU_CLASS[g];
+  const reduced=orig>81;
+  const uses=(SHU_USE[g]||[]).map(u=>`<span>${u}</span>`).join('');
+  el.style.display='';
+  el.innerHTML=`<div class="shu-big">
+    <div class="shu-num ${ncls}">${num}</div>
+    ${reduced?`<div class="shu-orig">${orig} − 80×${Math.round((orig-num)/80)} = ${num}（化简后对照）</div>`:`<div class="shu-orig">号码 ${orig}（1–81 直接对照）</div>`}
+    <div class="shu-name">${name}</div>
+    <div class="shu-badge ${bcls}">${lbl}</div>
+    <div class="shu-desc">${desc}</div>
+    <div class="shu-use">${uses}</div>
+    <div style="margin-top:16px"><button class="btn btn-red" onclick="shuSave(${orig})">💾 保存此号码</button></div>
+  </div>`;
+}
+window.shuSave=async function(orig){
+  const num=shuReduce(orig);if(!num)return;
+  if(!Array.isArray(state.shuliSaved))state.shuliSaved=[];
+  let label=prompt('给这个号码一个标签（如：家里门牌、车牌、手机号）','');
+  if(label===null)return;
+  state.shuliSaved.unshift({orig,num,label:(label||'').trim(),id:Date.now()});
+  renderShuSaved();await saveData();
+};
+window.shuDel=async function(i){state.shuliSaved.splice(i,1);renderShuSaved();await saveData();};
+window.shuViewSaved=function(orig){const el=document.getElementById('shuNum');if(el)el.value=orig;renderShuResult(orig);const r=document.getElementById('shuResult');if(r)r.scrollIntoView({behavior:'smooth',block:'center'});};
+function renderShuSaved(){
+  const el=document.getElementById('shuSaved');if(!el)return;
+  const arr=Array.isArray(state.shuliSaved)?state.shuliSaved:[];
+  el.innerHTML=arr.length?arr.map((s,i)=>{
+    const e=SHU_TABLE[s.num];if(!e)return'';
+    const[g,name]=e;const[lbl,bcls]=SHU_CLASS[g];
+    return `<div class="shu-saved-card"><div style="display:flex;align-items:center;gap:11px;cursor:pointer" onclick="shuViewSaved(${s.orig})"><span class="shu-saved-num ${SHU_CLASS[g][2]}">${s.num}</span><div><div style="font-weight:800;font-size:0.84rem">${s.label?esc(s.label)+' · ':''}${s.orig}</div><div style="font-size:0.68rem;color:var(--t3);font-weight:700">${name} <span class="shu-mini-badge ${bcls}">${lbl}</span></div></div></div><button class="ic-btn del" onclick="shuDel(${i})">✕</button></div>`;
+  }).join(''):'<div class="empty">尚未保存任何号码。分析后点「保存」即可记录。</div>';
+}
+function renderShuli(){ renderShuSaved(); }
+
 // ── SCENARIO PLANNER ──────────────────────────────────
 let scCfg=null,scInit=false;
 function scDefaults(){return {start:null,monthly:1000,ret:4,years:10,target:'',events:[]};}
@@ -2565,7 +2652,7 @@ window.editDebt=i=>{editDebtIdx=i;const d=state.debts[i];document.getElementById
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
   // Use explicit add/remove instead of toggle for reliability
-  ['finance','todo','goals','travel'].forEach(n=>{
+  ['finance','todo','goals','travel','shuli'].forEach(n=>{
     const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
     const page=document.getElementById('page-'+n);
     if(n===name){
@@ -2582,6 +2669,7 @@ function switchAppTab(name){
   if(name==='todo')renderTodos();
   else if(name==='goals')renderGoalPlans();
   else if(name==='travel'){try{renderTravelPlans();}catch(e){console.error('travel render',e);}}
+  else if(name==='shuli'){try{renderShuli();}catch(e){console.error('shuli render',e);}}
   else render();
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance','transfers','planner'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
@@ -2608,6 +2696,8 @@ document.getElementById('openBsAsset').onclick=()=>openBsModal('asset');
 document.getElementById('openBsLiab').onclick=()=>openBsModal('liability');
 document.getElementById('saveBs').onclick=async function(){const name=document.getElementById('bsName').value.trim();const value=parseFloat(document.getElementById('bsVal').value);if(!name||isNaN(value)||value<0){alert('Fill name and value.');return;}const it={name,cat:document.getElementById('bsCat').value,value,kind:bsKind,id:editBsIdx>=0?state.bsItems[editBsIdx].id:Date.now()};if(editBsIdx>=0)state.bsItems[editBsIdx]=it;else state.bsItems.push(it);bsOv.classList.remove('open');render();await saveData();};
 const trOv=modal('trOverlay','cancelTr');
+document.getElementById('shuGo').onclick=function(){const v=parseInt(document.getElementById('shuNum').value);if(!v||v<1){alert('请输入有效号码（正整数）。');return;}renderShuResult(v);};
+(function(){const el=document.getElementById('shuNum');if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('shuGo').click();});})();
 ['scStart','scMonthly','scRet','scYears','scTarget'].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=scRecalc;});
 document.getElementById('scSaveBtn').onclick=async function(){scReadInputs();state.scenario={start:scCfg.start,monthly:scCfg.monthly,ret:scCfg.ret,years:scCfg.years,target:scCfg.target,events:scCfg.events||[]};await saveData();const b=this;const o=b.textContent;b.textContent='\u2713 Saved';setTimeout(()=>b.textContent=o,1400);};
 document.getElementById('scEvAdd').onclick=function(){const ym=document.getElementById('scEvMonth').value;const amt=parseFloat(document.getElementById('scEvAmt').value);const lbl=document.getElementById('scEvLbl').value.trim();if(!ym||isNaN(amt)||amt===0){alert('Fill month and a non-zero amount (negative = expense).');return;}if(!scCfg)scCfg=Object.assign(scDefaults(),state.scenario||{});if(!scCfg.events)scCfg.events=[];scCfg.events.push({ym,amount:amt,label:lbl||'Event'});document.getElementById('scEvAmt').value='';document.getElementById('scEvLbl').value='';scRecalc();};
