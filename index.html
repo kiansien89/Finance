@@ -358,6 +358,9 @@ input,select,button,textarea{font-family:var(--sans)}
 .dc-text{font-size:0.68rem;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dc-text.done{text-decoration:line-through;color:var(--t4)}
 .dc-empty{font-size:0.66rem;color:var(--t4);font-weight:700}
+#hmMetrics .summary-card{display:flex;flex-direction:column;justify-content:center;align-items:center}
+#hmMetrics .pomo-card .pomo-bar{align-self:stretch}
+#hmMetrics .pomo-card .pomo-row{align-self:center}
 .pomo-bar{height:5px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden;margin:7px 8px 0}
 .pomo-fill{height:100%;width:0;background:var(--red);border-radius:4px;transition:width 0.4s linear}
 .pomo-row{display:flex;gap:5px;justify-content:center;margin-top:8px}
@@ -3030,7 +3033,7 @@ function renderNZWeatherCard(){
   if(!nzWeatherData){el.innerHTML='<div class="summary-lbl">NZ Weather</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div>';return;}
   if(nzWeatherData.error){el.innerHTML='<div class="summary-lbl">NZ Weather</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
   const[emoji,desc]=WMO[nzWeatherData.code]||['🌡️','Unknown'];
-  el.style.cssText+='justify-content:center;align-items:center;text-align:center';el.innerHTML='<div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+nzWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+nzWeatherData.rain+'% · 💨'+nzWeatherData.wind+'km/h</div>';
+  el.innerHTML='<div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+nzWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+nzWeatherData.rain+'% · 💨'+nzWeatherData.wind+'km/h</div>';
 }
 
 // ── TODAY / HOME DASHBOARD ────────────────────────────
