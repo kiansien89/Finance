@@ -313,6 +313,25 @@ input,select,button,textarea{font-family:var(--sans)}
 .todo-filter{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);transition:all 0.15s;font-family:var(--sans)}
 .todo-filter:hover{border-color:rgba(0,0,0,0.2);color:var(--t1)}
 .todo-filter.active{background:var(--red);color:white;border-color:var(--red);box-shadow:0 2px 8px rgba(191,0,0,0.3)}
+.todo-viewtabs{display:flex;gap:6px;margin-bottom:12px}
+.todo-vtab{flex:0 0 auto;background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:10px;padding:6px 16px;font-size:0.76rem;font-weight:800;cursor:pointer;color:var(--t3);transition:all 0.15s}
+.todo-vtab.active{background:var(--red);color:white;border-color:var(--red)}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-title{font-size:0.95rem;font-weight:800;color:var(--t1)}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(0,0,0,0.12);background:var(--glass);cursor:pointer;font-weight:800;color:var(--t2);font-size:0.85rem}
+.cal-nav button:hover{border-color:var(--red);color:var(--red)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{text-align:center;font-size:0.6rem;font-weight:800;color:var(--t4);text-transform:uppercase;padding:4px 0;letter-spacing:0.05em}
+.cal-cell{min-height:62px;border-radius:9px;border:1px solid rgba(0,0,0,0.06);background:rgba(255,255,255,0.45);padding:4px 4px 3px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.cal-cell.other{opacity:0.32}
+.cal-cell.today{border-color:var(--red);border-width:2px;background:rgba(191,0,0,0.04)}
+.cal-daynum{font-size:0.66rem;font-weight:800;color:var(--t2);align-self:flex-end;line-height:1}
+.cal-cell.today .cal-daynum{color:var(--red)}
+.cal-ev{font-size:0.56rem;font-weight:700;padding:1px 4px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.45}
+.cal-ev.done{text-decoration:line-through;opacity:0.5}
+.cal-more{font-size:0.54rem;color:var(--t4);font-weight:800;padding-left:3px}
+@media(max-width:640px){.cal-cell{min-height:50px}.cal-ev{font-size:0.5rem;padding:1px 3px}.cal-daynum{font-size:0.6rem}}
 .todo-cat-filter{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);font-family:var(--sans);outline:none}
 .todo-cat-filter:focus{border-color:var(--red)}
 .todo-quick-add{display:flex;gap:8px;margin-bottom:1rem}
@@ -852,7 +871,12 @@ input,select,button,textarea{font-family:var(--sans)}
         </select>
       </div>
 
+      <div class="todo-viewtabs">
+        <button class="todo-vtab active" id="tdvList" onclick="setTodoView('list')">☰ List</button>
+        <button class="todo-vtab" id="tdvCal" onclick="setTodoView('calendar')">🗓 Calendar</button>
+      </div>
       <div id="todoListWrap"><div class="todo-empty">No tasks yet — add one above.</div></div>
+      <div id="todoCalWrap" style="display:none"></div>
     </div>
 
     <!-- ══ GOALS PAGE ══ -->
@@ -944,7 +968,7 @@ input,select,button,textarea{font-family:var(--sans)}
     <div class="field"><label>Category</label><select id="taskCat"><option value="Work">Work</option><option value="Personal">Personal</option><option value="Finance">Finance</option><option value="Health">Health</option><option value="Other">Other</option></select></div>
     <div class="field"><label>Priority</label><select id="taskPriority"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select></div>
     <div class="field"><label>Due date (optional)</label><input type="date" id="taskDue"></div>
-    <div class="field"><label>Recurring</label><select id="taskRecur"><option value="none">No recurrence</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly (every 3 months)</option><option value="yearly">Yearly</option></select></div>
+    <div class="field"><label>Recurring</label><select id="taskRecur"><option value="none">No recurrence</option><option value="daily">Daily</option><option value="weekdays">Weekdays only (Mon–Fri)</option><option value="weekly">Weekly</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly (every 3 months)</option><option value="yearly">Yearly</option></select></div>
     <div class="modal-actions"><button class="btn btn-ghost" id="cancelTask">Cancel</button><button class="btn btn-red" id="saveTask">Save task</button></div>
   </div>
 </div>
@@ -1900,6 +1924,47 @@ function getDueLabel(due){
   return{label:d.toLocaleDateString('en-MY',{day:'numeric',month:'short'}),cls:'future'};
 }
 
+let todoView='list';
+let calYM=(function(){const d=new Date();return{y:d.getFullYear(),m:d.getMonth()};})();
+window.setTodoView=function(v){
+  todoView=v;
+  const lw=document.getElementById('todoListWrap'),cw=document.getElementById('todoCalWrap');
+  const lb=document.getElementById('tdvList'),cb=document.getElementById('tdvCal');
+  if(lw)lw.style.display=(v==='list')?'':'none';
+  if(cw)cw.style.display=(v==='calendar')?'':'none';
+  if(lb)lb.classList.toggle('active',v==='list');
+  if(cb)cb.classList.toggle('active',v==='calendar');
+  if(v==='calendar')renderTodoCalendar();
+};
+window.calNav=function(delta){let m=calYM.m+delta,y=calYM.y;if(m<0){m=11;y--;}else if(m>11){m=0;y++;}calYM={y,m};renderTodoCalendar();};
+window.calToday=function(){const d=new Date();calYM={y:d.getFullYear(),m:d.getMonth()};renderTodoCalendar();};
+function renderTodoCalendar(){
+  const wrap=document.getElementById('todoCalWrap');if(!wrap)return; // null-guard
+  const{y,m}=calYM;
+  const catFEl=document.getElementById('todoCatFilter');const catF=catFEl?catFEl.value:'';
+  const first=new Date(y,m,1);const startDow=first.getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const prevDays=new Date(y,m,0).getDate();
+  const todayS=todayStr();
+  // bucket todos by due date (YYYY-MM-DD)
+  const byDay={};
+  (state.todos||[]).forEach(t=>{if(!t.due)return;if(catF&&t.category!==catF)return;(byDay[t.due]=byDay[t.due]||[]).push(t);});
+  const PRI={high:'#BF0000',medium:'#C06000',low:'#0A7A5A'};
+  const cellHtml=(dayNum,ds,cls)=>{
+    const evs=byDay[ds]||[];
+    const evHtml=evs.slice(0,3).map(t=>{const c=PRI[t.priority]||'#888';return `<div class="cal-ev${t.done?' done':''}" style="background:${c}1A;color:${c}" onclick="openEditTask(${t.id})" title="${esc(t.title)}">${esc(t.title)}</div>`;}).join('');
+    const more=evs.length>3?`<div class="cal-more">+${evs.length-3} more</div>`:'';
+    return `<div class="cal-cell ${cls}"><span class="cal-daynum">${dayNum}</span>${evHtml}${more}</div>`;
+  };
+  let cells='';
+  for(let i=startDow-1;i>=0;i--){const dn=prevDays-i;const pm=m===0?11:m-1,py=m===0?y-1:y;const ds=py+'-'+String(pm+1).padStart(2,'0')+'-'+String(dn).padStart(2,'0');cells+=cellHtml(dn,ds,'other');}
+  for(let d=1;d<=daysInMonth;d++){const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');cells+=cellHtml(d,ds,ds===todayS?'today':'');}
+  const total=startDow+daysInMonth;const trail=(7-(total%7))%7;
+  for(let d=1;d<=trail;d++){const nm=m===11?0:m+1,ny=m===11?y+1:y;const ds=ny+'-'+String(nm+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');cells+=cellHtml(d,ds,'other');}
+  const dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  const monthCount=Object.keys(byDay).reduce((n,k)=>k.slice(0,7)===(y+'-'+String(m+1).padStart(2,'0'))?n+byDay[k].length:n,0);
+  wrap.innerHTML=`<div class="panel"><div class="cal-head"><div class="cal-title">${MONTHS[m]} ${y} <span style="font-size:0.66rem;color:var(--t3);font-weight:700">· ${monthCount} task${monthCount!==1?'s':''}</span></div><div class="cal-nav"><button onclick="calNav(-1)">‹</button><button onclick="calToday()" style="width:auto;padding:0 10px;font-size:0.68rem">Today</button><button onclick="calNav(1)">›</button></div></div><div class="cal-grid">${dow}${cells}</div><div style="font-size:0.62rem;color:var(--t4);font-weight:700;margin-top:8px">Tap a task to edit. Colour = priority (🔴 high · 🟠 medium · 🟢 low).</div></div>`;
+}
 function renderTodos(){
   const catFEl=document.getElementById('todoCatFilter');
   const catF=catFEl?catFEl.value:'';
@@ -1946,6 +2011,7 @@ function renderTodos(){
     html+=doneTodos.map(t=>todoItemHtml(t)).join('');
   }
   wrap.innerHTML=html;
+  if(todoView==='calendar'){try{renderTodoCalendar();}catch(e){console.error('cal',e);}}
 }
 
 function todoItemHtml(t){
@@ -2000,6 +2066,7 @@ function nextDueDate(due,recur){
   if(!due||!recur||recur==='none')return null;
   const d=new Date(due);
   if(recur==='daily')d.setDate(d.getDate()+1);
+  else if(recur==='weekdays'){d.setDate(d.getDate()+1);const wd=d.getDay();if(wd===6)d.setDate(d.getDate()+2);else if(wd===0)d.setDate(d.getDate()+1);}
   else if(recur==='weekly')d.setDate(d.getDate()+7);
   else if(recur==='biweekly')d.setDate(d.getDate()+14);
   else if(recur==='monthly')d.setMonth(d.getMonth()+1);
@@ -2049,7 +2116,8 @@ window.toggleTodo=async function(id){
       if(nextDue){
         state.todos.unshift({
           id:Date.now(),title:t.title,note:t.note,category:t.category,
-          priority:t.priority,due:nextDue,recur:t.recur,done:false,doneAt:null
+          priority:t.priority,due:nextDue,recur:t.recur,done:false,doneAt:null,
+          subtasks:(t.subtasks||[]).map((s,si)=>({title:s.title,done:false,id:Date.now()+si+1}))
         });
       }
     }
