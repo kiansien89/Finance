@@ -3188,7 +3188,7 @@ document.getElementById('saveTask').onclick=async function(){
   const title=document.getElementById('taskTitle').value.trim();
   if(!title){alert('Please enter a task title.');return;}
   const task={id:editTaskId||Date.now(),title,note:document.getElementById('taskNote').value.trim(),category:document.getElementById('taskCat').value,priority:document.getElementById('taskPriority').value,due:document.getElementById('taskDue').value,recur:document.getElementById('taskRecur').value,done:false,doneAt:null};
-  if(editTaskId){const idx=state.todos.findIndex(t=>t.id===editTaskId);if(idx>=0){task.done=state.todos[idx].done;task.doneAt=state.todos[idx].doneAt;state.todos[idx]=task;}}
+  if(editTaskId){const idx=state.todos.findIndex(t=>t.id===editTaskId);if(idx>=0){task.done=state.todos[idx].done;task.doneAt=state.todos[idx].doneAt;task.subtasks=state.todos[idx].subtasks;state.todos[idx]=task;}}
   else{state.todos.unshift(task);}
   taskOv.classList.remove('open');renderTodos();await saveData();
 };
