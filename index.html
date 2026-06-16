@@ -350,6 +350,14 @@ input,select,button,textarea{font-family:var(--sans)}
 .hm-gprog{height:6px;background:rgba(0,0,0,0.07);border-radius:4px;overflow:hidden;margin-top:5px}
 .hm-gfill{height:100%;border-radius:4px;background:var(--green)}
 .hm-metric-mini{font-size:0.6rem;font-weight:700;color:var(--t4);margin-top:1px}
+.dc-card{align-items:stretch !important;text-align:left !important}
+.dc-list{display:flex;flex-direction:column;gap:3px;width:100%}
+.dc-item{display:flex;align-items:center;gap:6px;cursor:pointer}
+.dc-box{width:15px;height:15px;border-radius:4px;border:1.5px solid rgba(0,0,0,0.25);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:white}
+.dc-box.on{background:var(--green);border-color:var(--green)}
+.dc-text{font-size:0.68rem;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-text.done{text-decoration:line-through;color:var(--t4)}
+.dc-empty{font-size:0.66rem;color:var(--t4);font-weight:700}
 .pomo-bar{height:5px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden;margin:7px 8px 0}
 .pomo-fill{height:100%;width:0;background:var(--red);border-radius:4px;transition:width 0.4s linear}
 .pomo-row{display:flex;gap:5px;justify-content:center;margin-top:8px}
@@ -767,10 +775,6 @@ input,select,button,textarea{font-family:var(--sans)}
       <div class="two-col">
         <div class="panel"><div class="ph"><div class="pt">✅ Tasks due today</div><button class="add-btn" onclick="switchAppTab('todo')">Open →</button></div><div id="hmTasks"><div class="empty">—</div></div></div>
         <div class="panel"><div class="ph"><div class="pt">💸 Bills due today</div><button class="add-btn" onclick="switchAppTab('finance')">Open →</button></div><div id="hmBills"><div class="empty">—</div></div></div>
-      </div>
-      <div class="two-col">
-        <div class="panel"><div class="ph"><div class="pt">🎯 Savings goals</div><button class="add-btn" onclick="switchAppTab('finance')">Open →</button></div><div id="hmGoals"><div class="empty">—</div></div></div>
-        <div class="panel"><div class="ph"><div class="pt">🔁 Transfers due this month</div><button class="add-btn" onclick="switchAppTab('finance')">Open →</button></div><div id="hmTransfers"><div class="empty">—</div></div></div>
       </div>
       <div class="panel" id="hmTripPanel" style="display:none"><div class="ph"><div class="pt">✈️ Next trip</div><button class="add-btn" onclick="switchAppTab('travel')">Open →</button></div><div id="hmTrip"></div></div>
     </div>
@@ -1989,7 +1993,7 @@ window.openEditGoalPlan=function(i){
   document.getElementById('saveGoalPlan').dataset.editIdx=i;
   document.getElementById('goalPlanOverlay').classList.add('open');
 };
-window.toggleMilestone=async function(gi,mi){const g=state.goalPlans[gi];if(!g||!g.milestones)return;g.milestones[mi].done=!g.milestones[mi].done;if(g.milestones.length>0)g.progress=Math.round((g.milestones.filter(m=>m.done).length/g.milestones.length)*100);renderGoalPlans();await saveData();};
+window.toggleMilestone=async function(gi,mi){const g=state.goalPlans[gi];if(!g||!g.milestones)return;g.milestones[mi].done=!g.milestones[mi].done;g.milestones[mi].doneAt=g.milestones[mi].done?new Date().toISOString():null;if(g.milestones.length>0)g.progress=Math.round((g.milestones.filter(m=>m.done).length/g.milestones.length)*100);renderGoalPlans();await saveData();};
 window.delMilestone=async function(gi,mi){const g=state.goalPlans[gi];if(!g)return;g.milestones.splice(mi,1);if(g.milestones.length>0)g.progress=Math.round((g.milestones.filter(m=>m.done).length/g.milestones.length)*100);renderGoalPlans();await saveData();};
 window.addMilestone=async function(gi){const g=state.goalPlans[gi];if(!g)return;const input=document.getElementById('ms-input-'+gi);const dateInput=document.getElementById('ms-date-'+gi);const title=input.value.trim();if(!title)return;if(!g.milestones)g.milestones=[];g.milestones.push({title,due:dateInput.value,done:false,id:Date.now()});if(g.milestones.length>0)g.progress=Math.round((g.milestones.filter(m=>m.done).length/g.milestones.length)*100);input.value='';dateInput.value='';renderGoalPlans();await saveData();};
 const now=new Date();viewYear=now.getFullYear();viewMonth=now.getMonth();
@@ -2967,14 +2971,39 @@ function pomoComplete(){
   pomoRender();
 }
 function hmTick(){
-  clockRender();
+  renderClocks();
   if(pomoRunning){
     pomoRemaining--;
     if(pomoRemaining<=0){pomoRemaining=0;pomoComplete();}
     else pomoRender();
   }
 }
-function ensureHmTimers(){if(hmTimerStarted)return;hmTimerStarted=true;setInterval(hmTick,1000);clockRender();}
+function ensureHmTimers(){if(hmTimerStarted)return;hmTimerStarted=true;setInterval(hmTick,1000);renderClocks();}
+
+// ── WORLD CLOCKS + WEEK + CHECKLIST ───────────────────
+function hmWeekRange(){
+  const d=new Date();const day=(d.getDay()+6)%7;
+  const mon=new Date(d);mon.setDate(d.getDate()-day);mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const f=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+  return {start:f(mon),end:f(sun)};
+}
+function tzLabel(tz){
+  try{const d=new Date();const utc=new Date(d.toLocaleString('en-US',{timeZone:'UTC'}));const loc=new Date(d.toLocaleString('en-US',{timeZone:tz}));let diff=Math.round((loc-utc)/3600000);return 'GMT'+(diff>=0?'+':'')+diff;}catch(e){return 'GMT';}
+}
+function clockCard(label,tz,emoji){
+  return '<div class="summary-card"><div class="summary-icon">'+emoji+'</div><div class="summary-lbl">'+label+'</div><div class="summary-val clock-time" data-tz="'+tz+'" style="font-size:1.3rem;font-family:var(--mono)">--:--</div><div class="hm-metric-mini clock-off" data-tz="'+tz+'">GMT</div></div>';
+}
+function renderClocks(){
+  document.querySelectorAll('.clock-time').forEach(el=>{const tz=el.dataset.tz;try{el.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());}catch(e){el.textContent='--:--';}});
+  document.querySelectorAll('.clock-off').forEach(el=>{el.textContent=tzLabel(el.dataset.tz);});
+}
+function dailyChecklistCardHTML(){
+  const tod=todayStr();
+  const items=(state.todos||[]).filter(t=>t.due===tod).slice(0,3);
+  const body=items.length?items.map(t=>'<div class="dc-item" onclick="hmToggleTask('+t.id+')"><span class="dc-box '+(t.done?'on':'')+'">'+(t.done?'✓':'')+'</span><span class="dc-text '+(t.done?'done':'')+'">'+esc(t.title)+'</span></div>').join(''):'<div class="dc-empty">No tasks due today</div>';
+  return '<div class="summary-card dc-card"><div class="summary-lbl" style="margin-bottom:6px">✅ Daily checklist</div><div class="dc-list">'+body+'</div></div>';
+}
 
 // ── TODAY / HOME DASHBOARD ────────────────────────────
 const HM_QUOTES=[
@@ -3057,13 +3086,30 @@ function renderDashboard(){
   const billsToday=(state.futures||[]).filter(f=>!f.paid&&f.date===tod);
   const billsTodayAmt=billsToday.reduce((s,f)=>s+(Number(f.amount)||0),0);
   const mEl=document.getElementById('hmMetrics');
+  // ACCA progress from goalPlans
+  const accaGoal=(state.goalPlans||[]).find(g=>/acca/i.test(g.title||''));
+  const accaPct=accaGoal?Math.min(100,Math.max(0,Number(accaGoal.progress)||0)):null;
+  // NZ application from goalPlans
+  const nzGoal=(state.goalPlans||[]).find(g=>/\bnz\b|new zealand|nz working/i.test(g.title||''));
+  let nzVal='\u2014',nzMini='Add NZ goal';
+  if(nzGoal){const ms=nzGoal.milestones||[];const doneCt=ms.filter(m=>m.done).length;const up=ms.filter(m=>!m.done&&m.due).sort((a,b)=>a.due.localeCompare(b.due))[0];nzVal=doneCt+(ms.length?'/'+ms.length:'')+' done';nzMini=up?('Next: '+new Date(up.due).toLocaleDateString('en-MY',{day:'numeric',month:'short'})):(nzGoal.targetDate?('Due: '+new Date(nzGoal.targetDate).toLocaleDateString('en-MY',{day:'numeric',month:'short'})):'In progress');}
+  // This week (Mon-Sun)
+  const wk=hmWeekRange();
+  const todosDoneWk=(state.todos||[]).filter(t=>t.done&&t.doneAt&&t.doneAt.slice(0,10)>=wk.start&&t.doneAt.slice(0,10)<=wk.end).length;
+  const msDoneWk=(state.goalPlans||[]).reduce((s,g)=>s+(g.milestones||[]).filter(m=>m.done&&m.doneAt&&m.doneAt.slice(0,10)>=wk.start&&m.doneAt.slice(0,10)<=wk.end).length,0);
+  const sc=(icon,label,value,mini,color)=>'<div class="summary-card"><div class="summary-icon">'+icon+'</div><div class="summary-lbl">'+label+'</div><div class="summary-val" style="font-size:1rem;color:'+(color||'var(--t1)')+'">'+value+'</div>'+(mini?'<div class="hm-metric-mini">'+mini+'</div>':'')+'</div>';
   if(mEl)mEl.innerHTML=[
-    ['\u2696\ufe0f','Net worth',fmtR(nw),'',nw>=0?'var(--green)':'var(--red)'],
-    ['\ud83d\udcb0','This month net',fmtR(net),(inc?'+'+fmtR(inc):'')+(exp?' / -'+fmtR(exp):''),net>=0?'var(--green)':'var(--red)'],
-    ['\u2705','Tasks today',tasksToday,overdue>0?overdue+' overdue':'all clear',overdue>0?'var(--red)':'var(--t1)'],
-    ['\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)']
-  ].map(m=>`<div class="summary-card"><div class="summary-icon">${m[0]}</div><div class="summary-lbl">${m[1]}</div><div class="summary-val" style="font-size:1rem;color:${m[4]}">${m[2]}</div>${m[3]?`<div class="hm-metric-mini">${m[3]}</div>`:''}</div>`).join('')+pomoCardHTML()+clockCardHTML();
-  pomoRender();clockRender();ensureHmTimers();
+    sc('\u2705','Tasks today',tasksToday,overdue>0?overdue+' overdue':'all clear',overdue>0?'var(--red)':'var(--t1)'),
+    sc('\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)'),
+    sc('\ud83d\udcda','ACCA',accaPct===null?'\u2014':accaPct+'%',accaPct===null?'Add ACCA goal':'Progress','var(--blue)'),
+    sc('\ud83c\uddf3\ud83c\uddff','NZ application',nzVal,nzMini,'var(--t1)'),
+    pomoCardHTML(),
+    sc('\ud83d\udcca','This week',todosDoneWk+' tasks',msDoneWk+' milestones done','var(--t1)'),
+    clockCard('NZ time','Pacific/Auckland','\ud83c\uddf3\ud83c\uddff'),
+    clockCard('Current (GMT)','UTC','\ud83d\udd50'),
+    clockCard('Kagoshima','Asia/Tokyo','\ud83c\udfef')
+  ].join('');
+  renderClocks();pomoRender();ensureHmTimers();
   // tasks due today
   const tEl=document.getElementById('hmTasks');
   if(tEl){
@@ -3074,20 +3120,6 @@ function renderDashboard(){
   // bills due today
   const bEl=document.getElementById('hmBills');
   if(bEl)bEl.innerHTML=billsToday.length?billsToday.map(f=>`<div class="hm-row"><span class="hm-task-name">${ce(f.category)} ${esc(f.description)}</span><span class="report-val" style="font-family:var(--mono);color:var(--amber);font-weight:800">${fmt(f.amount)}</span></div>`).join(''):'<div class="empty">No bills due today \u2713</div>';
-  // savings goals
-  const goEl=document.getElementById('hmGoals');
-  if(goEl){
-    const gs=(state.goals||[]);
-    goEl.innerHTML=gs.length?gs.slice(0,4).map(g=>{const pct=g.target>0?Math.min(100,Math.round((g.saved||0)/g.target*100)):0;return `<div style="padding:7px 0;border-top:1px solid rgba(0,0,0,0.05)"><div style="display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700"><span>${g.icon||'\ud83c\udfaf'} ${esc(g.name)}</span><span style="font-family:var(--mono);color:var(--t3)">${pct}%</span></div><div class="hm-gprog"><div class="hm-gfill" style="width:${pct}%;background:${pct>=100?'var(--green)':'var(--blue)'}"></div></div><div style="font-size:0.62rem;color:var(--t4);font-weight:700;margin-top:3px">${fmtR(g.saved||0)} / ${fmtR(g.target)}</div></div>`;}).join(''):'<div class="empty">No savings goals yet.</div>';
-  }
-  // transfers due this month
-  const trEl=document.getElementById('hmTransfers');
-  if(trEl){
-    const curVal=now.getFullYear()*12+now.getMonth();const due=[];
-    (state.transfers||[]).forEach(p=>{const monthly=(p.total*(1+(p.fee||0)/100))/p.months;const paid=p.paid||{};for(let i=0;i<p.months;i++){const[y,m]=(p.start||'2026-01').split('-').map(Number);const t=(m-1)+i;const vy=y+Math.floor(t/12),vm=t%12;if(vy*12+vm===curVal&&!paid[i]){due.push({name:p.name,amt:Math.round(monthly*100)/100});break;}}});
-    const dueTot=due.reduce((s,x)=>s+x.amt,0);
-    trEl.innerHTML=due.length?(due.map(x=>`<div class="hm-row"><span class="hm-task-name">\ud83d\udd01 ${esc(x.name)}</span><span class="report-val" style="font-family:var(--mono);font-weight:700">${fmt(x.amt)}</span></div>`).join('')+`<div class="hm-row" style="border-top:2px solid rgba(0,0,0,0.1)"><span class="hm-task-name" style="font-weight:800">Total this month</span><span class="report-val" style="font-family:var(--mono);font-weight:800;color:var(--amber)">${fmt(dueTot)}</span></div>`):'<div class="empty">No transfers due this month \u2713</div>';
-  }
   // next trip
   const tripPanel=document.getElementById('hmTripPanel'),tripEl=document.getElementById('hmTrip');
   if(tripPanel&&tripEl){
