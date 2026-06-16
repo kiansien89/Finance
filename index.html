@@ -2995,7 +2995,8 @@ function clockCard(label,tz,emoji){
   return '<div class="summary-card"><div class="summary-icon">'+emoji+'</div><div class="summary-lbl">'+label+'</div><div class="summary-val clock-time" data-tz="'+tz+'" style="font-size:1.3rem;font-family:var(--mono)">--:--</div><div class="hm-metric-mini clock-off" data-tz="'+tz+'">GMT</div></div>';
 }
 function renderClocks(){
-  document.querySelectorAll('.clock-time').forEach(el=>{const tz=el.dataset.tz;try{el.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());}catch(e){el.textContent='--:--';}});
+  const now=new Date();
+  document.querySelectorAll('.clock-time').forEach(el=>{const tz=el.dataset.tz;try{if(tz==='UTC'){el.textContent=String(now.getUTCHours()).padStart(2,'0')+':'+String(now.getUTCMinutes()).padStart(2,'0');}else{el.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).format(now);}}catch(e){el.textContent='--:--';}});
   document.querySelectorAll('.clock-off').forEach(el=>{el.textContent=tzLabel(el.dataset.tz);});
 }
 function dailyChecklistCardHTML(){
