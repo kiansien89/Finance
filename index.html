@@ -3030,7 +3030,7 @@ function renderNZWeatherCard(){
   if(!nzWeatherData){el.innerHTML='<div class="summary-lbl">NZ Weather</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div>';return;}
   if(nzWeatherData.error){el.innerHTML='<div class="summary-lbl">NZ Weather</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
   const[emoji,desc]=WMO[nzWeatherData.code]||['🌡️','Unknown'];
-  el.innerHTML='<div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+nzWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+nzWeatherData.rain+'% · 💨'+nzWeatherData.wind+'km/h</div>';
+  el.style.cssText+='justify-content:center;align-items:center;text-align:center';el.innerHTML='<div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+nzWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+nzWeatherData.rain+'% · 💨'+nzWeatherData.wind+'km/h</div>';
 }
 
 // ── TODAY / HOME DASHBOARD ────────────────────────────
@@ -3127,10 +3127,10 @@ function renderDashboard(){
     sc('\u2705','Tasks today',tasksToday,overdue>0?overdue+' overdue':'all clear',overdue>0?'var(--red)':'var(--t1)'),
     sc('\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)'),
     sc('\ud83d\udcda','ACCA',accaPct===null?'\u2014':accaPct+'%',accaPct===null?'Add ACCA goal':'Progress','var(--blue)'),
-    '<div class="summary-card" id="nzWeatherCard"><div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
+    '<div class="summary-card" id="nzWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
     pomoCardHTML(),
     sc('\ud83d\udcca','This week',todosDoneWk+' tasks',msDoneWk+' milestones done','var(--t1)'),
-    clockCard('NZ time','Pacific/Auckland','\ud83c\uddf3\ud83c\uddff'),
+    clockCard('NZ time','Pacific/Auckland','\ud83c\udf0f'),
     clockCard('Current (GMT+8)','Asia/Kuala_Lumpur','\ud83d\udd50'),
     clockCard('Kagoshima','Asia/Tokyo','\ud83c\udfef')
   ].join('');
