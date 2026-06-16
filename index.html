@@ -332,6 +332,24 @@ input,select,button,textarea{font-family:var(--sans)}
 .cal-ev.done{text-decoration:line-through;opacity:0.5}
 .cal-more{font-size:0.54rem;color:var(--t4);font-weight:800;padding-left:3px}
 @media(max-width:640px){.cal-cell{min-height:50px}.cal-ev{font-size:0.5rem;padding:1px 3px}.cal-daynum{font-size:0.6rem}}
+.hm-quote{position:relative;background:linear-gradient(135deg,#1A1410,#2A1810);border-radius:var(--rxl);padding:20px 52px 20px 22px;margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden}
+.hm-quote::before{content:'\201C';position:absolute;top:-10px;left:10px;font-size:4rem;color:rgba(255,255,255,0.07);font-family:Georgia,serif}
+.hm-quote-text{color:#F4E4D4;font-size:0.98rem;font-weight:700;line-height:1.55;letter-spacing:0.01em;position:relative;z-index:1}
+.hm-quote-next{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.08);color:#E8D0C0;cursor:pointer;font-size:0.9rem;transition:transform 0.3s,background 0.15s;z-index:2}
+.hm-quote-next:hover{background:rgba(255,255,255,0.16);transform:rotate(180deg)}
+.hm-greet{margin-bottom:14px;padding:0 2px}
+.hm-greet-hi{font-size:1.35rem;font-weight:800;color:var(--t1);line-height:1.2}
+.hm-greet-date{font-size:0.74rem;color:var(--t3);font-weight:700;margin-top:2px}
+.hm-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid rgba(0,0,0,0.05)}
+.hm-row:first-child{border-top:none}
+.hm-check{width:18px;height:18px;border-radius:5px;border:2px solid rgba(0,0,0,0.2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;transition:all 0.12s}
+.hm-check.on{background:var(--green);border-color:var(--green);color:white}
+.hm-task-name{flex:1;font-size:0.82rem;font-weight:600;color:var(--t1)}
+.hm-task-name.done{text-decoration:line-through;color:var(--t4)}
+.hm-pri{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.hm-gprog{height:6px;background:rgba(0,0,0,0.07);border-radius:4px;overflow:hidden;margin-top:5px}
+.hm-gfill{height:100%;border-radius:4px;background:var(--green)}
+.hm-metric-mini{font-size:0.6rem;font-weight:700;color:var(--t4);margin-top:1px}
 .todo-cat-filter{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);font-family:var(--sans);outline:none}
 .todo-cat-filter:focus{border-color:var(--red)}
 .todo-quick-add{display:flex;gap:8px;margin-bottom:1rem}
@@ -647,7 +665,10 @@ input,select,button,textarea{font-family:var(--sans)}
 
   <!-- TOP-LEVEL TABS -->
   <div class="app-top-tabs">
-    <button class="app-top-tab active" id="topTabFinance" onclick="switchAppTab('finance')">
+    <button class="app-top-tab active" id="topTabHome" onclick="switchAppTab('home')">
+      <div class="app-top-tab-inner">🏠 Today</div>
+    </button>
+    <button class="app-top-tab" id="topTabFinance" onclick="switchAppTab('finance')">
       <div class="app-top-tab-inner">💰 Finance</div>
     </button>
     <button class="app-top-tab" id="topTabTodo" onclick="switchAppTab('todo')">
@@ -666,8 +687,30 @@ input,select,button,textarea{font-family:var(--sans)}
 
   <div class="content">
 
+    <!-- ══ TODAY / HOME PAGE ══ -->
+    <div class="app-page active" id="page-home">
+      <div class="hm-quote" id="hmQuote">
+        <div class="hm-quote-text" id="hmQuoteText">—</div>
+        <button class="hm-quote-next" id="hmQuoteNext" title="Next quote">↻</button>
+      </div>
+      <div class="hm-greet">
+        <div class="hm-greet-hi" id="hmGreet">Hello</div>
+        <div class="hm-greet-date" id="hmDate"></div>
+      </div>
+      <div class="summary-grid" id="hmMetrics"></div>
+      <div class="two-col">
+        <div class="panel"><div class="ph"><div class="pt">✅ Tasks due today</div><button class="add-btn" onclick="switchAppTab('todo')">Open →</button></div><div id="hmTasks"><div class="empty">—</div></div></div>
+        <div class="panel"><div class="ph"><div class="pt">💸 Bills due today</div><button class="add-btn" onclick="switchAppTab('finance')">Open →</button></div><div id="hmBills"><div class="empty">—</div></div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel"><div class="ph"><div class="pt">🎯 Savings goals</div><button class="add-btn" onclick="switchAppTab('finance')">Open →</button></div><div id="hmGoals"><div class="empty">—</div></div></div>
+        <div class="panel"><div class="ph"><div class="pt">🔁 Transfers due this month</div><button class="add-btn" onclick="switchAppTab('finance')">Open →</button></div><div id="hmTransfers"><div class="empty">—</div></div></div>
+      </div>
+      <div class="panel" id="hmTripPanel" style="display:none"><div class="ph"><div class="pt">✈️ Next trip</div><button class="add-btn" onclick="switchAppTab('travel')">Open →</button></div><div id="hmTrip"></div></div>
+    </div>
+
     <!-- ══ FINANCE PAGE ══ -->
-    <div class="app-page active" id="page-finance">
+    <div class="app-page" id="page-finance">
       <div class="fx-bar">
         <div class="fx-bar-label">MYR Live</div>
         <div class="fx-items" id="fxTickerItems"></div>
@@ -2717,10 +2760,131 @@ window.editWallet=i=>{editWalletIdx=i;const w=state.wallets[i];document.getEleme
 window.editGoal=i=>{editGoalIdx=i;const g=state.goals[i];document.getElementById('gName').value=g.name;document.getElementById('gIcon').value=g.icon||'🎯';document.getElementById('gTarget').value=g.target;document.getElementById('gSaved').value=g.saved;document.getElementById('gDate').value=g.date||'';document.getElementById('goalModalTitle').textContent='Edit goal';document.getElementById('goalOverlay').classList.add('open');};
 window.editDebt=i=>{editDebtIdx=i;const d=state.debts[i];document.getElementById('dName').value=d.name;document.getElementById('dTotal').value=d.total;document.getElementById('dPaid').value=d.paid;document.getElementById('dMonthly').value=d.monthly||'';document.getElementById('dRate').value=d.rate||'';document.getElementById('debtModalTitle').textContent='Edit debt';document.getElementById('debtOverlay').classList.add('open');};
 
+// ── TODAY / HOME DASHBOARD ────────────────────────────
+const HM_QUOTES=[
+"Discipline is choosing what you want most over what you want now.",
+"No one is coming to save you. Get up and do the work.",
+"You don't lack time \u2014 you lack priorities.",
+"Motivation gets you started. Discipline keeps you going.",
+"The work you avoid today becomes the regret you carry tomorrow.",
+"Comfort is where goals go to die.",
+"Stop negotiating with the version of you that wants to quit.",
+"Your future is built by what you do today, not what you plan someday.",
+"You can have results or excuses. Not both.",
+"Hard now, easy later. Easy now, hard later. Choose.",
+"The obstacle in the path becomes the path. Walk it.",
+"Don't wait to feel ready. Readiness comes from doing.",
+"Small steps every day beat big plans never started.",
+"Consistency is the gap between who you are and who you want to be.",
+"Nobody pays for your potential. They pay for your output.",
+"Tired is the price, not an excuse.",
+"What's hard to do is easy to avoid \u2014 that's why most stay stuck.",
+"Win the morning, win the day.",
+"Stop waiting for Monday. Today is the day.",
+"The pain of discipline weighs ounces. The pain of regret weighs tons.",
+"Action cures fear. Sitting still feeds it.",
+"You won't always be motivated. Learn to be disciplined.",
+"Done is better than perfect. Start ugly.",
+"Every hour awake is a vote for who you become.",
+"You are one decision away from a different day. Make it.",
+"\u81EA\u5F8B\u7684\u4EBA\uFF0C\u624D\u914D\u8C08\u81EA\u7531\u3002",
+"\u73B0\u5728\u4E0D\u52AA\u529B\uFF0C\u672A\u6765\u5168\u662F\u501F\u53E3\u3002",
+"\u4F60\u4E0D\u662F\u6CA1\u65F6\u95F4\uFF0C\u662F\u6CA1\u628A\u5B83\u5F53\u56DE\u4E8B\u3002",
+"\u60F3\uFF0C\u90FD\u662F\u95EE\u9898\uFF1B\u505A\uFF0C\u624D\u662F\u7B54\u6848\u3002",
+"\u62D6\u5230\u660E\u5929\u7684\u4E8B\uFF0C\u4F1A\u53D8\u6210\u540E\u5929\u7684\u540E\u6094\u3002",
+"\u8212\u9002\u533A\u91CC\u957F\u4E0D\u51FA\u672A\u6765\u3002",
+"\u522B\u548C\u60F3\u653E\u5F03\u7684\u81EA\u5DF1\u8BB2\u9053\u7406\uFF0C\u76F4\u63A5\u884C\u52A8\u3002",
+"\u7ED3\u679C\u548C\u501F\u53E3\uFF0C\u53EA\u80FD\u9009\u4E00\u4E2A\u3002",
+"\u4ECA\u5929\u5077\u7684\u61D2\uFF0C\u660E\u5929\u8981\u52A0\u500D\u8FD8\u3002",
+"\u79CD\u6811\u6700\u597D\u7684\u65F6\u95F4\u662F\u5341\u5E74\u524D\uFF0C\u5176\u6B21\u662F\u73B0\u5728\u3002",
+"\u4F60\u7FA1\u6155\u7684\u751F\u6D3B\uFF0C\u90FD\u662F\u522B\u4EBA\u71AC\u51FA\u6765\u7684\u3002",
+"\u81EA\u5F8B\u4E0D\u662F\u675F\u7F1A\uFF0C\u662F\u7ED9\u81EA\u5DF1\u81EA\u7531\u7684\u4EE3\u4EF7\u3002",
+"\u5149\u60F3\u4E0D\u505A\uFF0C\u6C38\u8FDC\u505C\u5728\u539F\u5730\u3002",
+"\u4ECA\u5929\u7684\u9009\u62E9\uFF0C\u51B3\u5B9A\u4F60\u4E09\u5E74\u540E\u7684\u6837\u5B50\u3002",
+"\u6CA1\u4EBA\u4E3A\u4F60\u7684\u6F5C\u529B\u4E70\u5355\uFF0C\u53EA\u770B\u4F60\u7684\u6210\u679C\u3002",
+"\u7D2F\uFF0C\u662F\u6210\u957F\u7684\u6807\u4EF7\uFF0C\u4E0D\u662F\u653E\u5F03\u7684\u7406\u7531\u3002",
+"\u5148\u5B8C\u6210\uFF0C\u518D\u5B8C\u7F8E\u3002",
+"\u5AB6\u9EBB\u70E6\u7684\u4E8B\uFF0C\u5F80\u5F80\u624D\u662F\u8BE5\u505A\u7684\u4E8B\u3002",
+"\u628A\u201C\u4EE5\u540E\u201D\u6362\u6210\u201C\u73B0\u5728\u201D\uFF0C\u4EBA\u751F\u7ACB\u523B\u4E0D\u4E00\u6837\u3002",
+"\u4F60\u4E0D\u884C\u52A8\uFF0C\u68A6\u60F3\u5C31\u53EA\u662F\u6E05\u5355\u4E0A\u7684\u5B57\u3002",
+"\u8D62\u4E86\u65E9\u6668\uFF0C\u5C31\u8D62\u4E86\u4E00\u5929\u3002",
+"\u6210\u529F\u4E0D\u9760\u5FC3\u60C5\uFF0C\u9760\u4E60\u60EF\u3002",
+"\u522B\u7B49\u51C6\u5907\u597D\uFF0C\u505A\u7740\u505A\u7740\u5C31\u51C6\u5907\u597D\u4E86\u3002",
+"\u6015\uFF0C\u5C31\u5927\u58F0\u5589\u51FA\u6765\uFF1B\u505A\uFF0C\u5C31\u5B89\u9759\u53BB\u505A\u3002",
+"\u4E0D\u8981\u7528\u6218\u672F\u4E0A\u7684\u52E4\u594B\uFF0C\u63A9\u76D6\u6218\u7565\u4E0A\u7684\u61D2\u60F0\u3002"
+];
+function hmDayIndex(){const d=new Date();const start=new Date(d.getFullYear(),0,0);const day=Math.floor((d-start)/86400000);return day;}
+let hmQuoteOffset=0;
+function hmCurrentQuote(){return HM_QUOTES[(hmDayIndex()+hmQuoteOffset)%HM_QUOTES.length];}
+window.hmNextQuote=function(){hmQuoteOffset=(hmQuoteOffset+1)%HM_QUOTES.length;const el=document.getElementById('hmQuoteText');if(el)el.textContent=hmCurrentQuote();};
+function hmNetWorth(){
+  let a=(state.wallets||[]).reduce((s,w)=>s+(Number(w.balance)||0),0);
+  let l=(state.debts||[]).reduce((s,d)=>s+Math.max(0,(Number(d.total)||0)-(Number(d.paid)||0)),0);
+  (Array.isArray(state.bsItems)?state.bsItems:[]).forEach(it=>{const v=Number(it.value)||0;if(it.kind==='asset')a+=v;else if(it.kind==='liability')l+=v;});
+  return a-l;
+}
+function renderDashboard(){
+  const qEl=document.getElementById('hmQuoteText');if(!qEl)return; // null-guard
+  qEl.textContent=hmCurrentQuote();
+  const now=new Date();const hour=now.getHours();
+  const greet=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+  const gEl=document.getElementById('hmGreet');if(gEl)gEl.textContent=greet+', Kian Sien';
+  const dEl=document.getElementById('hmDate');if(dEl)dEl.textContent=now.toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const tod=todayStr();
+  // metrics
+  const txs=(state.transactions||[]).filter(t=>{const d=new Date(t.date);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();});
+  let inc=0,exp=0;txs.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else if(t.type==='expense')exp+=Number(t.amount)||0;});
+  const net=inc-exp;
+  const nw=hmNetWorth();
+  const tasksToday=(state.todos||[]).filter(t=>!t.done&&t.due===tod).length;
+  const overdue=(state.todos||[]).filter(t=>!t.done&&t.due&&t.due<tod).length;
+  const billsToday=(state.futures||[]).filter(f=>!f.paid&&f.date===tod);
+  const billsTodayAmt=billsToday.reduce((s,f)=>s+(Number(f.amount)||0),0);
+  const mEl=document.getElementById('hmMetrics');
+  if(mEl)mEl.innerHTML=[
+    ['\u2696\ufe0f','Net worth',fmtR(nw),'',nw>=0?'var(--green)':'var(--red)'],
+    ['\ud83d\udcb0','This month net',fmtR(net),(inc?'+'+fmtR(inc):'')+(exp?' / -'+fmtR(exp):''),net>=0?'var(--green)':'var(--red)'],
+    ['\u2705','Tasks today',tasksToday,overdue>0?overdue+' overdue':'all clear',overdue>0?'var(--red)':'var(--t1)'],
+    ['\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)']
+  ].map(m=>`<div class="summary-card"><div class="summary-icon">${m[0]}</div><div class="summary-lbl">${m[1]}</div><div class="summary-val" style="font-size:1rem;color:${m[4]}">${m[2]}</div>${m[3]?`<div class="hm-metric-mini">${m[3]}</div>`:''}</div>`).join('');
+  // tasks due today
+  const tEl=document.getElementById('hmTasks');
+  if(tEl){
+    const list=(state.todos||[]).filter(t=>t.due===tod).sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+    const PRI={high:'#BF0000',medium:'#C06000',low:'#0A7A5A'};
+    tEl.innerHTML=list.length?list.map(t=>`<div class="hm-row"><div class="hm-check ${t.done?'on':''}" onclick="hmToggleTask(${t.id})">${t.done?'\u2713':''}</div><span class="hm-pri" style="background:${PRI[t.priority]||'#888'}"></span><span class="hm-task-name ${t.done?'done':''}">${esc(t.title)}</span></div>`).join(''):(overdue>0?`<div class="empty" style="color:var(--red)">No tasks due today \u2014 but ${overdue} overdue. <a onclick="switchAppTab('todo')" style="color:var(--red);cursor:pointer;text-decoration:underline">review →</a></div>`:'<div class="empty">Nothing due today. Enjoy \ud83c\udf3f</div>');
+  }
+  // bills due today
+  const bEl=document.getElementById('hmBills');
+  if(bEl)bEl.innerHTML=billsToday.length?billsToday.map(f=>`<div class="hm-row"><span class="hm-task-name">${ce(f.category)} ${esc(f.description)}</span><span class="report-val" style="font-family:var(--mono);color:var(--amber);font-weight:800">${fmt(f.amount)}</span></div>`).join(''):'<div class="empty">No bills due today \u2713</div>';
+  // savings goals
+  const goEl=document.getElementById('hmGoals');
+  if(goEl){
+    const gs=(state.goals||[]);
+    goEl.innerHTML=gs.length?gs.slice(0,4).map(g=>{const pct=g.target>0?Math.min(100,Math.round((g.saved||0)/g.target*100)):0;return `<div style="padding:7px 0;border-top:1px solid rgba(0,0,0,0.05)"><div style="display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700"><span>${g.icon||'\ud83c\udfaf'} ${esc(g.name)}</span><span style="font-family:var(--mono);color:var(--t3)">${pct}%</span></div><div class="hm-gprog"><div class="hm-gfill" style="width:${pct}%;background:${pct>=100?'var(--green)':'var(--blue)'}"></div></div><div style="font-size:0.62rem;color:var(--t4);font-weight:700;margin-top:3px">${fmtR(g.saved||0)} / ${fmtR(g.target)}</div></div>`;}).join(''):'<div class="empty">No savings goals yet.</div>';
+  }
+  // transfers due this month
+  const trEl=document.getElementById('hmTransfers');
+  if(trEl){
+    const curVal=now.getFullYear()*12+now.getMonth();const due=[];
+    (state.transfers||[]).forEach(p=>{const monthly=(p.total*(1+(p.fee||0)/100))/p.months;const paid=p.paid||{};for(let i=0;i<p.months;i++){const[y,m]=(p.start||'2026-01').split('-').map(Number);const t=(m-1)+i;const vy=y+Math.floor(t/12),vm=t%12;if(vy*12+vm===curVal&&!paid[i]){due.push({name:p.name,amt:Math.round(monthly*100)/100});break;}}});
+    const dueTot=due.reduce((s,x)=>s+x.amt,0);
+    trEl.innerHTML=due.length?(due.map(x=>`<div class="hm-row"><span class="hm-task-name">\ud83d\udd01 ${esc(x.name)}</span><span class="report-val" style="font-family:var(--mono);font-weight:700">${fmt(x.amt)}</span></div>`).join('')+`<div class="hm-row" style="border-top:2px solid rgba(0,0,0,0.1)"><span class="hm-task-name" style="font-weight:800">Total this month</span><span class="report-val" style="font-family:var(--mono);font-weight:800;color:var(--amber)">${fmt(dueTot)}</span></div>`):'<div class="empty">No transfers due this month \u2713</div>';
+  }
+  // next trip
+  const tripPanel=document.getElementById('hmTripPanel'),tripEl=document.getElementById('hmTrip');
+  if(tripPanel&&tripEl){
+    const trips=(state.travelPlans||[]).filter(t=>t.startStr&&t.startStr>=tod).sort((a,b)=>a.startStr.localeCompare(b.startStr));
+    if(trips.length){const t=trips[0];const days=Math.round((new Date(t.startStr)-new Date(tod))/86400000);tripPanel.style.display='';tripEl.innerHTML=`<div class="hm-row"><span class="hm-task-name">\u2708\ufe0f ${esc(t.dest)} \u00b7 ${t.days} days</span><div style="text-align:right"><div class="report-val" style="font-family:var(--mono);color:var(--red);font-weight:800">${fmt(t.cost&&t.cost.total||0)}</div><div style="font-size:0.62rem;color:var(--t4);font-weight:700">in ${days} day${days!==1?'s':''} \u00b7 ${t.startStr}</div></div></div>`;}
+    else tripPanel.style.display='none';
+  }
+}
+window.hmToggleTask=async function(id){if(window.toggleTodo){await toggleTodo(id);}renderDashboard();};
+
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
   // Use explicit add/remove instead of toggle for reliability
-  ['finance','todo','goals','travel','shuli'].forEach(n=>{
+  ['home','finance','todo','goals','travel','shuli'].forEach(n=>{
     const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
     const page=document.getElementById('page-'+n);
     if(n===name){
@@ -2734,14 +2898,16 @@ function switchAppTab(name){
   const mnw=document.getElementById('monthNavWrap');
   if(mnw)mnw.style.display=name==='finance'?'flex':'none';
   // Re-render target tab content
-  if(name==='todo')renderTodos();
+  if(name==='home'){try{renderDashboard();}catch(e){console.error('dashboard',e);}}
+  else if(name==='todo')renderTodos();
   else if(name==='goals')renderGoalPlans();
   else if(name==='travel'){try{renderTravelPlans();}catch(e){console.error('travel render',e);}}
   else if(name==='shuli'){try{renderShuli();}catch(e){console.error('shuli render',e);}}
   else render();
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance','transfers','planner'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
-function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();}
+function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();try{switchAppTab('home');}catch(e){console.error('land home',e);}}
+(function(){const b=document.getElementById('hmQuoteNext');if(b)b.onclick=hmNextQuote;})();
 function showAuth(){document.getElementById('authScreen').style.display='flex';document.getElementById('appScreen').style.display='none';}
 
 // ── EVENTS ─────────────────────────────────────────────
