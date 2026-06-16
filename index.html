@@ -350,6 +350,21 @@ input,select,button,textarea{font-family:var(--sans)}
 .hm-gprog{height:6px;background:rgba(0,0,0,0.07);border-radius:4px;overflow:hidden;margin-top:5px}
 .hm-gfill{height:100%;border-radius:4px;background:var(--green)}
 .hm-metric-mini{font-size:0.6rem;font-weight:700;color:var(--t4);margin-top:1px}
+.pomo-bar{height:5px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden;margin:7px 8px 0}
+.pomo-fill{height:100%;width:0;background:var(--red);border-radius:4px;transition:width 0.4s linear}
+.pomo-row{display:flex;gap:5px;justify-content:center;margin-top:8px}
+.pomo-btn{font-size:0.62rem;font-weight:800;padding:4px 13px;border-radius:14px;border:1.5px solid var(--red);background:var(--red);color:white;cursor:pointer;font-family:var(--sans)}
+.pomo-btn.ghost{background:transparent;color:var(--red)}
+.pomo-btn:active{transform:scale(0.94)}
+.pomo-label{font-size:0.56rem;font-weight:800;letter-spacing:0.08em;color:var(--red);margin-top:6px}
+.pomo-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(2px)}
+.pomo-popup-overlay.show{display:flex}
+.pomo-popup{background:var(--glass);border-radius:var(--rxl);padding:28px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.35);max-width:300px;animation:pomoPopIn 0.25s ease}
+@keyframes pomoPopIn{from{transform:scale(0.85);opacity:0}to{transform:scale(1);opacity:1}}
+.pomo-popup-icon{font-size:2.6rem;margin-bottom:10px}
+.pomo-popup-msg{font-size:0.92rem;font-weight:700;color:var(--t1);margin-bottom:18px;line-height:1.55}
+@keyframes pomoFlashAnim{0%,100%{background-color:rgba(191,0,0,0)}25%,75%{background-color:rgba(191,0,0,0.16)}50%{background-color:rgba(191,0,0,0.30)}}
+.pomo-flash{animation:pomoFlashAnim 0.5s ease-in-out 3}
 .todo-cat-filter{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);font-family:var(--sans);outline:none}
 .todo-cat-filter:focus{border-color:var(--red)}
 .todo-quick-add{display:flex;gap:8px;margin-bottom:1rem}
@@ -2760,6 +2775,53 @@ window.editWallet=i=>{editWalletIdx=i;const w=state.wallets[i];document.getEleme
 window.editGoal=i=>{editGoalIdx=i;const g=state.goals[i];document.getElementById('gName').value=g.name;document.getElementById('gIcon').value=g.icon||'🎯';document.getElementById('gTarget').value=g.target;document.getElementById('gSaved').value=g.saved;document.getElementById('gDate').value=g.date||'';document.getElementById('goalModalTitle').textContent='Edit goal';document.getElementById('goalOverlay').classList.add('open');};
 window.editDebt=i=>{editDebtIdx=i;const d=state.debts[i];document.getElementById('dName').value=d.name;document.getElementById('dTotal').value=d.total;document.getElementById('dPaid').value=d.paid;document.getElementById('dMonthly').value=d.monthly||'';document.getElementById('dRate').value=d.rate||'';document.getElementById('debtModalTitle').textContent='Edit debt';document.getElementById('debtOverlay').classList.add('open');};
 
+// ── POMODORO + CLOCK ──────────────────────────────────
+const POMO_WORK=1500, POMO_REST=300;
+let pomoRemaining=POMO_WORK, pomoRunning=false, pomoMode='work', hmTimerStarted=false;
+function pomoCardHTML(){return `<div class="summary-card pomo-card"><div class="summary-icon">\u23f1\ufe0f</div><div class="summary-val" id="pomoTime" style="font-size:1.45rem;font-family:var(--mono);letter-spacing:0.02em">25:00</div><div class="pomo-bar"><div class="pomo-fill" id="pomoBar"></div></div><div class="pomo-row"><button class="pomo-btn" id="pomoToggleBtn" onclick="pomoToggle()">Start</button><button class="pomo-btn ghost" onclick="pomoReset()">Reset</button></div><div class="pomo-label" id="pomoLabel">WORKING</div></div>`;}
+function clockCardHTML(){return `<div class="summary-card"><div class="summary-icon">\ud83d\udd50</div><div class="summary-lbl">Current time</div><div class="summary-val" id="clockTime" style="font-size:1.45rem;font-family:var(--mono)">--:--</div></div>`;}
+function pomoRender(){
+  const t=document.getElementById('pomoTime'); if(!t)return;
+  const tot=pomoMode==='work'?POMO_WORK:POMO_REST;
+  const m=Math.floor(pomoRemaining/60), s=pomoRemaining%60;
+  t.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const bar=document.getElementById('pomoBar');
+  if(bar){const pct=Math.max(0,Math.min(100,Math.round((1-pomoRemaining/tot)*100)));bar.style.width=pct+'%';bar.style.background=pomoMode==='work'?'var(--red)':'var(--green)';}
+  const lbl=document.getElementById('pomoLabel');
+  if(lbl){lbl.textContent=pomoMode==='work'?(pomoRunning?'WORKING':'WORK \u00b7 PAUSED'):(pomoRunning?'REST':'REST \u00b7 PAUSED');lbl.style.color=pomoMode==='work'?'var(--red)':'var(--green)';}
+  const btn=document.getElementById('pomoToggleBtn');
+  if(btn)btn.textContent=pomoRunning?'Pause':'Start';
+}
+function clockRender(){const c=document.getElementById('clockTime');if(!c)return;const d=new Date();c.textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+window.pomoToggle=function(){pomoRunning=!pomoRunning;ensureHmTimers();pomoRender();};
+window.pomoReset=function(){pomoRunning=false;pomoMode='work';pomoRemaining=POMO_WORK;pomoRender();};
+function pomoBeep(){try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();[0,0.22,0.44].forEach(off=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=880;const st=ctx.currentTime+off;g.gain.setValueAtTime(0.0001,st);g.gain.exponentialRampToValueAtTime(0.35,st+0.02);g.gain.exponentialRampToValueAtTime(0.0001,st+0.18);o.start(st);o.stop(st+0.2);});}catch(e){}}
+function pomoFlash(){const el=document.getElementById('appScreen')||document.body;if(!el)return;el.classList.remove('pomo-flash');void el.offsetWidth;el.classList.add('pomo-flash');setTimeout(()=>el.classList.remove('pomo-flash'),1600);}
+function pomoPopup(msg){
+  let ov=document.getElementById('pomoPopup');
+  if(!ov){ov=document.createElement('div');ov.id='pomoPopup';ov.className='pomo-popup-overlay';ov.innerHTML='<div class="pomo-popup"><div class="pomo-popup-icon">\ud83c\udf45</div><div class="pomo-popup-msg" id="pomoPopupMsg"></div><button class="pomo-btn" style="padding:6px 24px;font-size:0.78rem" onclick="document.getElementById(\'pomoPopup\').classList.remove(\'show\')">OK</button></div>';document.body.appendChild(ov);}
+  const m=document.getElementById('pomoPopupMsg');if(m)m.textContent=msg;
+  ov.classList.add('show');
+}
+function pomoComplete(){
+  const wasWork=pomoMode==='work';
+  pomoBeep();pomoFlash();
+  pomoPopup(wasWork?'\ud83c\udf45 Work session complete! Take a 5-minute break.':'\u2615 Break over \u2014 ready for the next session?');
+  pomoMode=wasWork?'rest':'work';
+  pomoRemaining=pomoMode==='work'?POMO_WORK:POMO_REST;
+  pomoRunning=false;
+  pomoRender();
+}
+function hmTick(){
+  clockRender();
+  if(pomoRunning){
+    pomoRemaining--;
+    if(pomoRemaining<=0){pomoRemaining=0;pomoComplete();}
+    else pomoRender();
+  }
+}
+function ensureHmTimers(){if(hmTimerStarted)return;hmTimerStarted=true;setInterval(hmTick,1000);clockRender();}
+
 // ── TODAY / HOME DASHBOARD ────────────────────────────
 const HM_QUOTES=[
 "Discipline is choosing what you want most over what you want now.",
@@ -2846,7 +2908,8 @@ function renderDashboard(){
     ['\ud83d\udcb0','This month net',fmtR(net),(inc?'+'+fmtR(inc):'')+(exp?' / -'+fmtR(exp):''),net>=0?'var(--green)':'var(--red)'],
     ['\u2705','Tasks today',tasksToday,overdue>0?overdue+' overdue':'all clear',overdue>0?'var(--red)':'var(--t1)'],
     ['\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)']
-  ].map(m=>`<div class="summary-card"><div class="summary-icon">${m[0]}</div><div class="summary-lbl">${m[1]}</div><div class="summary-val" style="font-size:1rem;color:${m[4]}">${m[2]}</div>${m[3]?`<div class="hm-metric-mini">${m[3]}</div>`:''}</div>`).join('');
+  ].map(m=>`<div class="summary-card"><div class="summary-icon">${m[0]}</div><div class="summary-lbl">${m[1]}</div><div class="summary-val" style="font-size:1rem;color:${m[4]}">${m[2]}</div>${m[3]?`<div class="hm-metric-mini">${m[3]}</div>`:''}</div>`).join('')+pomoCardHTML()+clockCardHTML();
+  pomoRender();clockRender();ensureHmTimers();
   // tasks due today
   const tEl=document.getElementById('hmTasks');
   if(tEl){
