@@ -365,6 +365,57 @@ input,select,button,textarea{font-family:var(--sans)}
 .pomo-popup-msg{font-size:0.92rem;font-weight:700;color:var(--t1);margin-bottom:18px;line-height:1.55}
 @keyframes pomoFlashAnim{0%,100%{background-color:rgba(191,0,0,0)}25%,75%{background-color:rgba(191,0,0,0.16)}50%{background-color:rgba(191,0,0,0.30)}}
 .pomo-flash{animation:pomoFlashAnim 0.5s ease-in-out 3}
+.goal-viewbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.goal-viewtabs{display:flex;gap:5px;flex-wrap:wrap}
+.goal-vtab{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:9px;padding:6px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);transition:all 0.15s;font-family:var(--sans)}
+.goal-vtab.active{background:var(--red);color:white;border-color:var(--red)}
+.gd-section{background:var(--glass);border-radius:var(--rl);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.08);padding:14px 16px;margin-bottom:10px}
+.gd-sec-title{font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--t3);margin-bottom:10px}
+.gd-prog-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.gd-prog-name{flex:0 0 42%;font-size:0.78rem;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gd-prog-track{flex:1;height:8px;background:rgba(0,0,0,0.07);border-radius:5px;overflow:hidden}
+.gd-prog-fill{height:100%;border-radius:5px;transition:width 0.4s}
+.gd-prog-pct{flex:0 0 38px;text-align:right;font-size:0.7rem;font-weight:800;font-family:var(--mono);color:var(--t2)}
+.gd-ms-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(0,0,0,0.05)}
+.gd-ms-row:first-child{border-top:none}
+.gd-ms-name{font-size:0.78rem;font-weight:700;color:var(--t1)}
+.gd-ms-goal{font-size:0.62rem;color:var(--t4);font-weight:700;margin-top:1px}
+.gd-ms-due{font-size:0.66rem;font-weight:800;font-family:var(--mono);white-space:nowrap;text-align:right;line-height:1.3}
+.gd-stat-mini{display:flex;gap:20px;flex-wrap:wrap}
+.gd-stat-mini>div{font-size:0.66rem;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:0.03em}
+.gd-stat-mini b{font-size:1.3rem;color:var(--t1);font-family:var(--mono);display:block;letter-spacing:0}
+.gk-board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:760px){.gk-board{grid-template-columns:repeat(2,1fr)}}
+.gk-col{background:rgba(0,0,0,0.025);border-radius:var(--rl);padding:8px;min-height:110px;border:1.5px dashed transparent;transition:border 0.15s,background 0.15s}
+.gk-col.drag-over{border-color:var(--red);background:rgba(191,0,0,0.05)}
+.gk-col-title{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--t3);padding:3px 4px 8px;display:flex;justify-content:space-between}
+.gk-card{background:var(--glass);border-radius:9px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.08);padding:9px 10px;margin-bottom:7px;cursor:grab;border-left:3px solid var(--t4)}
+.gk-card:active{cursor:grabbing}
+.gk-card.dragging{opacity:0.4}
+.gk-card-title{font-size:0.75rem;font-weight:800;color:var(--t1);line-height:1.3}
+.gk-card-meta{font-size:0.6rem;color:var(--t4);font-weight:700;margin-top:4px}
+.gk-card-track{height:5px;background:rgba(0,0,0,0.07);border-radius:4px;overflow:hidden;margin-top:6px}
+.gk-card-fill{height:100%;border-radius:4px}
+.gl-controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.gl-search{flex:1;min-width:140px;background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:9px;padding:7px 12px;font-size:0.8rem;font-weight:600;color:var(--t1);outline:none;font-family:var(--sans)}
+.gl-search:focus{border-color:var(--red)}
+.gl-sort{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:9px;padding:7px 10px;font-size:0.76rem;font-weight:700;color:var(--t2);font-family:var(--sans);outline:none}
+.gl-table{background:var(--glass);border-radius:var(--rl);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.08);overflow:hidden}
+.gl-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid rgba(0,0,0,0.05);cursor:pointer}
+.gl-row:first-child{border-top:none}
+.gl-row:hover{background:rgba(0,0,0,0.015)}
+.gl-row-icon{font-size:1.1rem;flex-shrink:0}
+.gl-row-main{flex:1;min-width:0}
+.gl-row-title{font-size:0.82rem;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gl-row-sub{font-size:0.64rem;color:var(--t4);font-weight:700;margin-top:1px}
+.gl-row-prog{flex:0 0 80px}
+.gl-row-track{height:6px;background:rgba(0,0,0,0.07);border-radius:4px;overflow:hidden}
+.gl-row-fill{height:100%;border-radius:4px}
+.gl-row-date{flex:0 0 auto;font-size:0.66rem;font-weight:700;color:var(--t3);font-family:var(--mono);white-space:nowrap}
+.gl-badge{flex:0 0 auto;font-size:0.56rem;font-weight:800;padding:2px 8px;border-radius:12px;white-space:nowrap}
+.gl-expand{padding:4px 14px 12px 48px;background:rgba(0,0,0,0.015)}
+.gl-ms{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:0.74rem;color:var(--t2);font-weight:600}
+@media(max-width:640px){.gl-row-prog{flex:0 0 56px}.gl-badge{display:none}}
 .todo-cat-filter{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);font-family:var(--sans);outline:none}
 .todo-cat-filter:focus{border-color:var(--red)}
 .todo-quick-add{display:flex;gap:8px;margin-bottom:1rem}
@@ -945,20 +996,29 @@ input,select,button,textarea{font-family:var(--sans)}
         <div class="goals-stat"><div class="goals-stat-val" id="gpDone" style="color:var(--green)">0</div><div class="goals-stat-lbl">Achieved</div></div>
         <div class="goals-stat"><div class="goals-stat-val" id="gpMs" style="color:var(--amber)">0</div><div class="goals-stat-lbl">Milestones</div></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px">
-        <div class="goals-cat-filters">
-          <button class="goals-cat-btn active" onclick="setGoalFilter('all',this)">All</button>
-          <button class="goals-cat-btn" onclick="setGoalFilter('Career',this)">💼 Career</button>
-          <button class="goals-cat-btn" onclick="setGoalFilter('Financial',this)">💰 Financial</button>
-          <button class="goals-cat-btn" onclick="setGoalFilter('Life',this)">🌟 Life</button>
-          <button class="goals-cat-btn" onclick="setGoalFilter('active',this)">🔵 Active</button>
-          <button class="goals-cat-btn" onclick="setGoalFilter('done',this)">✅ Done</button>
+      <div class="goal-viewbar">
+        <div class="goal-viewtabs">
+          <button class="goal-vtab active" data-v="dashboard" onclick="switchGoalView('dashboard')">📊 Dashboard</button>
+          <button class="goal-vtab" data-v="kanban" onclick="switchGoalView('kanban')">📋 Kanban</button>
+          <button class="goal-vtab" data-v="cards" onclick="switchGoalView('cards')">🎯 Cards</button>
+          <button class="goal-vtab" data-v="list" onclick="switchGoalView('list')">📈 List</button>
+          <button class="goal-vtab" data-v="gantt" onclick="switchGoalView('gantt')">📅 Gantt</button>
         </div>
         <button class="btn btn-red" id="openGoalPlan">+ Add goal</button>
-        <button class="btn" id="toggleGanttBtn" onclick="toggleGanttView()" style="background:white;border:1.5px solid rgba(0,0,0,0.15);color:#4A4A4A;font-weight:700">📊 Gantt view</button>
       </div>
+      <div class="goals-cat-filters" id="goalFiltersRow" style="margin-bottom:0.75rem;display:none">
+        <button class="goals-cat-btn active" onclick="setGoalFilter('all',this)">All</button>
+        <button class="goals-cat-btn" onclick="setGoalFilter('Career',this)">💼 Career</button>
+        <button class="goals-cat-btn" onclick="setGoalFilter('Financial',this)">💰 Financial</button>
+        <button class="goals-cat-btn" onclick="setGoalFilter('Life',this)">🌟 Life</button>
+        <button class="goals-cat-btn" onclick="setGoalFilter('active',this)">🔵 Active</button>
+        <button class="goals-cat-btn" onclick="setGoalFilter('done',this)">✅ Done</button>
+      </div>
+      <div id="goalsDashWrap" style="display:none;margin-bottom:1rem"></div>
+      <div id="goalsKanbanWrap" style="display:none;margin-bottom:1rem"></div>
       <!-- GANTT CHART -->
       <div id="ganttWrap" style="display:none;margin-bottom:1rem"></div>
+      <div id="goalsListWrap" style="display:none;margin-bottom:1rem"></div>
       <div id="goalsTimeline"><div class="todo-empty">No goals yet — tap Add goal to start your path.</div></div>
     </div>
 
@@ -1313,7 +1373,101 @@ function goalHealthHtml(g){
   return'<div class="goal-health"><div class="health-dot" style="background:'+dot+'"></div><span class="health-label" style="color:'+color+'">'+label+'</span><span style="font-size:0.65rem;color:#9A9A9A;font-weight:600;margin-left:4px">'+Math.round(timePct)+'% time · '+progPct+'% done</span></div>';
 }
 
+// ── GOAL MULTI-VIEW ───────────────────────────────────
+let goalView=(function(){try{return localStorage.getItem('goalView')||'dashboard';}catch(e){return 'dashboard';}})();
+const GSTATUS_COLOR={'not-started':'var(--t4)',active:'var(--blue)',done:'var(--green)',paused:'var(--amber)'};
+window.switchGoalView=function(v){
+  goalView=v;
+  try{localStorage.setItem('goalView',v);}catch(e){}
+  const map={dashboard:'goalsDashWrap',kanban:'goalsKanbanWrap',cards:'goalsTimeline',list:'goalsListWrap',gantt:'ganttWrap'};
+  Object.keys(map).forEach(k=>{const el=document.getElementById(map[k]);if(el)el.style.display=(k===v)?(k==='cards'?'':'block'):'none';});
+  document.querySelectorAll('.goal-vtab').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  const fr=document.getElementById('goalFiltersRow');if(fr)fr.style.display=(v==='cards'||v==='list')?'flex':'none';
+  try{
+    if(v==='dashboard')renderGoalDashboard();
+    else if(v==='kanban')renderGoalKanban();
+    else if(v==='cards')renderGoalPlans();
+    else if(v==='list')renderGoalListView();
+    else if(v==='gantt')renderGantt();
+  }catch(e){console.error('goal view render',e);}
+};
+
+function renderGoalDashboard(){
+  const wrap=document.getElementById('goalsDashWrap');if(!wrap)return;
+  const plans=state.goalPlans||[];
+  if(!plans.length){wrap.innerHTML='<div class="todo-empty">No goals yet — add one above.</div>';return;}
+  const active=plans.filter(g=>g.status==='active');
+  const done=plans.filter(g=>g.status==='done');
+  const avgProg=Math.round(plans.reduce((s,g)=>s+(Number(g.progress)||0),0)/plans.length);
+  const sortP=[...plans].sort((a,b)=>(b.progress||0)-(a.progress||0));
+  const progRows=sortP.map(g=>{const pct=Math.min(100,Math.max(0,Number(g.progress)||0));const col=g.status==='done'?'var(--green)':pct>=75?'var(--blue)':pct>=40?'var(--amber)':'var(--red)';return '<div class="gd-prog-row"><div class="gd-prog-name">'+esc(g.icon||'🎯')+' '+esc(g.title)+'</div><div class="gd-prog-track"><div class="gd-prog-fill" style="width:'+pct+'%;background:'+col+'"></div></div><div class="gd-prog-pct">'+pct+'%</div></div>';}).join('');
+  const today=todayStr();
+  const ms=[];
+  plans.forEach(g=>(g.milestones||[]).forEach(m=>{if(!m.done&&m.due)ms.push({title:m.title,due:m.due,goal:g.title,icon:g.icon});}));
+  ms.sort((a,b)=>a.due.localeCompare(b.due));
+  const upcoming=ms.slice(0,6);
+  const msHtml=upcoming.length?upcoming.map(m=>{const overdue=m.due<today;const dueD=new Date(m.due);const diff=Math.round((dueD-new Date(today))/86400000);const lbl=overdue?'Overdue':diff===0?'Today':'in '+diff+'d';return '<div class="gd-ms-row"><div><div class="gd-ms-name">'+esc(m.title)+'</div><div class="gd-ms-goal">'+esc(m.icon||'🎯')+' '+esc(m.goal)+'</div></div><div class="gd-ms-due" style="color:'+(overdue?'var(--red)':diff===0?'var(--amber)':'var(--t3)')+'">'+lbl+'<br><span style="font-size:0.58rem;color:var(--t4)">'+dueD.toLocaleDateString('en-MY',{day:'numeric',month:'short'})+'</span></div></div>';}).join(''):'<div class="empty">No upcoming milestones — all clear.</div>';
+  wrap.innerHTML='<div class="gd-section"><div class="gd-sec-title">Overview</div><div class="gd-stat-mini"><div><b>'+plans.length+'</b>Total</div><div><b style="color:var(--blue)">'+active.length+'</b>Active</div><div><b style="color:var(--green)">'+done.length+'</b>Achieved</div><div><b style="color:var(--amber)">'+avgProg+'%</b>Avg progress</div></div></div><div class="gd-section"><div class="gd-sec-title">⏳ Upcoming milestones</div>'+msHtml+'</div><div class="gd-section"><div class="gd-sec-title">📊 Progress by goal</div>'+progRows+'</div>';
+}
+
+const GK_COLS=[['not-started','Not Started'],['active','Active'],['done','Achieved'],['paused','Paused']];
+function renderGoalKanban(){
+  const wrap=document.getElementById('goalsKanbanWrap');if(!wrap)return;
+  const plans=state.goalPlans||[];
+  const cols=GK_COLS.map(pair=>{
+    const st=pair[0],lbl=pair[1];
+    const items=plans.filter(g=>(g.status||'not-started')===st);
+    const cards=items.map(g=>{const pct=Math.min(100,Math.max(0,Number(g.progress)||0));const col=GSTATUS_COLOR[st];const msLen=(g.milestones||[]).length;const msDone=(g.milestones||[]).filter(m=>m.done).length;const ds=g.targetDate?new Date(g.targetDate).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'2-digit'}):'';return '<div class="gk-card" draggable="true" data-id="'+g.id+'" style="border-left-color:'+col+'" ondragstart="gkDragStart(event,'+g.id+')" ondragend="gkDragEnd(event)" onclick="openEditGoalPlan('+plans.indexOf(g)+')"><div class="gk-card-title">'+esc(g.icon||'🎯')+' '+esc(g.title)+'</div><div class="gk-card-meta">'+pct+'%'+(msLen?' · '+msDone+'/'+msLen+' ms':'')+(ds?' · '+ds:'')+'</div><div class="gk-card-track"><div class="gk-card-fill" style="width:'+pct+'%;background:'+col+'"></div></div></div>';}).join('');
+    return '<div class="gk-col" data-status="'+st+'" ondragover="gkDragOver(event)" ondragleave="gkDragLeave(event)" ondrop="gkDrop(event,\''+st+'\')"><div class="gk-col-title"><span>'+lbl+'</span><span>'+items.length+'</span></div>'+(cards||'<div style="font-size:0.62rem;color:var(--t4);text-align:center;padding:14px 0;font-weight:700">Drop here</div>')+'</div>';
+  }).join('');
+  wrap.innerHTML='<div class="gk-board">'+cols+'</div><div style="font-size:0.64rem;color:var(--t4);font-weight:700;margin-top:8px">Drag a card between columns to change status (desktop). On mobile, tap a card to edit and change status there.</div>';
+}
+let gkDragId=null;
+window.gkDragStart=function(e,id){gkDragId=id;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',String(id));}catch(_){}if(e.target&&e.target.classList)e.target.classList.add('dragging');};
+window.gkDragEnd=function(e){if(e.target&&e.target.classList)e.target.classList.remove('dragging');document.querySelectorAll('.gk-col').forEach(c=>c.classList.remove('drag-over'));};
+window.gkDragOver=function(e){e.preventDefault();e.dataTransfer.dropEffect='move';e.currentTarget.classList.add('drag-over');};
+window.gkDragLeave=function(e){e.currentTarget.classList.remove('drag-over');};
+window.gkDrop=async function(e,status){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  let id=gkDragId;try{const d=e.dataTransfer.getData('text/plain');if(d)id=Number(d);}catch(_){}
+  const g=(state.goalPlans||[]).find(x=>x.id===id);
+  if(g&&g.status!==status){g.status=status;if(status==='done'&&(!g.progress||g.progress<100))g.progress=100;renderGoalKanban();await saveData();}
+  else renderGoalKanban();
+  gkDragId=null;
+};
+
+let glSearch='',glSort='date';
+function renderGoalListView(){
+  const wrap=document.getElementById('goalsListWrap');if(!wrap)return;
+  let plans=[...(state.goalPlans||[])];
+  if(goalPlanFilter==='active')plans=plans.filter(g=>g.status==='active');
+  else if(goalPlanFilter==='done')plans=plans.filter(g=>g.status==='done');
+  else if(goalPlanFilter!=='all'&&goalPlanFilter!=='list')plans=plans.filter(g=>g.type===goalPlanFilter);
+  if(glSearch){const q=glSearch.toLowerCase();plans=plans.filter(g=>g.title.toLowerCase().includes(q)||(g.desc||'').toLowerCase().includes(q)||(g.milestones||[]).some(m=>m.title.toLowerCase().includes(q)));}
+  const order={'not-started':0,active:1,paused:2,done:3};
+  if(glSort==='date')plans.sort((a,b)=>{if(!a.targetDate&&!b.targetDate)return 0;if(!a.targetDate)return 1;if(!b.targetDate)return -1;return a.targetDate.localeCompare(b.targetDate);});
+  else if(glSort==='progress')plans.sort((a,b)=>(b.progress||0)-(a.progress||0));
+  else if(glSort==='name')plans.sort((a,b)=>a.title.localeCompare(b.title));
+  else if(glSort==='status')plans.sort((a,b)=>order[a.status||'not-started']-order[b.status||'not-started']);
+  const today=todayStr();
+  const rows=plans.length?plans.map(g=>{
+    const pct=Math.min(100,Math.max(0,Number(g.progress)||0));
+    const col=g.status==='done'?'var(--green)':pct>=75?'var(--blue)':pct>=40?'var(--amber)':'var(--red)';
+    const ds=g.targetDate?new Date(g.targetDate).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'2-digit'}):'—';
+    const overdue=g.targetDate&&g.targetDate<today&&g.status!=='done';
+    const scol=GSTATUS_COLOR[g.status||'not-started'];
+    const msLen=(g.milestones||[]).length,msDone=(g.milestones||[]).filter(m=>m.done).length;
+    const exp=msLen?'<div class="gl-expand" id="gl-exp-'+g.id+'" style="display:none">'+g.milestones.map(m=>'<div class="gl-ms"><span style="color:'+(m.done?'var(--green)':'var(--t4)')+'">'+(m.done?'✓':'○')+'</span><span style="'+(m.done?'text-decoration:line-through;color:var(--t4)':'')+'">'+esc(m.title)+'</span>'+(m.due?'<span style="margin-left:auto;font-size:0.62rem;color:var(--t4);font-family:var(--mono)">'+new Date(m.due).toLocaleDateString('en-MY',{day:'numeric',month:'short'})+'</span>':'')+'</div>').join('')+'</div>':'';
+    return '<div class="gl-row" onclick="glToggleExp('+g.id+')"><span class="gl-row-icon">'+esc(g.icon||'🎯')+'</span><div class="gl-row-main"><div class="gl-row-title">'+esc(g.title)+'</div><div class="gl-row-sub">'+esc(g.type||'Life')+(msLen?' · '+msDone+'/'+msLen+' milestones':'')+'</div></div><div class="gl-row-prog"><div class="gl-row-track"><div class="gl-row-fill" style="width:'+pct+'%;background:'+col+'"></div></div><div style="font-size:0.6rem;text-align:right;font-family:var(--mono);color:var(--t3);font-weight:800;margin-top:2px">'+pct+'%</div></div><span class="gl-badge" style="background:'+scol+'1A;color:'+scol+'">'+STATUS_LABEL[g.status||'not-started'].replace(' ✅','')+'</span><span class="gl-row-date" style="'+(overdue?'color:var(--red)':'')+'">'+ds+'</span></div>'+exp;
+  }).join(''):'<div class="todo-empty">No goals match your search/filter.</div>';
+  wrap.innerHTML='<div class="gl-controls"><input class="gl-search" id="glSearchInput" placeholder="🔍 Search goals or milestones..." value="'+esc(glSearch)+'"><select class="gl-sort" id="glSortSel"><option value="date">Sort: Due date</option><option value="progress">Sort: Progress</option><option value="name">Sort: Name</option><option value="status">Sort: Status</option></select></div><div class="gl-table">'+rows+'</div><div style="font-size:0.62rem;color:var(--t4);font-weight:700;margin-top:8px">Tap a row to expand milestones. To edit a goal, use the Cards view.</div>';
+  const si=document.getElementById('glSearchInput');if(si){si.oninput=function(){const pos=this.selectionStart;glSearch=this.value;renderGoalListView();const ns=document.getElementById('glSearchInput');if(ns){ns.focus();try{ns.setSelectionRange(pos,pos);}catch(_){}}};}
+  const ss=document.getElementById('glSortSel');if(ss){ss.value=glSort;ss.onchange=function(){glSort=this.value;renderGoalListView();};}
+}
+window.glToggleExp=function(id){const el=document.getElementById('gl-exp-'+id);if(el)el.style.display=el.style.display==='none'?'block':'none';};
+
 // ── GANTT CHART ───────────────────────────────────────
+
 let ganttVisible=false;
 function toggleGanttView(){
   ganttVisible=!ganttVisible;
@@ -1823,7 +1977,7 @@ function renderGoalPlans(){
   wrap.innerHTML=html;
   if(ganttVisible)renderGantt();
 }
-window.setGoalFilter=function(f,btn){goalPlanFilter=f;document.querySelectorAll('.goals-cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGoalPlans();};
+window.setGoalFilter=function(f,btn){goalPlanFilter=f;document.querySelectorAll('.goals-cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(goalView==='list')renderGoalListView();else renderGoalPlans();};
 window.delGoalPlan=async function(i){state.goalPlans.splice(i,1);renderGoalPlans();await saveData();};
 window.openEditGoalPlan=function(i){
   const g=state.goalPlans[i];
@@ -2963,7 +3117,7 @@ function switchAppTab(name){
   // Re-render target tab content
   if(name==='home'){try{renderDashboard();}catch(e){console.error('dashboard',e);}}
   else if(name==='todo')renderTodos();
-  else if(name==='goals')renderGoalPlans();
+  else if(name==='goals'){try{switchGoalView(goalView);}catch(e){renderGoalPlans();}}
   else if(name==='travel'){try{renderTravelPlans();}catch(e){console.error('travel render',e);}}
   else if(name==='shuli'){try{renderShuli();}catch(e){console.error('shuli render',e);}}
   else render();
