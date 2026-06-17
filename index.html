@@ -2305,6 +2305,20 @@ window.toggleSubtask=async function(tid,si){
   const t=state.todos.find(t=>t.id===tid);
   if(!t||!t.subtasks)return;
   t.subtasks[si].done=!t.subtasks[si].done;
+  // For a recurring task: once ALL sub-tasks are done, auto-complete the parent
+  // and spawn the next occurrence with sub-tasks reset to undone.
+  const allDone=t.subtasks.length>0&&t.subtasks.every(s=>s.done);
+  if(allDone&&!t.done&&t.recur&&t.recur!=='none'&&t.due){
+    t.done=true;t.doneAt=new Date().toISOString();
+    const nextDue=nextDueDate(t.due,t.recur);
+    if(nextDue){
+      state.todos.unshift({
+        id:Date.now(),title:t.title,note:t.note,category:t.category,
+        priority:t.priority,due:nextDue,recur:t.recur,done:false,doneAt:null,
+        subtasks:(t.subtasks||[]).map((s,si2)=>({title:s.title,done:false,id:Date.now()+si2+1}))
+      });
+    }
+  }
   renderTodos();await saveData();
 };
 window.delSubtask=async function(tid,si){
