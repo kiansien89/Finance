@@ -3575,6 +3575,211 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     return acct;
   }
 
+  // ── shared utilities ──
+  const MONTH_MAP={JAN:'01',FEB:'02',MAR:'03',APR:'04',MAY:'05',JUN:'06',JUL:'07',AUG:'08',SEP:'09',OCT:'10',NOV:'11',DEC:'12'};
+  function st_monName(s){return MONTH_MAP[(s||'').toUpperCase().slice(0,3)]||'01';}
+  function st_ddmon(s,yr){
+    // "24 MAY" or "24 May" → "24/05"
+    const m=(s||'').match(/(\d{1,2})\s+([A-Za-z]{3})/);
+    if(!m)return s;
+    return m[1].padStart(2,'0')+'/'+st_monName(m[2]);
+  }
+  function st_yearFromPeriodStr(s){
+    if(!s)return new Date().getFullYear();
+    const m=(s||'').match(/(\d{4})/);
+    return m?parseInt(m[1]):new Date().getFullYear();
+  }
+
+  // ── bank auto-detect ──
+  function st_detectBank(lines){
+    const full=lines.join(' ').toUpperCase();
+    if(/PUBLIC BANK|PUBLIC BANK BERHAD|PBB/i.test(full))return 'publicbank';
+    if(/STANDARD CHARTERED|STANDARDCHARTERED/i.test(full))return 'sc';
+    if(/\bUOB\b|UNITED OVERSEAS BANK/i.test(full))return 'uob';
+    if(/MAYBANK|MALAYAN BANKING/i.test(full))return 'maybank';
+    return null;
+  }
+
+  // ── Public Bank parser ──
+  function st_parsePublicBank(lines){
+    const acct={bankName:'Public Bank',accountNumber:null,statementPeriod:null,cards:[],warnings:[]};
+    const full=lines.join('\n');
+
+    // statement date
+    const sdm=full.match(/STATEMENT DATE[^\d]*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i)||full.match(/TARIKH PENYATA[^\d]*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i);
+    if(sdm)acct.statementPeriod=sdm[1];
+
+    let curCard=null;
+    const pushCard=c=>{if(c&&c.transactions.length)acct.cards.push(c);};
+
+    // card header pattern: "VISA QUANTUM 4355 3100 7552 5118 SIM KIAN SIEN" or "ONE VISA CARD ** 4599..."
+    const PB_CARD_FULL=/([A-Z][A-Z\s]+(?:VISA|MASTER|CARD)[A-Z\s]*)\s+[\*\d]{4}[- ]?[\*\d]{4}[- ]?[\*\d]{4}[- ]?(\d{4})/i;
+    const PB_CARD_NUM=/VISA\s+\w+\s+(\d{4}\s+\d{4}\s+\d{4}\s+\d{4})/i;
+    // transaction row: "DD MON  Description  Amount[CR]"
+    const PB_TX=/^(\d{1,2}\s+[A-Z]{3})\s{2,}(\d{1,2}\s+[A-Z]{3}|\d{1,2}[A-Z]{3})\s+(.*?)\s+(\d{1,3}(?:,\d{3})*\.\d{2})(CR)?$/i;
+    const PB_TX_SIMPLE=/^(\d{1,2}\s+[A-Z]{3})\s+(.*?)\s{2,}(\d{1,3}(?:,\d{3})*\.\d{2})(CR)?$/i;
+
+    const SKIP_PB=/PREVIOUS BAL|CREDIT LIMIT|This month total|Grand total|Jumlah|MINIMUM PAYMENT|Payment Due|Baki Terdahulu|Pembayaran Minimum|BAYARAN MINIMUM|STATEMENT DATE|TARIKH/i;
+
+    for(let i=0;i<lines.length;i++){
+      const ln=lines[i];
+      const up=ln.toUpperCase();
+
+      // detect new card section by card number header
+      const cnm=ln.match(PB_CARD_NUM);
+      const altCard=ln.match(/^(ONE VISA CARD|VISA QUANTUM|MASTER[\w\s]+)\s+\*{2}(\d{4}[-\s]\d{4}[-\s]\d{4}[-\s]\d{4})/i)||
+                    ln.match(/^([A-Z][A-Z\s]{3,30}CARD[A-Z\s]*)\s+\*{2}(\d{4}[-\s]\d{4}[-\s]\d{4}[-\s]\d{4})/i);
+
+      if(cnm){
+        pushCard(curCard);
+        const num=cnm[1].replace(/\s/g,'');
+        // card name: look for a VISA/MASTER keyword on same line before the number
+        const namePart=ln.slice(0,ln.search(PB_CARD_NUM)).trim()||'Public Bank Card';
+        curCard={cardName:namePart||'Public Bank Card',cardNumber:num,cardLast4:num.slice(-4),
+                 creditLimit:null,prevBalance:null,currentBalance:null,minPayment:null,transactions:[]};
+        if(!acct.accountNumber)acct.accountNumber=num;
+        continue;
+      }
+      if(altCard){
+        pushCard(curCard);
+        const rawNum=(altCard[2]||'').replace(/[-\s]/g,'');
+        const name=(altCard[1]||'').replace(/\s+/g,' ').trim();
+        curCard={cardName:name||'Public Bank Card',cardNumber:rawNum,cardLast4:rawNum.slice(-4),
+                 creditLimit:null,prevBalance:null,currentBalance:null,minPayment:null,transactions:[]};
+        if(!acct.accountNumber)acct.accountNumber=rawNum;
+        continue;
+      }
+
+      if(SKIP_PB.test(ln))continue;
+
+      // balance fields (account-level)
+      if(/Total Balance Due|Baki Perlu Dibayar/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+        if(m&&curCard)curCard.currentBalance=st_money(m[m.length-1]);
+        continue;
+      }
+      if(/Previous Balance|Baki Terdahulu/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/);
+        if(m&&curCard)curCard.prevBalance=st_money(m[1]);
+        continue;
+      }
+      if(/Minimum Payment Due|Bayaran Minimum/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+        if(m&&curCard)curCard.minPayment=st_money(m[m.length-1]);
+        continue;
+      }
+
+      // transaction row — try two-date format first, then single-date
+      if(!curCard)continue;
+      let tm=ln.match(PB_TX);
+      let txDate,desc,amtStr,isCR;
+      if(tm){txDate=st_ddmon(tm[1]);desc=(tm[3]||'').trim();amtStr=tm[4];isCR=!!tm[5];}
+      else{
+        tm=ln.match(PB_TX_SIMPLE);
+        if(tm){txDate=st_ddmon(tm[1]);desc=(tm[2]||'').trim();amtStr=tm[3];isCR=!!tm[4];}
+      }
+      if(tm&&desc&&amtStr){
+        const cat=st_categorize(desc,isCR);
+        curCard.transactions.push({txnDate:txDate,desc,amount:st_money(amtStr),isCR,category:cat});
+      }
+    }
+    pushCard(curCard);
+
+    // balance summary line: "1297.33 1327.75 .00 2953.21 .00 2922.79"
+    if(!acct.cards.length||acct.cards.every(c=>c.currentBalance==null)){
+      for(const ln of lines){
+        if(/Total Balance Due|Grand total/i.test(ln)){
+          const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+          if(m&&acct.cards.length)acct.cards[acct.cards.length-1].currentBalance=st_money(m[m.length-1]);
+        }
+      }
+    }
+    if(!acct.cards.length)acct.warnings.push('No card sections found. Confirm this is a Public Bank credit card statement (text-based PDF, not scanned).');
+    return acct;
+  }
+
+  // ── Standard Chartered parser ──
+  function st_parseStdChartered(lines){
+    const acct={bankName:'Standard Chartered',accountNumber:null,statementPeriod:null,cards:[],warnings:[]};
+    const full=lines.join('\n');
+
+    // statement date
+    const sdm=full.match(/Statement Date[^\d]*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i)||full.match(/Tarikh Penyata[^\d]*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i);
+    if(sdm)acct.statementPeriod=sdm[1];
+
+    let curCard=null;
+    const pushCard=c=>{if(c&&c.transactions.length)acct.cards.push(c);};
+
+    // SC card name + number: "SIMPLY CASH CREDIT CARD   5520-40XX-XXXX-7635"
+    const SC_CARD=/^([A-Z][A-Z0-9\s\-]{3,40}(?:CARD|ACCOUNT))\s+([\dX\-]{13,20})$/i;
+    // transaction: "13 May  12 May  Description  [Txn Ref xxx]  [CCY Amt]  RM Amount[CR]"
+    const SC_TX=/^(\d{1,2}\s+[A-Za-z]{3})\s+(\d{1,2}\s+[A-Za-z]{3})\s+(.*?)\s+(\d{1,3}(?:,\d{3})*\.\d{2})(CR)?$/i;
+    const SC_SKIP=/BALANCE FROM PREVIOUS|New Balance|MINIMUM PAYMENT|Payment Due|Baki dari|Pembayaran Minimum|Approved Credit|Available Credit|Previous Balance|Payments|Purchases|Cash Advance|Charges|Baki Baru|Baki Sebelumnya/i;
+
+    for(let i=0;i<lines.length;i++){
+      const ln=lines[i];
+
+      // card header
+      const cm=ln.match(SC_CARD);
+      if(cm&&!/^\d/.test(cm[1])){
+        pushCard(curCard);
+        const rawNum=(cm[2]||'').replace(/[^0-9X]/g,'');
+        const last4=(cm[2]||'').match(/(\d{4})$/);
+        curCard={cardName:(cm[1]||'').trim(),cardNumber:rawNum,cardLast4:last4?last4[1]:rawNum.slice(-4),
+                 creditLimit:null,prevBalance:null,currentBalance:null,minPayment:null,availableCredit:null,transactions:[]};
+        if(!acct.accountNumber)acct.accountNumber=rawNum;
+        continue;
+      }
+
+      // credit limit
+      if(/Approved Credit Limit/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g);
+        if(m&&curCard)curCard.creditLimit=st_money(m[0]);
+        continue;
+      }
+      if(/Available Credit/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g);
+        if(m&&curCard)curCard.availableCredit=st_money(m[m.length-1]);
+        continue;
+      }
+      if(/New Balance|Baki Baru/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+        if(m&&curCard)curCard.currentBalance=st_money(m[m.length-1]);
+        continue;
+      }
+      if(/Minimum Payment Due|Pembayaran Minimum/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+        if(m&&curCard)curCard.minPayment=st_money(m[m.length-1]);
+        continue;
+      }
+
+      if(SC_SKIP.test(ln))continue;
+      if(!curCard)continue;
+
+      const tm=ln.match(SC_TX);
+      if(tm){
+        let desc=(tm[3]||'').trim();
+        // strip trailing Txn Ref or currency amount from description
+        desc=desc.replace(/Txn Ref:?\s*[\w\d]+/i,'').replace(/[A-Z]{3}\s+[\d,]+\.\d{2}/,'').replace(/\s+/g,' ').trim();
+        const isCR=!!tm[5];
+        const cat=st_categorize(desc,isCR);
+        const txDate=st_ddmon(tm[2]); // use transaction date (tm[2]), not posting date (tm[1])
+        curCard.transactions.push({txnDate:txDate,desc,amount:st_money(tm[4]),isCR,category:cat});
+      }
+    }
+    pushCard(curCard);
+    if(!acct.cards.length)acct.warnings.push('No card sections found. Confirm this is a Standard Chartered credit card statement (text-based PDF, not scanned).');
+    return acct;
+  }
+
+  // ── UOB parser (stub) ──
+  function st_parseUOB(lines){
+    return {
+      bankName:'UOB',accountNumber:null,statementPeriod:null,cards:[],
+      warnings:['UOB parser not yet available. Share a UOB statement to enable it.']
+    };
+  }
+
   // ── dedup key ──
   function st_acctKey(a){return (a.bankName||'')+'|'+(a.accountNumber||'')+'|'+(a.statementPeriod||'');}
 
@@ -3588,10 +3793,16 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     try{
       const buf=await file.arrayBuffer();
       const lines=await st_extractLines(buf);
-      const acct=st_parseMaybank(lines);
+      const bank=st_detectBank(lines);
+      let acct;
+      if(bank==='publicbank')acct=st_parsePublicBank(lines);
+      else if(bank==='sc')acct=st_parseStdChartered(lines);
+      else if(bank==='uob')acct=st_parseUOB(lines);
+      else if(bank==='maybank')acct=st_parseMaybank(lines);
+      else{st_setStatus('Unsupported bank — only Maybank, Public Bank, and Standard Chartered are supported.','err');return;}
       st_pending=acct;
       st_renderReview(acct);
-      st_setStatus('Parsed — review below before saving.','ok');
+      st_setStatus('Parsed ('+acct.bankName+') — review below before saving.','ok');
     }catch(e){
       console.error('st parse',e);
       st_setStatus((e&&e.message)||'Could not read this PDF.','err');
