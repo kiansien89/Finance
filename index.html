@@ -3595,6 +3595,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     const full=lines.join(' ').toUpperCase();
     if(/PUBLIC BANK|PUBLIC BANK BERHAD|PBB/i.test(full))return 'publicbank';
     if(/STANDARD CHARTERED|STANDARDCHARTERED/i.test(full))return 'sc';
+    if(/HSBC|HSBC AMANAH/i.test(full))return 'hsbc';
     if(/\bUOB\b|UNITED OVERSEAS BANK/i.test(full))return 'uob';
     if(/MAYBANK|MALAYAN BANKING/i.test(full))return 'maybank';
     return null;
@@ -3610,7 +3611,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     if(sdm)acct.statementPeriod=sdm[1];
 
     let curCard=null;
-    const pushCard=c=>{if(c&&c.transactions.length)acct.cards.push(c);};
+    const pushCard=c=>{if(c&&(c.transactions.length||c.currentBalance!=null))acct.cards.push(c);};
 
     // card header pattern: "VISA QUANTUM 4355 3100 7552 5118 SIM KIAN SIEN" or "ONE VISA CARD ** 4599..."
     const PB_CARD_FULL=/([A-Z][A-Z\s]+(?:VISA|MASTER|CARD)[A-Z\s]*)\s+[\*\d]{4}[- ]?[\*\d]{4}[- ]?[\*\d]{4}[- ]?(\d{4})/i;
@@ -3650,9 +3651,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
         continue;
       }
 
-      if(SKIP_PB.test(ln))continue;
-
-      // balance fields (account-level)
+      // balance fields — must come BEFORE SKIP_PB check
       if(/Total Balance Due|Baki Perlu Dibayar/i.test(ln)){
         const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
         if(m&&curCard)curCard.currentBalance=st_money(m[m.length-1]);
@@ -3668,6 +3667,8 @@ document.getElementById('saveGoalPlan').onclick=async function(){
         if(m&&curCard)curCard.minPayment=st_money(m[m.length-1]);
         continue;
       }
+
+      if(SKIP_PB.test(ln))continue;
 
       // transaction row — try two-date format first, then single-date
       if(!curCard)continue;
@@ -3708,7 +3709,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     if(sdm)acct.statementPeriod=sdm[1];
 
     let curCard=null;
-    const pushCard=c=>{if(c&&c.transactions.length)acct.cards.push(c);};
+    const pushCard=c=>{if(c&&(c.transactions.length||c.currentBalance!=null))acct.cards.push(c);};
 
     // SC card name + number: "SIMPLY CASH CREDIT CARD   5520-40XX-XXXX-7635"
     const SC_CARD=/^([A-Z][A-Z0-9\s\-]{3,40}(?:CARD|ACCOUNT))\s+([\dX\-]{13,20})$/i;
@@ -3772,6 +3773,105 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     return acct;
   }
 
+  // ── HSBC / HSBC Amanah parser ──
+  function st_parseHSBC(lines){
+    const acct={bankName:'HSBC',accountNumber:null,statementPeriod:null,cards:[],warnings:[]};
+    const full=lines.join('\n');
+
+    // statement date: "06 JUN 2026" or "Statement Date 06 JUN 2026"
+    const sdm=full.match(/Statement Date[^\d]*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i)||
+              full.match(/(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})/);
+    if(sdm)acct.statementPeriod=sdm[1];
+
+    let curCard=null;
+    const pushCard=c=>{if(c&&(c.transactions.length||c.currentBalance!=null))acct.cards.push(c);};
+
+    // card number: "4617 7290 2058 8134" in header area or inline
+    const HSBC_CARDNUM=/(\d{4}\s+\d{4}\s+\d{4}\s+\d{4})/;
+    // card name: lines like "MPower Platinum Card-i" before/near card number
+    const HSBC_CARDNAME=/^([\w\s\-]+(?:Card|Card-i|Platinum|Gold|Visa|Master|Amanah)[\w\s\-]*)$/i;
+    // location suffix to strip: "KUALA LUMPUR MY", "PETALING JAYA MY", "SELANGOR MY"
+    const HSBC_LOC=/\s+[A-Z\s]{3,20}\s+MY\s*$/i;
+    // transaction row: "20 MAY  20 MAY  Description  Amount[CR]"
+    const HSBC_TX=/^(\d{1,2}\s+[A-Za-z]{3})\s+(\d{1,2}\s+[A-Za-z]{3})\s+(.*?)\s+(\d{1,3}(?:,\d{3})*\.\d{2})(CR)?$/i;
+    const HSBC_SKIP=/Previous Statement Balance|Your Credit Limit|Credit used last|CASH BACK SUMMARY|Cash Back from|Cash Back earned|Bonus Cash Back|Cash Back adj|Cash Back credited|Total Cash Back|Arrears of Payment|Current Due|Minimum Monthly|Overlimit|Payment Due Date|Effective Profit|Post date|Transaction date|Transaction details|Amount \(RM\)|Account Statement/i;
+
+    let pendingCardName=null;
+
+    for(let i=0;i<lines.length;i++){
+      const ln=lines[i];
+
+      // card number detection — create new card section
+      const cnm=ln.match(HSBC_CARDNUM);
+      if(cnm){
+        pushCard(curCard);
+        const num=cnm[1].replace(/\s/g,'');
+        // card name: look at previous non-empty lines for card name
+        let name=pendingCardName||'HSBC Card';
+        // also check same line before the number
+        const beforeNum=ln.slice(0,ln.search(HSBC_CARDNUM)).trim();
+        if(beforeNum&&beforeNum.length>2)name=beforeNum;
+        curCard={cardName:name,cardNumber:num,cardLast4:num.slice(-4),
+                 creditLimit:null,prevBalance:null,currentBalance:null,
+                 minPayment:null,paymentDue:null,transactions:[]};
+        if(!acct.accountNumber)acct.accountNumber=num;
+        pendingCardName=null;
+        continue;
+      }
+
+      // capture pending card name (line before card number)
+      if(HSBC_CARDNAME.test(ln.trim())&&!HSBC_SKIP.test(ln)){
+        pendingCardName=ln.trim();
+      }
+
+      // balance fields
+      if(/Payment Due\b/i.test(ln)&&!/Payment Due Date/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+        if(m&&curCard)curCard.currentBalance=st_money(m[m.length-1]);
+        continue;
+      }
+      if(/Payment Due Date/i.test(ln)){
+        const m=ln.match(/(\d{1,2}\s+[A-Za-z]+\s+\d{4})/);
+        if(m&&curCard)curCard.paymentDue=m[1];
+        continue;
+      }
+      if(/Your Previous Statement Balance/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+        if(m&&curCard)curCard.prevBalance=st_money(m[m.length-1]);
+        continue;
+      }
+      if(/Minimum Monthly Payment/i.test(ln)){
+        const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
+        if(m&&curCard)curCard.minPayment=st_money(m[m.length-1]);
+        continue;
+      }
+      if(/Your Credit Limit/i.test(ln)){
+        const m=ln.match(/RM\s*([\d,]+(?:\.\d{2})?)/i)||ln.match(/(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
+        if(m&&curCard)curCard.creditLimit=st_money(m[1]);
+        continue;
+      }
+
+      if(HSBC_SKIP.test(ln))continue;
+      if(!curCard)continue;
+
+      // transaction row
+      const tm=ln.match(HSBC_TX);
+      if(tm){
+        let desc=(tm[3]||'').trim();
+        desc=desc.replace(HSBC_LOC,'').replace(/\s+/g,' ').trim();
+        const isCR=!!tm[5];
+        const txnType=st_classifyTxType(desc,isCR);
+        if(txnType==='skip')continue;
+        const cat=txnType==='transfer'?'Transfer':txnType==='income'&&/CASH BACK|REBATE|REWARD/i.test(desc)?'Cash Back':txnType==='income'&&/REFUND|REVERSAL|ADJUSTMENT/i.test(desc)?'Refund':st_categorize(desc,isCR);
+        const txDate=st_ddmon(tm[2]); // use transaction date
+        curCard.transactions.push({txnDate:txDate,desc,amount:st_money(tm[4]),isCR,txnType,category:cat});
+      }
+    }
+    pushCard(curCard);
+    if(!acct.cards.length)acct.warnings.push('No card sections found. Confirm this is an HSBC/HSBC Amanah credit card statement (text-based PDF, not scanned).');
+    return acct;
+  }
+
   // ── UOB parser (stub) ──
   function st_parseUOB(lines){
     return {
@@ -3797,9 +3897,10 @@ document.getElementById('saveGoalPlan').onclick=async function(){
       let acct;
       if(bank==='publicbank')acct=st_parsePublicBank(lines);
       else if(bank==='sc')acct=st_parseStdChartered(lines);
+      else if(bank==='hsbc')acct=st_parseHSBC(lines);
       else if(bank==='uob')acct=st_parseUOB(lines);
       else if(bank==='maybank')acct=st_parseMaybank(lines);
-      else{st_setStatus('Unsupported bank — only Maybank, Public Bank, and Standard Chartered are supported.','err');return;}
+      else{st_setStatus('Unsupported bank — supported: Maybank, Public Bank, Standard Chartered, HSBC/HSBC Amanah.','err');return;}
       st_pending=acct;
       st_renderReview(acct);
       st_setStatus('Parsed ('+acct.bankName+') — review below before saving.','ok');
@@ -3852,7 +3953,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
       const sign=t.isCR?'+':'';
       const col=t.isCR?'var(--green)':'var(--t1)';
       const opts=ST_CATS.map(cc=>'<option'+(cc===t.category?' selected':'')+'>'+cc+'</option>').join('');
-      return '<div class="st-tx-row"><span style="font-size:0.6rem;color:var(--t4);font-family:var(--mono);min-width:34px">'+st_esc(t.posting)+'</span><span class="st-tx-desc">'+st_esc(t.desc)+'</span><select class="st-catsel" data-ci="'+ci+'" data-ti="'+ti+'">'+opts+'</select><span class="st-tx-amt" style="color:'+col+'">'+sign+st_fmt(t.amount)+(t.isCR?' CR':'')+'</span></div>';
+      return '<div class="st-tx-row"><span style="font-size:0.6rem;color:var(--t4);font-family:var(--mono);min-width:34px">'+st_esc(t.posting||t.txnDate||'')+'</span><span class="st-tx-desc">'+st_esc(t.desc)+'</span><select class="st-catsel" data-ci="'+ci+'" data-ti="'+ti+'">'+opts+'</select><span class="st-tx-amt" style="color:'+col+'">'+sign+st_fmt(t.amount)+(t.isCR?' CR':'')+'</span></div>';
     }).join('');
     return h+'</div>';
   }
@@ -3864,16 +3965,31 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     return m?parseInt(m[1]):new Date().getFullYear();
   }
 
+  // ── CR transaction classifier — replaces blind isCR→income mapping ──
+  function st_classifyTxType(desc,isCR){
+    if(!isCR)return 'expense';
+    const up=(desc||'').toUpperCase();
+    // payments to card = savings bucket (excluded from income & expense totals, visible in filter)
+    if(/PAYMENT|BAYARAN|IBG |DUITNOW|PAY-TO-ACCOUNT|TRANSFER IN|FUND TRANSFER|PAYMENT-THANK|PAYMENT RECD|PAY RECD|PAY REC/i.test(up))return 'savings';
+    if(/BTIPP|BTIP |BALANCE TRANSFER|INSTALLMENT PLAN/i.test(up))return 'skip';
+    if(/CASH BACK|REBATE|REWARD/i.test(up))return 'income';
+    if(/REFUND|REVERSAL|REVERSL|ADJUSTMENT/i.test(up))return 'income';
+    return 'income';
+  }
+
   function st_toTx(t,cardName,year){
     const parts=(t.txnDate||'01/01').split('/');
     const dd=(parts[0]||'01').padStart(2,'0');
     const mm=(parts[1]||'01').padStart(2,'0');
+    const txnType=t.txnType||st_classifyTxType(t.desc,t.isCR);
+    if(txnType==='skip')return null;
+    const cat=txnType==='transfer'?'Transfer':t.category||'Other';
     return {
       description:t.desc||'',
       amount:Number(t.amount)||0,
       date:`${year}-${mm}-${dd}`,
-      type:t.isCR?'income':'expense',
-      category:t.category||'Other',
+      type:txnType,
+      category:cat,
       note:'['+cardName+']',
       walletId:null,
       id:Date.now()+Math.random()
@@ -3884,7 +4000,10 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     const txs=state.transactions||[];
     const nd=new Date(newTx.date).getTime();
     return txs.find(ex=>{
-      if(ex.type!==newTx.type)return false;
+      // treat savings+income as interchangeable for dedup (payments may have been stored as income before fix)
+      const sameType=ex.type===newTx.type||
+        ((ex.type==='income'||ex.type==='savings')&&(newTx.type==='income'||newTx.type==='savings'));
+      if(!sameType&&ex.type!==newTx.type)return false;
       if(Number(ex.amount)!==Number(newTx.amount))return false;
       const ed=new Date(ex.date).getTime();
       return Math.abs(nd-ed)<=86400000;
@@ -3897,6 +4016,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     (acct.cards||[]).forEach(c=>{
       (c.transactions||[]).forEach(t=>{
         const newTx=st_toTx(t,c.cardName||'',year);
+        if(!newTx)return; // skip: balance transfer or classified skip
         const existing=st_isDuplicate(newTx);
         if(existing)duplicates.push({newTx,existing});
         else nonDuplicates.push(newTx);
@@ -3950,7 +4070,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     html+='<div style="font-size:0.7rem;color:var(--t3);font-weight:700;margin-bottom:8px">'+nonDuplicates.length+' new transactions ready. Check any duplicates to include them anyway:</div>';
     html+='<div id="stDupList">';
     duplicates.forEach((d,i)=>{
-      const col=d.newTx.type==='income'?'var(--green)':'var(--t1)';
+      const col=d.newTx.type==='income'?'var(--green)':d.newTx.type==='savings'?'var(--t3)':'var(--t1)';
       const sign=d.newTx.type==='income'?'+':'';
       html+='<div class="st-dup-row"><input type="checkbox" class="st-dup-cb" id="dup_'+i+'">';
       html+='<div class="st-dup-info"><div class="st-dup-desc">'+st_esc(d.newTx.description)+'</div>';
