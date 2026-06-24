@@ -4029,17 +4029,18 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     if(!Array.isArray(state.wallets))state.wallets=[];
     cards.forEach(c=>{
       if(c.currentBalance==null)return;
+      const bal=-(Number(c.currentBalance)||0); // negative = liability (we owe this)
       const existing=state.wallets.find(w=>
         w.name===c.cardName||(c.cardLast4&&w.name&&w.name.includes(c.cardLast4))
       );
       if(existing){
-        existing.balance=Number(c.currentBalance)||0;
+        existing.balance=bal;
         existing.type='credit_card';
       }else{
         state.wallets.push({
           name:c.cardName||('Card ••••'+c.cardLast4),
           type:'credit_card',
-          balance:Number(c.currentBalance)||0,
+          balance:bal,
           id:Date.now()+Math.random()
         });
       }
