@@ -760,8 +760,8 @@ input,select,button,textarea{font-family:var(--sans)}
     <button class="app-top-tab" id="topTabShuli" onclick="switchAppTab('shuli')">
       <div class="app-top-tab-inner">🔢 数理</div>
     </button>
-    <button class="app-top-tab" id="topTabBazi" onclick="bz_initTab()">
-      <div class="app-top-tab-inner">🧮 磁场</div>
+    <button class="app-top-tab" id="topTabBazi" onclick="switchAppTab('bazi')">
+      <div class="app-top-tab-inner">🔮 八字</div>
     </button>
   </div>
 
@@ -4423,7 +4423,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 
   let _cur=null;
 
-  window.bz_initTab=function(){injectCSS();bz_renderSaved();};
+  window.bz_initTab=function(){if(typeof switchAppTab==='function')switchAppTab('bazi');injectCSS();bz_renderSaved();};
 
   window.bz_toggleTime=function(){
     const u=document.getElementById('bzUnknown').checked;
