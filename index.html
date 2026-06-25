@@ -1175,8 +1175,8 @@ const DRIVE_FILE='finance_dashboard_data.json',SCOPES='https://www.googleapis.co
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CAT_EMOJI={'Food & drink':'🍜','Transport':'🚗','Groceries':'🛒','Utilities':'💡','Shopping':'🛍️','Health':'💊','Entertainment':'🎬','Salary':'💼','Savings':'🏦','Other':'📦','Subscription':'📱','Rent/Mortgage':'🏠','Insurance':'🛡️','Loan repayment':'💳','Investment':'📈','Telco':'📡'};
 const CAT_COLORS=['#BF0000','#0055AA','#007A38','#C06000','#7A50C8','#C04878','#4A9820','#0088AA'];
-const W_ICONS={bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈'};
-const W_LABELS={bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment'};
+const W_ICONS={bank:'🏦',ewallet:'📱',cash:'💵',savings:'🐖',investment:'📈',credit_card:'💳',loan:'📋'};
+const W_LABELS={bank:'Bank',ewallet:'E-wallet',cash:'Cash',savings:'Savings',investment:'Investment',credit_card:'Credit Card',loan:'Loan / BNPL'};
 
 // ── WALLPAPERS (New Zealand scenes) ──────────────────
 const WALLPAPERS=[
@@ -2165,7 +2165,26 @@ document.getElementById('fxRefreshBtn').onclick=fetchFxRates;
 document.getElementById('fxFromAmt').addEventListener('input',calcFx);
 document.addEventListener('change',function(e){if(e.target.id==='fxFromCur'||e.target.id==='fxToCur')calcFx();});
 
-function renderWallets(){const grid=document.getElementById('walletGrid');const total=state.wallets.reduce((s,w)=>s+Number(w.balance),0);grid.innerHTML=state.wallets.length?state.wallets.map((w,i)=>`<div class="wallet-card"><div class="w-actions"><button class="ic-btn" onclick="editWallet(${i})">✎</button><button class="ic-btn del" onclick="delWallet(${i})">✕</button></div><div class="w-icon">${W_ICONS[w.type]||'💳'}</div><div class="w-name">${esc(w.name)}</div><div class="w-bal">${fmt(w.balance)}</div><div class="w-type">${W_LABELS[w.type]||w.type}</div></div>`).join(''):'<div class="empty" style="text-align:left">No accounts yet.</div>';document.getElementById('walletTotal').textContent=fmt(total);const sel=document.getElementById('txWallet');const cur=sel.value;sel.innerHTML='<option value="">— none —</option>';state.wallets.forEach(w=>{const o=document.createElement('option');o.value=w.id;o.textContent=w.name;sel.appendChild(o);});if(cur)sel.value=cur;}
+function renderWallets(){
+  const grid=document.getElementById('walletGrid');
+  const total=state.wallets.reduce((s,w)=>s+Number(w.balance),0);
+  const isDebt=w=>w.type==='credit_card'||w.type==='loan';
+  grid.innerHTML=state.wallets.length?state.wallets.map((w,i)=>{
+    const bal=Number(w.balance);
+    const debt=isDebt(w);
+    const balDisplay=debt?fmt(Math.abs(bal)):fmt(bal);
+    const balColor=debt?'var(--red)':bal<0?'var(--red)':'var(--t1)';
+    const typeLabel=(W_LABELS[w.type]||w.type)+(debt?' · OWED':'');
+    return`<div class="wallet-card"><div class="w-actions"><button class="ic-btn" onclick="editWallet(${i})">✎</button><button class="ic-btn del" onclick="delWallet(${i})">✕</button></div><div class="w-icon">${W_ICONS[w.type]||'💳'}</div><div class="w-name">${esc(w.name)}</div><div class="w-bal" style="color:${balColor}">${balDisplay}</div><div class="w-type">${typeLabel}</div></div>`;
+  }).join(''):'<div class="empty" style="text-align:left">No accounts yet.</div>';
+  const totalEl=document.getElementById('walletTotal');
+  totalEl.textContent=fmt(total);
+  totalEl.style.color=total<0?'#ff6b6b':'';
+  const sel=document.getElementById('txWallet');const cur=sel.value;
+  sel.innerHTML='<option value="">— none —</option>';
+  state.wallets.forEach(w=>{const o=document.createElement('option');o.value=w.id;o.textContent=w.name;sel.appendChild(o);});
+  if(cur)sel.value=cur;
+}
 function updateMetrics(){const txs=monthTx();let inc=0,exp=0,sav=0;txs.forEach(t=>{if(t.type==='income')inc+=Number(t.amount);else if(t.type==='expense')exp+=Number(t.amount);else if(t.type==='savings')sav+=Number(t.amount);});const bal=inc-exp-sav;const pct=inc>0?Math.round((sav/inc)*100):0;const tod=todayStr();const upc=state.futures.filter(f=>f.date>=tod).reduce((s,f)=>s+Number(f.amount),0);document.getElementById('mIncome').textContent=fmtR(inc);document.getElementById('mIncomeSub').textContent=txs.filter(t=>t.type==='income').length+' entries';document.getElementById('mExpense').textContent=fmtR(exp);document.getElementById('mExpSub').textContent=txs.filter(t=>t.type==='expense').length+' entries';document.getElementById('mSaved').textContent=fmtR(sav);document.getElementById('mSavedSub').textContent=pct+'% of income';const mb=document.getElementById('mBalance');mb.textContent=fmtR(bal);mb.style.color=bal>=0?'var(--t1)':'var(--red)';document.getElementById('mUpcoming').textContent='Upcoming: '+fmtR(upc);}
 function renderTxList(elId,txs,limit){const el=document.getElementById(elId);if(!txs.length){el.innerHTML='<div class="empty">No transactions.</div>';return;}const show=limit?txs.slice(0,limit):txs;el.innerHTML=show.map(t=>{const gi=state.transactions.indexOf(t);const cls=t.type==='income'?'in':t.type==='savings'?'sav':'out';const sign=t.type==='income'?'+':'-';const ds=new Date(t.date).toLocaleDateString('en-MY',{day:'numeric',month:'short'});const w=t.walletId?state.wallets.find(w=>w.id==t.walletId):null;return`<div class="tx-item"><div class="tx-emoji">${ce(t.category)}</div><div class="tx-info"><div class="tx-name">${esc(t.description)}</div><div class="tx-meta">${ds}${w?' · '+esc(w.name):''}${t.note?' · '+esc(t.note):''}</div></div><span class="tx-tag">${esc(t.category)}</span><span class="amt ${cls}">${sign}${fmt(t.amount)}</span><button class="ic-btn del" onclick="delTx(${gi})">✕</button></div>`;}).join('');}
 function renderFutureList(elId,limit){const el=document.getElementById(elId);const fs=state.futures.slice().sort((a,b)=>a.date.localeCompare(b.date));if(!fs.length){el.innerHTML='<div class="empty">No upcoming payments.</div>';return;}const show=limit?fs.slice(0,limit):fs;el.innerHTML=show.map(f=>{const d=new Date(f.date);const today=new Date();today.setHours(0,0,0,0);const diff=Math.round((d-today)/86400000);let badge,dl;if(f.paid){badge='<span class="badge" style="background:rgba(0,122,56,0.1);color:var(--green)">✓ Paid</span>';dl='';}else if(diff<0){badge='<span class="badge overdue">Overdue</span>';dl=Math.abs(diff)+'d ago';}else if(diff===0){badge='<span class="badge today">Today</span>';dl='due today';}else if(diff<=7){badge='<span class="badge soon">Soon</span>';dl='in '+diff+'d';}else{badge='<span class="badge upcoming">Upcoming</span>';dl='in '+diff+'d';}const ds=d.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});const ri=state.futures.indexOf(f);const payBtn=f.paid?`<button class="unpay-btn" onclick="togglePaid(${ri})">Undo</button>`:`<button class="pay-btn" onclick="togglePaid(${ri})">✓ Mark paid</button>`;return`<div class="fut-item${f.paid?' paid':''}"><div class="tx-emoji">${ce(f.category)}</div><div class="fut-info"><div class="fut-name">${esc(f.description)}</div><div class="fut-meta">${ds} · ${esc(f.recurrence)}</div></div><div class="fut-r">${badge}<span style="font-family:var(--mono);font-size:0.72rem;color:var(--t2);font-weight:700">${fmt(f.amount)}</span>${dl?`<span style="font-size:0.65rem;color:var(--t4);font-weight:600">${dl}</span>`:''}</div>${payBtn}<button class="ic-btn del" onclick="delFuture(${ri})">✕</button></div>`;}).join('');}
@@ -4423,7 +4442,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 
   let _cur=null;
 
-  window.bz_initTab=function(){if(typeof switchAppTab==='function')switchAppTab('bazi');injectCSS();bz_renderSaved();};
+  window.bz_initTab=function(){injectCSS();bz_renderSaved();};
 
   window.bz_toggleTime=function(){
     const u=document.getElementById('bzUnknown').checked;
@@ -4487,8 +4506,6 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     if(!charts.length){el.innerHTML='';return;}
     el.innerHTML=charts.map((c,i)=>{const dm=c.dm||{};return`<div class="bz-si" onclick="bz_loadSaved(${i})"><div style="font-size:1.3rem">${EL_EMO[dm.dei||0]}</div><div style="flex:1"><div class="bz-sn">${esc(c.name||'Unnamed')}</div><div class="bz-sm">${c.dateStr}${c.timeStr?' · '+c.timeStr:''} · ${dm.name||''} · ${dm.str||''}</div></div><button class="ic-btn del" onclick="event.stopPropagation();bz_delChart(${i})">✕</button></div>`;}).join('');
   };
-
-})();
 
 })();
 
