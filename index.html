@@ -2046,9 +2046,11 @@ function renderTodos(){
   const doneTodos=todos.filter(t=>t.done);
   let html='';
   if(pendingTodos.length){html+=pendingTodos.map(t=>todoItemHtml(t)).join('');}
-  if(doneTodos.length&&todoFilter!=='pending'){
-    html+=`<div class="todo-section-label">Completed (${doneTodos.length})</div>`;
+  if(doneTodos.length&&todoFilter==='done'){
     html+=doneTodos.map(t=>todoItemHtml(t)).join('');
+  } else if(doneTodos.length&&todoFilter!=='pending'){
+    html+=`<div class="todo-section-label" style="cursor:pointer;user-select:none" onclick="const s=this.nextElementSibling;const show=s.style.display==='none';s.style.display=show?'':'none';this.querySelector('.td-cv').textContent=show?'▾':'▸'">✓ Completed (${doneTodos.length}) <span class="td-cv">▸</span></div>`;
+    html+=`<div style="display:none">${doneTodos.map(t=>todoItemHtml(t)).join('')}</div>`;
   }
   wrap.innerHTML=html;
   if(todoView==='calendar'){try{renderTodoCalendar();}catch(e){console.error('cal',e);}}
@@ -2129,15 +2131,17 @@ window.toggleSubtask=async function(tid,si){
   // For a recurring task: once ALL sub-tasks are done, auto-complete the parent
   // and spawn the next occurrence with sub-tasks reset to undone.
   const allDone=t.subtasks.length>0&&t.subtasks.every(s=>s.done);
-  if(allDone&&!t.done&&t.recur&&t.recur!=='none'&&t.due){
+  if(allDone&&!t.done&&t.recur&&t.recur!=='none'){
     t.done=true;t.doneAt=new Date().toISOString();
-    const nextDue=nextDueDate(t.due,t.recur);
+    const baseDue=t.due||todayStr();
+    const nextDue=nextDueDate(baseDue,t.recur);
     if(nextDue){
       state.todos.unshift({
         id:Date.now(),title:t.title,note:t.note,category:t.category,
         priority:t.priority,due:nextDue,recur:t.recur,done:false,doneAt:null,
         subtasks:(t.subtasks||[]).map((s,si2)=>({title:s.title,done:false,id:Date.now()+si2+1}))
       });
+      state.todos=state.todos.filter(x=>x.id!==t.id);
     }
   }
   renderTodos();await saveData();
@@ -2163,16 +2167,18 @@ window.toggleTodo=async function(id){
   const t=state.todos.find(t=>t.id===id);
   if(!t)return;
   if(!t.done){
-    // marking done — if recurring, spawn next occurrence
     t.done=true;t.doneAt=new Date().toISOString();
-    if(t.recur&&t.recur!=='none'&&t.due){
-      const nextDue=nextDueDate(t.due,t.recur);
+    if(t.recur&&t.recur!=='none'){
+      const baseDue=t.due||todayStr(); // use today if no due date set
+      const nextDue=nextDueDate(baseDue,t.recur);
       if(nextDue){
         state.todos.unshift({
           id:Date.now(),title:t.title,note:t.note,category:t.category,
           priority:t.priority,due:nextDue,recur:t.recur,done:false,doneAt:null,
           subtasks:(t.subtasks||[]).map((s,si)=>({title:s.title,done:false,id:Date.now()+si+1}))
         });
+        // auto-remove the completed recurring instance to keep list clean
+        state.todos=state.todos.filter(x=>x.id!==t.id);
       }
     }
   }else{
@@ -3739,7 +3745,20 @@ document.getElementById('saveGoalPlan').onclick=async function(){
   function st_cardReviewHtml(c,ci){
     const util=c.creditLimit?Math.min(100,Math.round((c.currentBalance/c.creditLimit)*100)):null;
     let h='<div class="st-card"><div class="st-card-hdr"><div><div class="st-card-name">💳 '+st_esc(c.cardName)+'</div><div class="st-card-num">•••• '+st_esc(c.cardLast4||'')+'</div></div></div>';
-    h+='<div class="st-due-grid"><div class="st-due-box"><div class="st-due-lbl">Balance</div><div class="st-due-val">'+st_fmtR(c.currentBalance)+'</div></div><div class="st-due-box"><div class="st-due-lbl">Prev bal</div><div class="st-due-val">'+st_fmtR(c.prevBalance||0)+'</div></div><div class="st-due-box"><div class="st-due-lbl">Limit</div><div class="st-due-val">'+(c.creditLimit?st_fmtR(c.creditLimit):'—')+'</div></div></div>';
+    const _minP=c.minPayment!=null?st_fmtR(c.minPayment):'—';
+    const _amtDue=c.amountDue!=null?st_fmtR(c.amountDue):(c.balanceDue!=null?st_fmtR(c.balanceDue):'—');
+    const _dueDate=c.paymentDue||'—';
+    const _redIfAmt=(v)=>v!=='—'?'color:var(--red)':'';
+    h+='<div class="st-due-grid" style="grid-template-columns:repeat(3,1fr)">';
+    h+='<div class="st-due-box"><div class="st-due-lbl">Total Balance</div><div class="st-due-val" style="color:var(--red)">'+st_fmtR(c.currentBalance)+'</div></div>';
+    h+='<div class="st-due-box"><div class="st-due-lbl">Min Payment</div><div class="st-due-val" style="'+_redIfAmt(_minP)+'">'+_minP+'</div></div>';
+    h+='<div class="st-due-box"><div class="st-due-lbl">Payment Due</div><div class="st-due-val">'+_dueDate+'</div></div>';
+    h+='</div>';
+    h+='<div class="st-due-grid" style="grid-template-columns:repeat(3,1fr);margin-top:4px">';
+    h+='<div class="st-due-box"><div class="st-due-lbl">Amount Due</div><div class="st-due-val" style="'+_redIfAmt(_amtDue)+'">'+_amtDue+'</div></div>';
+    h+='<div class="st-due-box"><div class="st-due-lbl">Prev Bal</div><div class="st-due-val">'+st_fmtR(c.prevBalance||0)+'</div></div>';
+    h+='<div class="st-due-box"><div class="st-due-lbl">Limit</div><div class="st-due-val">'+(c.creditLimit?st_fmtR(c.creditLimit):'—')+'</div></div>';
+    h+='</div>';
     if(c.balanceTransfers&&c.balanceTransfers.length){
       h+='<div class="st-sec-lbl">Balance transfers detected ('+c.balanceTransfers.length+')</div>';
       h+=c.balanceTransfers.map(b=>'<div class="st-bt"><div class="st-bt-name">'+st_esc(b.desc)+'</div><div class="st-bt-meta">'+st_fmt(b.monthly)+'/mo · month '+b.tenureCur+' of '+b.tenureTot+' · <strong>'+b.remaining+' left</strong> · est. remaining '+st_fmt(b.monthly*b.remaining)+'</div></div>').join('');
