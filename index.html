@@ -1084,6 +1084,7 @@ input,select,button,textarea{font-family:var(--sans)}
     <div class="field"><label>Category</label><select id="taskCat"><option value="Work">Work</option><option value="Personal">Personal</option><option value="Finance">Finance</option><option value="Health">Health</option><option value="Other">Other</option></select></div>
     <div class="field"><label>Priority</label><select id="taskPriority"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select></div>
     <div class="field"><label>Due date (optional)</label><input type="date" id="taskDue"></div>
+    <div class="field"><label>Due time (optional)</label><input type="time" id="taskDueTime"></div>
     <div class="field"><label>Recurring</label><select id="taskRecur"><option value="none">No recurrence</option><option value="daily">Daily</option><option value="weekdays">Weekdays only (Mon–Fri)</option><option value="weekly">Weekly</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly (every 3 months)</option><option value="yearly">Yearly</option></select></div>
     <div class="modal-actions"><button class="btn btn-ghost" id="cancelTask">Cancel</button><button class="btn btn-red" id="saveTask">Save task</button></div>
   </div>
@@ -1954,14 +1955,15 @@ function renderReport(){const txs=state.transactions;let inc=0,exp=0;txs.forEach
 function renderFilteredTx(){const fType=document.getElementById('txFilterType').value;const fCat=document.getElementById('txFilterCat').value;let txs=monthTx().filter(t=>(!fType||t.type===fType)&&(!fCat||t.category===fCat)).sort((a,b)=>b.date.localeCompare(a.date));renderTxList('txListFull',txs,0);document.getElementById('txMonthLbl2').textContent=MONTHS[viewMonth]+' '+viewYear;}
 
 // ── TODO RENDER ────────────────────────────────────────
-function getDueLabel(due){
+function getDueLabel(due,dueTime){
   if(!due)return null;
   const d=new Date(due);const today=new Date();today.setHours(0,0,0,0);
   const diff=Math.round((d-today)/86400000);
-  if(diff<0)return{label:Math.abs(diff)+'d overdue',cls:'overdue'};
-  if(diff===0)return{label:'Due today',cls:'today'};
-  if(diff<=3)return{label:'Due in '+diff+'d',cls:'soon'};
-  return{label:d.toLocaleDateString('en-MY',{day:'numeric',month:'short'}),cls:'future'};
+  const t=dueTime?' · '+dueTime:'';
+  if(diff<0)return{label:Math.abs(diff)+'d overdue'+t,cls:'overdue'};
+  if(diff===0)return{label:'Today'+t,cls:'today'};
+  if(diff<=3)return{label:'Due in '+diff+'d'+t,cls:'soon'};
+  return{label:d.toLocaleDateString('en-MY',{day:'numeric',month:'short'})+t,cls:'future'};
 }
 
 let todoView='list';
@@ -2057,7 +2059,7 @@ function renderTodos(){
 }
 
 function todoItemHtml(t){
-  const dueInfo=getDueLabel(t.due);
+  const dueInfo=getDueLabel(t.due,t.dueTime);
   const catCss=CAT_CSS[t.category]||'cat-other';
   const priColor=PRI_COLORS[t.priority]||'#C06000';
   const subs=t.subtasks||[];
@@ -2138,7 +2140,7 @@ window.toggleSubtask=async function(tid,si){
     if(nextDue){
       state.todos.unshift({
         id:Date.now(),title:t.title,note:t.note,category:t.category,
-        priority:t.priority,due:nextDue,recur:t.recur,done:false,doneAt:null,
+        priority:t.priority,due:nextDue,dueTime:t.dueTime,recur:t.recur,done:false,doneAt:null,
         subtasks:(t.subtasks||[]).map((s,si2)=>({title:s.title,done:false,id:Date.now()+si2+1}))
       });
       state.todos=state.todos.filter(x=>x.id!==t.id);
@@ -2174,7 +2176,7 @@ window.toggleTodo=async function(id){
       if(nextDue){
         state.todos.unshift({
           id:Date.now(),title:t.title,note:t.note,category:t.category,
-          priority:t.priority,due:nextDue,recur:t.recur,done:false,doneAt:null,
+          priority:t.priority,due:nextDue,dueTime:t.dueTime,recur:t.recur,done:false,doneAt:null,
           subtasks:(t.subtasks||[]).map((s,si)=>({title:s.title,done:false,id:Date.now()+si+1}))
         });
         // auto-remove the completed recurring instance to keep list clean
@@ -2195,6 +2197,7 @@ window.openEditTask=function(id){
   document.getElementById('taskCat').value=t.category;
   document.getElementById('taskPriority').value=t.priority;
   document.getElementById('taskDue').value=t.due||'';
+  document.getElementById('taskDueTime').value=t.dueTime||'';
   document.getElementById('taskRecur').value=t.recur||'none';
   document.getElementById('taskModalTitle').textContent='Edit task';
   document.getElementById('taskOverlay').classList.add('open');
@@ -3069,7 +3072,7 @@ document.getElementById('saveTr').onclick=async function(){
   if(editTrIdx>=0)state.transfers[editTrIdx]=p;else state.transfers.push(p);
   trOv.classList.remove('open');renderTransfers();await saveData();};
 document.getElementById('openBudget').onclick=()=>bOv.classList.add('open');
-document.getElementById('openTaskModal').onclick=()=>{editTaskId=null;document.getElementById('taskTitle').value='';document.getElementById('taskNote').value='';document.getElementById('taskCat').value='Work';document.getElementById('taskPriority').value='medium';document.getElementById('taskDue').value='';document.getElementById('taskRecur').value='none';document.getElementById('taskModalTitle').textContent='Add task';taskOv.classList.add('open');};
+document.getElementById('openTaskModal').onclick=()=>{editTaskId=null;document.getElementById('taskTitle').value='';document.getElementById('taskNote').value='';document.getElementById('taskCat').value='Work';document.getElementById('taskPriority').value='medium';document.getElementById('taskDue').value='';document.getElementById('taskDueTime').value='';document.getElementById('taskRecur').value='none';document.getElementById('taskModalTitle').textContent='Add task';taskOv.classList.add('open');};
 
 // Quick add on Enter
 document.getElementById('quickTaskInput').addEventListener('keydown',async function(e){
@@ -3090,7 +3093,7 @@ document.getElementById('saveBudget').onclick=async function(){const cat=documen
 document.getElementById('saveTask').onclick=async function(){
   const title=document.getElementById('taskTitle').value.trim();
   if(!title){alert('Please enter a task title.');return;}
-  const task={id:editTaskId||Date.now(),title,note:document.getElementById('taskNote').value.trim(),category:document.getElementById('taskCat').value,priority:document.getElementById('taskPriority').value,due:document.getElementById('taskDue').value,recur:document.getElementById('taskRecur').value,done:false,doneAt:null};
+  const task={id:editTaskId||Date.now(),title,note:document.getElementById('taskNote').value.trim(),category:document.getElementById('taskCat').value,priority:document.getElementById('taskPriority').value,due:document.getElementById('taskDue').value,dueTime:document.getElementById('taskDueTime').value,recur:document.getElementById('taskRecur').value,done:false,doneAt:null};
   if(editTaskId){const idx=state.todos.findIndex(t=>t.id===editTaskId);if(idx>=0){task.done=state.todos[idx].done;task.doneAt=state.todos[idx].doneAt;task.subtasks=state.todos[idx].subtasks;state.todos[idx]=task;}}
   else{state.todos.unshift(task);}
   taskOv.classList.remove('open');renderTodos();await saveData();
