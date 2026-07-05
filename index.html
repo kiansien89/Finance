@@ -701,8 +701,8 @@ input,select,button,textarea{font-family:var(--sans)}
     <button class="app-top-tab" id="topTabGoals" onclick="switchAppTab('goals')">
       <div class="app-top-tab-inner">🗺️ Goals</div>
     </button>
-    <button class="app-top-tab" id="topTabTravel" onclick="switchAppTab('travel')">
-      <div class="app-top-tab-inner">✈️ Travel</div>
+    <button class="app-top-tab" id="topTabPomo" onclick="switchAppTab('pomo')">
+      <div class="app-top-tab-inner">⏱ Pomo</div>
     </button>
     <button class="app-top-tab" id="topTabShuli" onclick="switchAppTab('shuli')">
       <div class="app-top-tab-inner">🔢 数理</div>
@@ -729,7 +729,7 @@ input,select,button,textarea{font-family:var(--sans)}
         <div class="panel"><div class="ph"><div class="pt">✅ Tasks due today</div><button class="add-btn" onclick="switchAppTab('todo')">Open →</button></div><div id="hmTasks"><div class="empty">—</div></div></div>
         <div class="panel"><div class="ph"><div class="pt">💸 Bills due today</div><button class="add-btn" onclick="switchAppTab('finance')">Open →</button></div><div id="hmBills"><div class="empty">—</div></div></div>
       </div>
-      <div class="panel" id="hmTripPanel" style="display:none"><div class="ph"><div class="pt">✈️ Next trip</div><button class="add-btn" onclick="switchAppTab('travel')">Open →</button></div><div id="hmTrip"></div></div>
+
     </div>
 
     <!-- ══ FINANCE PAGE ══ -->
@@ -893,7 +893,7 @@ input,select,button,textarea{font-family:var(--sans)}
         </div>
         <div class="panel"><div class="ph"><div class="pt">📈 Projection</div><span id="scChartSub" style="font-size:0.66rem;color:var(--t3);font-weight:700"></span></div><div class="sc-chart-wrap" id="scChart"></div></div>
         <div class="two-col">
-          <div class="panel"><div class="ph"><div class="pt">📌 One-off events</div><button class="add-btn" id="scImportTravel">✈️ Import trips</button></div>
+          <div class="panel"><div class="ph"><div class="pt">📌 One-off events</div></div>
             <div id="scEvList"><div class="empty">No events. Add planned big expenses (− ) or windfalls (+).</div></div>
             <div class="trv-form-grid" style="margin-top:10px;grid-template-columns:1fr 1fr">
               <div class="field" style="margin:0"><label>Month</label><input type="month" id="scEvMonth"></div>
@@ -996,31 +996,36 @@ input,select,button,textarea{font-family:var(--sans)}
       <div id="goalsTimeline"><div class="todo-empty">No goals yet — tap Add goal to start your path.</div></div>
     </div>
 
-    <!-- ══ TRAVEL PAGE ══ -->
-    <div class="app-page" id="page-travel">
-      <div class="panel">
-        <div class="ph"><div class="pt">✈️ Trip generator</div></div>
-        <div class="trv-form-grid">
-          <div class="field" style="margin:0"><label>Destination</label><input type="text" id="trvDest" placeholder="e.g. Queenstown, Tokyo, Bali"></div>
-          <div class="field" style="margin:0"><label>Number of days</label><input type="number" id="trvDays" min="1" max="30" value="8"></div>
-          <div class="field" style="margin:0"><label>Start date (optional)</label><input type="date" id="trvStart"></div>
-          <div class="field" style="margin:0"><label>Travellers (pax)</label><input type="number" id="trvPax" min="1" max="20" value="2"></div>
-          <div class="field" style="margin:0"><label>Style</label><select id="trvTier"><option value="budget">💵 Budget</option><option value="mid" selected>💳 Mid-range</option><option value="luxury">💎 Luxury</option></select></div>
-          <div class="field" style="margin:0"><label>Departure</label><input type="text" id="trvOrigin" value="Kuala Lumpur" placeholder="from"></div>
-        </div>
-        <div class="field" style="margin:6px 0 0"><label>Interests (tap to select)</label>
-          <div class="trv-chips" id="trvChips"></div>
-        </div>
-        <button class="btn btn-red" id="trvGenBtn" style="width:100%;margin-top:12px">✨ Generate trip plan</button>
-      </div>
-      <div id="trvResult"></div>
-      <div class="panel" id="trvSavedPanel">
-        <div class="ph"><div class="pt">📁 Saved trips</div></div>
-        <div id="trvSaved"><div class="empty">No saved trips yet.</div></div>
-      </div>
-    </div>
+
 
     <!-- ══ 数理 PAGE ══ -->
+    <!-- ══ POMODORO PAGE ══ -->
+    <div class="app-page" id="page-pomo">
+      <div class="pomo-tab-wrap">
+        <div class="panel pomo-tab-panel">
+          <div class="ph"><div class="pt">⏱ Pomodoro Timer</div></div>
+          <div class="pomo-tab-body">
+            <div class="pomo-tab-mode" id="pomoTabMode">WORKING</div>
+            <div class="pomo-tab-time" id="pomoTime">25:00</div>
+            <div class="pomo-tab-bar"><div class="pomo-fill" id="pomoBar"></div></div>
+            <div class="pomo-tab-label" id="pomoLabel">Focus session</div>
+            <div class="pomo-tab-btns">
+              <button class="btn btn-red pomo-tab-start" id="pomoToggleBtn" onclick="pomoToggle()">Start</button>
+              <button class="btn btn-ghost" onclick="pomoReset()">Reset</button>
+            </div>
+            <div class="pomo-tab-sessions">
+              <div class="pomo-tab-session-lbl">Sessions today</div>
+              <div class="pomo-tab-session-val" id="pomoSessionCount">0</div>
+            </div>
+            <div class="pomo-tab-tips">
+              <div class="pomo-tip">🍅 Work 25 min then 5 min break. Repeat.</div>
+              <div class="pomo-tip">📵 Close distractions. One task at a time.</div>
+              <div class="pomo-tip">🔁 After 4 sessions, take a 15-min break.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="app-page" id="page-shuli">
       <div class="panel">
         <div class="ph"><div class="pt">🔢 81数理吉凶分析器</div></div>
@@ -2782,10 +2787,12 @@ window.editDebt=i=>{editDebtIdx=i;const d=state.debts[i];document.getElementById
 
 // ── POMODORO + CLOCK ──────────────────────────────────
 const POMO_WORK=1500, POMO_REST=300;
-let pomoRemaining=POMO_WORK, pomoRunning=false, pomoMode='work', hmTimerStarted=false;
+let pomoRemaining=POMO_WORK, pomoRunning=false, pomoMode='work', hmTimerStarted=false, pomoSessions=0;
 function pomoCardHTML(){return `<div class="summary-card pomo-card"><div class="summary-icon">\u23f1\ufe0f</div><div class="summary-val" id="pomoTime" style="font-size:1.45rem;font-family:var(--mono);letter-spacing:0.02em">25:00</div><div class="pomo-bar"><div class="pomo-fill" id="pomoBar"></div></div><div class="pomo-row"><button class="pomo-btn" id="pomoToggleBtn" onclick="pomoToggle()">Start</button><button class="pomo-btn ghost" onclick="pomoReset()">Reset</button></div><div class="pomo-label" id="pomoLabel">WORKING</div></div>`;}
 function clockCardHTML(){return `<div class="summary-card"><div class="summary-icon">\ud83d\udd50</div><div class="summary-lbl">Current time</div><div class="summary-val" id="clockTime" style="font-size:1.45rem;font-family:var(--mono)">--:--</div></div>`;}
 function pomoRender(){
+  const modeEl=document.getElementById('pomoTabMode');if(modeEl)modeEl.textContent=pomoMode==='work'?'WORKING':'ON BREAK';
+  const scEl=document.getElementById('pomoSessionCount');if(scEl)scEl.textContent=String(pomoSessions||0);
   const t=document.getElementById('pomoTime'); if(!t)return;
   const tot=pomoMode==='work'?POMO_WORK:POMO_REST;
   const m=Math.floor(pomoRemaining/60), s=pomoRemaining%60;
@@ -2810,6 +2817,7 @@ function pomoPopup(msg){
 }
 function pomoComplete(){
   const wasWork=pomoMode==='work';
+  if(wasWork)pomoSessions++;
   pomoBeep();pomoFlash();
   pomoPopup(wasWork?'\ud83c\udf45 Work session complete! Take a 5-minute break.':'\u2615 Break over \u2014 ready for the next session?');
   pomoMode=wasWork?'rest':'work';
@@ -2825,7 +2833,7 @@ function hmTick(){
     else pomoRender();
   }
 }
-function ensureHmTimers(){if(hmTimerStarted)return;hmTimerStarted=true;setInterval(hmTick,1000);renderClocks();}
+function ensureHmTimers(){if(hmTimerStarted)return;hmTimerStarted=true;setInterval(hmTick,1000);setInterval(()=>{if(document.getElementById('page-home').style.display!=='none')fetchFXRates();},1800000);renderClocks();}
 
 // ── WORLD CLOCKS + WEEK + CHECKLIST ───────────────────
 function hmWeekRange(){
@@ -2878,6 +2886,41 @@ function renderNZWeatherCard(){
   if(nzWeatherData.error){el.innerHTML='<div class="summary-lbl">NZ Weather</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
   const[emoji,desc]=WMO[nzWeatherData.code]||['🌡️','Unknown'];
   el.innerHTML='<div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+nzWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+nzWeatherData.rain+'% · 💨'+nzWeatherData.wind+'km/h</div>';
+}
+
+// ── CURRENCY RATES (MYR/USD · MYR/NZD) ───────────────
+let fxData=null,fxLastFetch=0;
+async function fetchFXRates(){
+  // Throttle: only re-fetch after 30 min
+  if(fxData&&Date.now()-fxLastFetch<1800000){renderFXCard();return;}
+  try{
+    const r=await fetch('https://api.frankfurter.app/latest?from=MYR&to=USD,NZD');
+    const j=await r.json();
+    fxData={usd:j.rates.USD,nzd:j.rates.NZD,ts:new Date()};
+    fxLastFetch=Date.now();
+  }catch(e){fxData={error:true};}
+  renderFXCard();
+}
+function renderFXCard(){
+  const el=document.getElementById('fxCard');if(!el)return;
+  if(!fxData||fxData.error){
+    el.innerHTML='<div class="summary-lbl">💱 Currency</div><div class="summary-val" style="font-size:0.75rem;color:var(--t4)">Unavailable</div>';
+    return;
+  }
+  const ts=fxData.ts?fxData.ts.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}):'—';
+  el.innerHTML=
+    '<div class="summary-lbl">💱 Currency (MYR)</div>'+
+    '<div style="display:flex;flex-direction:column;gap:4px;margin:6px 0;width:100%;padding:0 8px;box-sizing:border-box">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<span style="font-size:0.62rem;font-weight:700;color:var(--t3)">MYR/USD</span>'+
+        '<span style="font-size:1rem;font-weight:800;font-family:var(--mono)">'+fxData.usd.toFixed(4)+'</span>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<span style="font-size:0.62rem;font-weight:700;color:var(--t3)">MYR/NZD</span>'+
+        '<span style="font-size:1rem;font-weight:800;font-family:var(--mono)">'+fxData.nzd.toFixed(4)+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="hm-metric-mini" style="font-size:0.54rem">↻ live · '+ts+'</div>';
 }
 
 // ── TODAY / HOME DASHBOARD ────────────────────────────
@@ -2975,14 +3018,15 @@ function renderDashboard(){
     sc('\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)'),
     sc('\ud83d\udcda','ACCA',accaPct===null?'\u2014':accaPct+'%',accaPct===null?'Add ACCA goal':'Progress','var(--blue)'),
     '<div class="summary-card" id="nzWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
-    pomoCardHTML(),
+    '<div class="summary-card" id="fxCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">💱 Currency</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
     sc('\ud83d\udcca','This week',todosDoneWk+' tasks',msDoneWk+' milestones done','var(--t1)'),
     clockCard('NZ time','Pacific/Auckland','\ud83c\udf0f'),
     clockCard('Current (GMT+8)','Asia/Kuala_Lumpur','\ud83d\udd50'),
     clockCard('Kagoshima','Asia/Tokyo','\ud83c\udfef')
   ].join('');
-  renderClocks();pomoRender();ensureHmTimers();
+  renderClocks();ensureHmTimers();
   if(!nzWeatherData)fetchNZWeather();else renderNZWeatherCard();
+  if(!fxData)fetchFXRates();else renderFXCard();
   // tasks due today
   const tEl=document.getElementById('hmTasks');
   if(tEl){
@@ -3006,7 +3050,7 @@ window.hmToggleTask=async function(id){if(window.toggleTodo){await toggleTodo(id
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
   // Use explicit add/remove instead of toggle for reliability
-  ['home','finance','todo','goals','travel','shuli','bazi'].forEach(n=>{
+  ['home','finance','todo','goals','pomo','shuli','bazi'].forEach(n=>{
     const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
     const page=document.getElementById('page-'+n);
     if(n===name){
@@ -3023,7 +3067,7 @@ function switchAppTab(name){
   if(name==='home'){try{renderDashboard();}catch(e){console.error('dashboard',e);}}
   else if(name==='todo')renderTodos();
   else if(name==='goals'){try{switchGoalView(goalView);}catch(e){renderGoalPlans();}}
-  else if(name==='travel'){try{renderTravelPlans();}catch(e){console.error('travel render',e);}}
+  else if(name==='pomo'){pomoRender();}
   else if(name==='shuli'){try{renderShuli();}catch(e){console.error('shuli render',e);}}
   else if(name==='bazi'){try{bz_initTab();}catch(e){console.error('bazi render',e);}}
   else render();
@@ -3058,7 +3102,6 @@ document.getElementById('shuGo').onclick=function(){const v=parseInt(document.ge
 ['scStart','scMonthly','scRet','scYears','scTarget'].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=scRecalc;});
 document.getElementById('scSaveBtn').onclick=async function(){scReadInputs();state.scenario={start:scCfg.start,monthly:scCfg.monthly,ret:scCfg.ret,years:scCfg.years,target:scCfg.target,events:scCfg.events||[]};await saveData();const b=this;const o=b.textContent;b.textContent='\u2713 Saved';setTimeout(()=>b.textContent=o,1400);};
 document.getElementById('scEvAdd').onclick=function(){const ym=document.getElementById('scEvMonth').value;const amt=parseFloat(document.getElementById('scEvAmt').value);const lbl=document.getElementById('scEvLbl').value.trim();if(!ym||isNaN(amt)||amt===0){alert('Fill month and a non-zero amount (negative = expense).');return;}if(!scCfg)scCfg=Object.assign(scDefaults(),state.scenario||{});if(!scCfg.events)scCfg.events=[];scCfg.events.push({ym,amount:amt,label:lbl||'Event'});document.getElementById('scEvAmt').value='';document.getElementById('scEvLbl').value='';scRecalc();};
-document.getElementById('scImportTravel').onclick=function(){const plans=Array.isArray(state.travelPlans)?state.travelPlans:[];if(!plans.length){alert('No saved trips yet. Save a trip in the Travel tab first.');return;}if(!scCfg)scCfg=Object.assign(scDefaults(),state.scenario||{});if(!scCfg.events)scCfg.events=[];let added=0,skipped=0;plans.forEach(p=>{const lbl='Trip: '+p.dest;if(scCfg.events.some(e=>e.label===lbl)){return;}let ym=p.startStr?p.startStr.slice(0,7):'';if(!ym){skipped++;return;}scCfg.events.push({ym,amount:-Math.abs(p.cost&&p.cost.total||0),label:lbl});added++;});scRecalc();alert(added+' trip(s) imported as expenses.'+(skipped?(' '+skipped+' skipped (no start date set).'):''));};
 
 document.getElementById('openTransfer').onclick=()=>openTransferModal();
 ['trTotal','trFee','trMonths'].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=trUpdateCalc;});
