@@ -3596,9 +3596,9 @@ document.getElementById('saveGoalPlan').onclick=async function(){
   // ── bank auto-detect ──
   function st_detectBank(lines){
     const full=lines.join(' ').toUpperCase();
-    if(/PUBLIC BANK|PUBLIC BANK BERHAD|PBB/i.test(full))return 'publicbank';
-    if(/STANDARD CHARTERED|STANDARDCHARTERED/i.test(full))return 'sc';
-    if(/HSBC|HSBC AMANAH/i.test(full))return 'hsbc';
+    if(/PUBLIC\s*BANK|PUBLIC BANK BERHAD|PBB/i.test(full))return 'publicbank';
+    if(/STANDARD\s*CHARTERED|STANDARDCHARTERED/i.test(full))return 'sc';
+    if(/HSBC|AMANAH|MPOWER PLATINUM/i.test(full))return 'hsbc';
     if(/\bUOB\b|UNITED OVERSEAS BANK/i.test(full))return 'uob';
     if(/MAYBANK|MALAYAN BANKING/i.test(full))return 'maybank';
     return null;
@@ -3788,36 +3788,62 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 
     let curCard=null;
     const pushCard=c=>{if(c&&(c.transactions.length||c.currentBalance!=null))acct.cards.push(c);};
+    const cardsByNum={};
+    const getOrMakeCard=(num,name)=>{
+      if(cardsByNum[num])return cardsByNum[num];
+      const c={cardName:name||'HSBC Card',cardNumber:num,cardLast4:num.slice(-4),
+                creditLimit:null,prevBalance:null,currentBalance:null,
+                minPayment:null,paymentDue:null,transactions:[]};
+      cardsByNum[num]=c;
+      if(!acct.accountNumber)acct.accountNumber=num;
+      return c;
+    };
 
-    // card number: "4617 7290 2058 8134" in header area or inline
-    const HSBC_CARDNUM=/(\d{4}\s+\d{4}\s+\d{4}\s+\d{4})/;
+    // card number: "4617 7290 2058 8134" — 4 groups of 4 digits, space separated
+    const HSBC_CARDNUM=/(\d{4}\s\d{4}\s\d{4}\s\d{4})/;
+    // footer/reference code guard: page footers look like "4   4617729020588134   0000369042   0000061107"
+    // (single leading digit or long unbroken digit blob before/after) — exclude these
+    const HSBC_FOOTER=/^\s*\d\s+\d{12,}|^\s*\d{12,}\s+\d{4,}\s+\d{4,}/;
     // card name: lines like "MPower Platinum Card-i" before/near card number
     const HSBC_CARDNAME=/^([\w\s\-]+(?:Card|Card-i|Platinum|Gold|Visa|Master|Amanah)[\w\s\-]*)$/i;
     // location suffix to strip: "KUALA LUMPUR MY", "PETALING JAYA MY", "SELANGOR MY"
     const HSBC_LOC=/\s+[A-Z\s]{3,20}\s+MY\s*$/i;
     // transaction row: "20 MAY  20 MAY  Description  Amount[CR]"
     const HSBC_TX=/^(\d{1,2}\s+[A-Za-z]{3})\s+(\d{1,2}\s+[A-Za-z]{3})\s+(.*?)\s+(\d{1,3}(?:,\d{3})*\.\d{2})(CR)?$/i;
-    const HSBC_SKIP=/Previous Statement Balance|Your Credit Limit|Credit used last|CASH BACK SUMMARY|Cash Back from|Cash Back earned|Bonus Cash Back|Cash Back adj|Cash Back credited|Total Cash Back|Arrears of Payment|Current Due|Minimum Monthly|Overlimit|Payment Due Date|Effective Profit|Post date|Transaction date|Transaction details|Amount \(RM\)|Account Statement/i;
+    const HSBC_SKIP=/Previous Statement Balance|Your Credit Limit|Credit used last|CASH BACK SUMMARY|Cash Back from|Cash Back earned|Bonus Cash Back|Cash Back adj|Cash Back credited|Total Cash Back|Arrears of Payment|Current Due|Minimum Monthly|Overlimit|Payment Due Date|Effective Profit|Post date|Transaction date|Transaction details|Amount \(RM\)|Account Statement|GLOSSARY/i;
 
+    // ── PASS 1: Page-1 style compact summary table row ──
+    // "4617 7290 2058 8134  MPower Platinum Card-i  3,690.42  611.07  0.00  611.07"
+    // Also tolerates the row broken as: cardnum+cardtype on one line, 4 numbers following
+    // (either same line or next 1-2 lines), matched via a wide window search.
+    const HSBC_SUMMARY_ROW=/(\d{4}\s\d{4}\s\d{4}\s\d{4})\s+([A-Za-z][\w\s\-]*?(?:Card-i|Card|Platinum|Gold|Amanah))\s+(\d{1,3}(?:,\d{3})*\.\d{2})\s+(\d{1,3}(?:,\d{3})*\.\d{2})\s+(\d{1,3}(?:,\d{3})*\.\d{2})\s+(\d{1,3}(?:,\d{3})*\.\d{2})/i;
+    for(let i=0;i<lines.length;i++){
+      if(HSBC_FOOTER.test(lines[i]))continue;
+      const sm=lines[i].match(HSBC_SUMMARY_ROW);
+      if(sm){
+        const num=sm[1].replace(/\s/g,'');
+        const c=getOrMakeCard(num,sm[2].trim());
+        c.currentBalance=st_money(sm[3]);
+        c.minPayment=st_money(sm[4]);
+        // sm[5] = overlimit, sm[6] = payment due
+        c.paymentDueAmt=st_money(sm[6]);
+      }
+    }
+
+    // ── PASS 2: line-by-line detail (Page 2/3 breakdown + transactions) ──
     let pendingCardName=null;
-
     for(let i=0;i<lines.length;i++){
       const ln=lines[i];
+      if(HSBC_FOOTER.test(ln))continue;
 
-      // card number detection — create new card section
+      // card number detection — switch active card context
       const cnm=ln.match(HSBC_CARDNUM);
       if(cnm){
-        pushCard(curCard);
         const num=cnm[1].replace(/\s/g,'');
-        // card name: look at previous non-empty lines for card name
-        let name=pendingCardName||'HSBC Card';
-        // also check same line before the number
         const beforeNum=ln.slice(0,ln.search(HSBC_CARDNUM)).trim();
-        if(beforeNum&&beforeNum.length>2)name=beforeNum;
-        curCard={cardName:name,cardNumber:num,cardLast4:num.slice(-4),
-                 creditLimit:null,prevBalance:null,currentBalance:null,
-                 minPayment:null,paymentDue:null,transactions:[]};
-        if(!acct.accountNumber)acct.accountNumber=num;
+        let name=pendingCardName||beforeNum||'HSBC Card';
+        if(curCard&&curCard.cardNumber!==num)pushCard(curCard);
+        curCard=getOrMakeCard(num,name);
         pendingCardName=null;
         continue;
       }
@@ -3827,10 +3853,10 @@ document.getElementById('saveGoalPlan').onclick=async function(){
         pendingCardName=ln.trim();
       }
 
-      // balance fields
+      // balance fields (fills gaps if Pass 1 summary row wasn't found)
       if(/Payment Due\b/i.test(ln)&&!/Payment Due Date/i.test(ln)){
         const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
-        if(m&&curCard)curCard.currentBalance=st_money(m[m.length-1]);
+        if(m&&curCard&&curCard.currentBalance==null)curCard.currentBalance=st_money(m[m.length-1]);
         continue;
       }
       if(/Payment Due Date/i.test(ln)){
@@ -3845,7 +3871,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
       }
       if(/Minimum Monthly Payment/i.test(ln)){
         const m=ln.match(/(\d{1,3}(?:,\d{3})*\.\d{2})/g);
-        if(m&&curCard)curCard.minPayment=st_money(m[m.length-1]);
+        if(m&&curCard&&curCard.minPayment==null)curCard.minPayment=st_money(m[m.length-1]);
         continue;
       }
       if(/Your Credit Limit/i.test(ln)){
@@ -3871,6 +3897,9 @@ document.getElementById('saveGoalPlan').onclick=async function(){
       }
     }
     pushCard(curCard);
+    // push any cards created in Pass 1 that Pass 2 never touched (e.g. no txns matched)
+    Object.values(cardsByNum).forEach(c=>{if(!acct.cards.includes(c)&&(c.transactions.length||c.currentBalance!=null))acct.cards.push(c);});
+
     if(!acct.cards.length)acct.warnings.push('No card sections found. Confirm this is an HSBC/HSBC Amanah credit card statement (text-based PDF, not scanned).');
     return acct;
   }
@@ -4396,4 +4425,96 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     let h=`<div class="panel bz-res"><div class="ph"><div class="pt">🔮 ${esc(c.name||'BaZi Chart')}</div><span style="font-size:0.64rem;font-weight:700;color:var(--t3)">${c.dateStr}${c.timeStr?' · '+c.timeStr:' · Time unknown'}</span></div>`;
     h+=`<div class="bz-pgrid">${pil('年 Year',yp,tg.yr)}${pil('月 Month',mp,tg.mo)}${pil('日 Day',dp,tg.dy)}${pil('時 Hour',hp,tg.hr)}</div>`;
     h+=`<div class="bz-sec">Day Master 日主 · ${dm.name} · <span style="color:${EL_COL[dm.dei]};font-weight:800">${dm.str}</span></div>`;
-    h+=`<div class="bz-card"><div class="bz-row"><b>Traits:</b> ${dm.traits}</div><div class="bz-row"><b>Character (${dm.str}):</b> ${dm.char}</div><div class="bz-row"><b>Lucky Elements:</b> ${dm.lucky} &nbsp;·&nbsp; <b>Challenge:</b> ${dm.challenge}</div><div class="bz-row bz-a
+    h+=`<div class="bz-card"><div class="bz-row"><b>Traits:</b> ${dm.traits}</div><div class="bz-row"><b>Character (${dm.str}):</b> ${dm.char}</div><div class="bz-row"><b>Lucky Elements:</b> ${dm.lucky} &nbsp;·&nbsp; <b>Challenge:</b> ${dm.challenge}</div><div class="bz-row bz-adv">💡 ${dm.advice}</div></div>`;
+    h+=`<div class="bz-sec">Five Elements 五行</div><div class="bz-egrid">`;
+    EL.forEach((e,i)=>{const pct=tot>0?Math.round(ec[i]/tot*100):0;const brd=i===dm.dei?`border:2px solid ${EL_COL[i]};`:'';h+=`<div class="bz-ecard" style="${brd}"><div style="font-size:1.3rem">${EL_EMO[i]}</div><div style="font-size:0.58rem;font-weight:800;color:${EL_COL[i]}">${EL_ZH[i]} ${e}</div><div style="font-size:1.1rem;font-weight:800">${ec[i]}</div><div style="font-size:0.54rem;color:var(--t3);font-weight:700">${pct}%</div><div style="width:100%;height:4px;background:rgba(0,0,0,0.1);border-radius:2px;margin-top:5px"><div style="width:${pct}%;height:100%;background:${EL_COL[i]};border-radius:2px"></div></div></div>`;});
+    h+=`</div><div class="bz-sec">Ten Gods 十神</div><div class="bz-tgrid">`;
+    [{l:'Year 年',g:tg.yr,p:yp},{l:'Month 月',g:tg.mo,p:mp},{l:'Day 日',g:tg.dy,p:dp},{l:'Hour 時',g:tg.hr,p:hp}].forEach(r=>{
+      if(!r.p&&r.l!=='Day 日')return;
+      const col=r.p?EL_COL[STEM_EL[r.p.si]]:'var(--t3)';
+      h+=`<div class="bz-trow"><div class="bz-tl">${r.l}</div><div class="bz-tg" style="color:${col}">${r.g||'?'}</div><div class="bz-td">${TG_DESC[r.g]||'—'}</div></div>`;
+    });
+    h+=`</div><div class="bz-sec">Major Luck Pillars 大運 · Starts age ${lp.startAge} · ${lp.fwd?'↗ Forward':'↙ Reverse'} cycle</div><div class="bz-lscroll"><div class="bz-lprow">`;
+    lp.pillars.forEach(p=>{const sC=EL_COL[STEM_EL[p.si]],bC=EL_COL[BRANCH_EL[p.bi]];h+=`<div class="bz-lp"><div class="bz-lage">Age ${p.age}–${p.ageEnd}</div><div class="bz-lyr">${p.yr}–${p.yrEnd}</div><div class="bz-ls" style="color:${sC}">${p.s}</div><div class="bz-lb" style="color:${bC}">${p.b}</div><div class="bz-le" style="color:${sC}">${EL_ZH[p.eli]}${EL[p.eli]}</div></div>`;});
+    h+=`</div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-red" id="bzSaveBtn" style="flex:1">💾 Save Chart to Drive</button></div></div>`;
+    return h;
+  }
+
+  function injectCSS(){
+    if(document.getElementById('bz-css'))return;
+    const s=document.createElement('style');s.id='bz-css';
+    s.textContent=`.bz-wrap{padding:0 4px}.bz-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}.bz-unk{display:flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:700;color:var(--t2);margin-bottom:10px}.bz-pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.bz-pil{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.07);border-radius:12px;padding:12px 6px;text-align:center}.bz-upil{opacity:.35}.bz-pl{font-size:0.5rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}.bz-ps{font-size:2rem;font-weight:800;line-height:1}.bz-pb{font-size:1.6rem;font-weight:800;margin-top:6px}.bz-sub{font-size:0.5rem;font-weight:700;color:var(--t3);margin:2px 0}.bz-pg{font-size:0.54rem;font-weight:800;background:rgba(0,0,0,0.06);border-radius:6px;padding:3px 5px;margin-top:6px;color:var(--t2);cursor:help}.bz-sec{font-size:0.6rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px;border-top:1px solid rgba(0,0,0,0.06);padding-top:10px}.bz-card{background:rgba(0,0,0,0.03);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}.bz-row{font-size:0.7rem;font-weight:700;color:var(--t2);line-height:1.5}.bz-adv{background:rgba(0,0,0,0.04);border-radius:8px;padding:8px;font-weight:800;color:var(--t1)}.bz-egrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.bz-ecard{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.06);border-radius:10px;padding:9px 4px;text-align:center}.bz-tgrid{display:flex;flex-direction:column;gap:4px}.bz-trow{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05)}.bz-tl{font-size:0.6rem;font-weight:800;color:var(--t3);min-width:56px}.bz-tg{font-size:0.7rem;font-weight:800;min-width:110px;line-height:1.3}.bz-td{font-size:0.6rem;font-weight:700;color:var(--t3);line-height:1.4}.bz-lscroll{overflow-x:auto;padding-bottom:6px}.bz-lprow{display:flex;gap:7px;min-width:max-content}.bz-lp{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.06);border-radius:10px;padding:10px 6px;text-align:center;min-width:82px}.bz-lage{font-size:0.54rem;font-weight:800;color:var(--t3);margin-bottom:2px}.bz-lyr{font-size:0.5rem;font-weight:700;color:var(--t4);margin-bottom:6px;font-family:var(--mono)}.bz-ls{font-size:1.7rem;font-weight:800;line-height:1}.bz-lb{font-size:1.3rem;font-weight:800}.bz-le{font-size:0.58rem;font-weight:800;margin-top:3px}.bz-si{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer}.bz-si:hover{opacity:.75}.bz-sn{font-size:0.74rem;font-weight:800;color:var(--t1)}.bz-sm{font-size:0.6rem;font-weight:700;color:var(--t3)}@media(max-width:600px){.bz-pgrid{grid-template-columns:repeat(2,1fr)}.bz-egrid{grid-template-columns:repeat(3,1fr)}.bz-form-row{grid-template-columns:1fr}}`;
+    document.head.appendChild(s);
+  }
+
+  let _cur=null;
+
+  window.bz_initTab=function(){injectCSS();bz_renderSaved();};
+
+  window.bz_toggleTime=function(){
+    const u=document.getElementById('bzUnknown').checked;
+    const t=document.getElementById('bzTime');
+    if(t){t.disabled=u;if(u)t.value='';}
+  };
+
+  window.bz_calculate=function(){
+    const name=(document.getElementById('bzName')||{}).value||'';
+    const dateStr=(document.getElementById('bzDate')||{}).value||'';
+    const timeStr=(document.getElementById('bzTime')||{}).value||'';
+    const unk=(document.getElementById('bzUnknown')||{}).checked||false;
+    if(!dateStr){alert('Please enter a birth date.');return;}
+    injectCSS();
+    _cur=buildChart(name.trim(),dateStr,timeStr||null,unk);
+    const el=document.getElementById('bzResult');
+    if(!el)return;
+    el.innerHTML=renderChart(_cur);
+    const sb=document.getElementById('bzSaveBtn');
+    if(sb)sb.onclick=bz_save;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+
+  window.bz_save=async function(){
+    if(!_cur)return;
+    if(!Array.isArray(state.baziCharts))state.baziCharts=[];
+    const idx=state.baziCharts.findIndex(c=>c.id===_cur.id);
+    if(idx>=0)state.baziCharts[idx]=_cur;else state.baziCharts.unshift(_cur);
+    if(typeof saveData==='function')await saveData();
+    bz_renderSaved();
+    const sb=document.getElementById('bzSaveBtn');
+    if(sb)sb.textContent='✓ Saved to Drive';
+  };
+
+  window.bz_loadSaved=function(idx){
+    if(!state.baziCharts||!state.baziCharts[idx])return;
+    injectCSS();_cur=state.baziCharts[idx];
+    const el=document.getElementById('bzResult');
+    if(!el)return;
+    el.innerHTML=renderChart(_cur);
+    const sb=document.getElementById('bzSaveBtn');
+    if(sb)sb.onclick=bz_save;
+    ['bzName','bzDate','bzTime'].forEach(id=>{const e=document.getElementById(id);if(!e)return;e.value=id==='bzName'?_cur.name||'':id==='bzDate'?_cur.dateStr||'':_cur.timeStr||'';});
+    const bu=document.getElementById('bzUnknown');if(bu)bu.checked=!_cur.timeStr;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+
+  window.bz_delChart=async function(idx){
+    if(!confirm('Delete this chart?'))return;
+    state.baziCharts.splice(idx,1);
+    if(typeof saveData==='function')await saveData();
+    bz_renderSaved();
+  };
+
+  window.bz_renderSaved=function(){
+    const el=document.getElementById('bzSavedList');
+    const panel=document.getElementById('bzSavedPanel');
+    if(!el)return;
+    const charts=state.baziCharts||[];
+    if(panel)panel.style.display=charts.length?'block':'none';
+    if(!charts.length){el.innerHTML='';return;}
+    el.innerHTML=charts.map((c,i)=>{const dm=c.dm||{};return`<div class="bz-si" onclick="bz_loadSaved(${i})"><div style="font-size:1.3rem">${EL_EMO[dm.dei||0]}</div><div style="flex:1"><div class="bz-sn">${esc(c.name||'Unnamed')}</div><div class="bz-sm">${c.dateStr}${c.timeStr?' · '+c.timeStr:''} · ${dm.name||''} · ${dm.str||''}</div></div><button class="ic-btn del" onclick="event.stopPropagation();bz_delChart(${i})">✕</button></div>`;}).join('');
+  };
+
+})();
+
+</script>
+</body>
