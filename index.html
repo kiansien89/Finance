@@ -376,6 +376,23 @@ input,select,button,textarea{font-family:var(--sans)}
 .pomo-popup-msg{font-size:0.92rem;font-weight:700;color:var(--t1);margin-bottom:18px;line-height:1.55}
 @keyframes pomoFlashAnim{0%,100%{background-color:rgba(191,0,0,0)}25%,75%{background-color:rgba(191,0,0,0.16)}50%{background-color:rgba(191,0,0,0.30)}}
 .pomo-flash{animation:pomoFlashAnim 0.5s ease-in-out 3}
+.pomo-tab-wrap{display:flex;flex-direction:column;align-items:center;padding:12px 4px 24px;gap:20px}
+.pomo-clock-face{position:relative;width:280px;height:280px;display:flex;align-items:center;justify-content:center}
+.pomo-ring-svg{position:absolute;top:0;left:0;width:100%;height:100%}
+.pomo-ring-bg{stroke:rgba(0,0,0,0.09)}
+.pomo-ring-fg{stroke:var(--red);transition:stroke-dashoffset 0.5s linear,stroke 0.3s}
+.pomo-clock-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;z-index:1}
+.pomo-tab-mode{font-size:0.58rem;font-weight:800;letter-spacing:0.18em;color:var(--t3);text-transform:uppercase}
+.pomo-tab-time{font-size:3.8rem;font-weight:800;font-family:var(--mono);letter-spacing:0.03em;color:var(--t1);line-height:1}
+.pomo-tab-label{font-size:0.62rem;font-weight:700;color:var(--t3)}
+.pomo-tab-btns{display:flex;align-items:center;gap:12px}
+.pomo-main-btn{width:100px;height:44px;font-size:0.9rem;font-weight:800}
+.pomo-sq-btn{height:44px;padding:0 18px;font-size:0.82rem}
+.pomo-session-box{display:flex;flex-direction:column;align-items:center;min-width:52px}
+.pomo-tab-session-val{font-size:1.6rem;font-weight:800;font-family:var(--mono);color:var(--t1);line-height:1}
+.pomo-tab-session-lbl{font-size:0.52rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.pomo-tab-tips{display:flex;flex-direction:column;gap:7px;width:100%;max-width:320px;background:rgba(0,0,0,0.03);border-radius:12px;padding:14px 16px}
+.pomo-tip{font-size:0.68rem;font-weight:700;color:var(--t3)}
 .goal-viewbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .goal-viewtabs{display:flex;gap:5px;flex-wrap:wrap}
 .goal-vtab{background:var(--glass);border:1.5px solid rgba(0,0,0,0.1);border-radius:9px;padding:6px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;color:var(--t3);transition:all 0.15s;font-family:var(--sans)}
@@ -1002,27 +1019,29 @@ input,select,button,textarea{font-family:var(--sans)}
     <!-- ══ POMODORO PAGE ══ -->
     <div class="app-page" id="page-pomo">
       <div class="pomo-tab-wrap">
-        <div class="panel pomo-tab-panel">
-          <div class="ph"><div class="pt">⏱ Pomodoro Timer</div></div>
-          <div class="pomo-tab-body">
+        <div class="pomo-clock-face">
+          <svg class="pomo-ring-svg" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+            <circle class="pomo-ring-bg" cx="140" cy="140" r="120" fill="none" stroke-width="10"/>
+            <circle class="pomo-ring-fg" id="pomoRingFg" cx="140" cy="140" r="120" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="754" stroke-dashoffset="0" transform="rotate(-90 140 140)"/>
+          </svg>
+          <div class="pomo-clock-inner">
             <div class="pomo-tab-mode" id="pomoTabMode">WORKING</div>
             <div class="pomo-tab-time" id="pomoTime">25:00</div>
-            <div class="pomo-tab-bar"><div class="pomo-fill" id="pomoBar"></div></div>
             <div class="pomo-tab-label" id="pomoLabel">Focus session</div>
-            <div class="pomo-tab-btns">
-              <button class="btn btn-red pomo-tab-start" id="pomoToggleBtn" onclick="pomoToggle()">Start</button>
-              <button class="btn btn-ghost" onclick="pomoReset()">Reset</button>
-            </div>
-            <div class="pomo-tab-sessions">
-              <div class="pomo-tab-session-lbl">Sessions today</div>
-              <div class="pomo-tab-session-val" id="pomoSessionCount">0</div>
-            </div>
-            <div class="pomo-tab-tips">
-              <div class="pomo-tip">🍅 Work 25 min then 5 min break. Repeat.</div>
-              <div class="pomo-tip">📵 Close distractions. One task at a time.</div>
-              <div class="pomo-tip">🔁 After 4 sessions, take a 15-min break.</div>
-            </div>
           </div>
+        </div>
+        <div class="pomo-tab-btns">
+          <button class="btn btn-ghost pomo-sq-btn" onclick="pomoReset()">↺ Reset</button>
+          <button class="btn btn-red pomo-main-btn" id="pomoToggleBtn" onclick="pomoToggle()">Start</button>
+          <div class="pomo-session-box">
+            <div class="pomo-tab-session-val" id="pomoSessionCount">0</div>
+            <div class="pomo-tab-session-lbl">Sessions</div>
+          </div>
+        </div>
+        <div class="pomo-tab-tips">
+          <div class="pomo-tip">🍅 Work 25 min &rarr; rest 5 min &rarr; repeat</div>
+          <div class="pomo-tip">📵 One task at a time. Close distractions.</div>
+          <div class="pomo-tip">🔁 After 4 sessions, take a 15-min break.</div>
         </div>
       </div>
     </div>
@@ -1919,7 +1938,7 @@ async function saveData(){
   }
 }
 
-async function fetchFxRates(){try{const r=await fetch('https://api.exchangerate-api.com/v4/latest/MYR');const d=await r.json();state.fxRates=d.rates||{};state.fxLastUpdate=Date.now();renderFx();await saveData();}catch(e){state.fxRates={USD:0.2174,NZD:0.3623,SGD:0.2907,EUR:0.2012,GBP:0.1712,JPY:32.5,AUD:0.338,CNY:1.575};state.fxLastUpdate=Date.now();renderFx();}}
+async function fetchFxRates(){try{const r=await fetch('https://api.exchangerate-api.com/v4/latest/MYR');const d=await r.json();state.fxRates=d.rates||{};state.fxLastUpdate=Date.now();renderFx();renderFXCard&&fetchFXRates();await saveData();}catch(e){state.fxRates={USD:0.2174,NZD:0.3623,SGD:0.2907,EUR:0.2012,GBP:0.1712,JPY:32.5,AUD:0.338,CNY:1.575};state.fxLastUpdate=Date.now();renderFx();renderFXCard&&fetchFXRates();}}
 function renderFx(){const rates=state.fxRates;if(!Object.keys(rates).length)return;const curs=state.fxCurrencies;document.getElementById('fxTickerItems').innerHTML=curs.map(cur=>{const rate=rates[cur]??0;return`<div class="fx-item"><span class="fx-pair">MYR/${cur}</span><span class="fx-rate">${(1/rate).toFixed(4)}</span></div>`;}).join('');const t=state.fxLastUpdate?new Date(state.fxLastUpdate).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'}):'—';document.getElementById('fxTime').textContent=t;document.getElementById('fxConvTime').textContent='Rates as of '+t;document.getElementById('fxRatesGrid').innerHTML=curs.map(cur=>{const rate=rates[cur]??0;return`<div class="fx-rate-card"><div class="fx-rate-pair">1 MYR → ${cur}</div><div class="fx-rate-val">${Number(rate).toFixed(4)}</div><div style="font-size:0.65rem;color:var(--t3);margin-top:3px;font-weight:600">1 ${cur} = RM ${(1/rate).toFixed(4)}</div></div>`;}).join('');document.getElementById('fxChips').innerHTML=curs.map(cur=>`<div class="fx-chip">${cur} <button onclick="removeFxCurrency('${cur}')" title="Remove">✕</button></div>`).join('');const populate=id=>{const sel=document.getElementById(id);const cur=sel.value;sel.innerHTML=['MYR',...curs,...ALL_CURRENCIES.filter(c=>!curs.includes(c))].map(c=>`<option${c===cur?' selected':''}>${c}</option>`).join('');};populate('fxFromCur');populate('fxToCur');calcFx();}
 function calcFx(){const rates=state.fxRates;if(!Object.keys(rates).length)return;const amt=parseFloat(document.getElementById('fxFromAmt').value)||0;const from=document.getElementById('fxFromCur').value;const to=document.getElementById('fxToCur').value;const toMYR=from==='MYR'?amt:amt*(1/(rates[from]??1));const result=to==='MYR'?toMYR:toMYR*(rates[to]??1);document.getElementById('fxToAmt').textContent=result.toFixed(4)+' '+to;}
 function addFxCurrency(){const sel=document.getElementById('fxAddSel');const cur=sel.value;if(!cur)return;if(!state.fxCurrencies.includes(cur)){state.fxCurrencies.push(cur);renderFx();saveData();}sel.value='';}
@@ -2797,6 +2816,8 @@ function pomoRender(){
   const tot=pomoMode==='work'?POMO_WORK:POMO_REST;
   const m=Math.floor(pomoRemaining/60), s=pomoRemaining%60;
   t.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const ring=document.getElementById('pomoRingFg');
+  if(ring){const pct=Math.max(0,Math.min(1,pomoRemaining/tot));ring.style.strokeDashoffset=String(Math.round(754*pct));ring.style.stroke=pomoMode==='work'?'var(--red)':'var(--green)';}
   const bar=document.getElementById('pomoBar');
   if(bar){const pct=Math.max(0,Math.min(100,Math.round((1-pomoRemaining/tot)*100)));bar.style.width=pct+'%';bar.style.background=pomoMode==='work'?'var(--red)':'var(--green)';}
   const lbl=document.getElementById('pomoLabel');
@@ -2891,10 +2912,14 @@ function renderNZWeatherCard(){
 // ── CURRENCY RATES (MYR/USD · MYR/NZD) ───────────────
 let fxData=null,fxLastFetch=0;
 async function fetchFXRates(){
-  // Throttle: only re-fetch after 30 min
-  if(fxData&&Date.now()-fxLastFetch<1800000){renderFXCard();return;}
+  // Reuse Finance tab rates from state.fxRates (same source, no double fetch)
+  if(state.fxRates&&Object.keys(state.fxRates).length){
+    fxData={usd:state.fxRates.USD,nzd:state.fxRates.NZD,ts:state.fxLastUpdate?new Date(state.fxLastUpdate):null};
+    renderFXCard();return;
+  }
+  // Fallback: fetch if Finance tab hasn't loaded yet (use same API)
   try{
-    const r=await fetch('https://api.frankfurter.app/latest?from=MYR&to=USD,NZD');
+    const r=await fetch('https://api.exchangerate-api.com/v4/latest/MYR');
     const j=await r.json();
     fxData={usd:j.rates.USD,nzd:j.rates.NZD,ts:new Date()};
     fxLastFetch=Date.now();
