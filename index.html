@@ -2931,7 +2931,7 @@ window.editDebt=i=>{editDebtIdx=i;const d=state.debts[i];document.getElementById
 
 // ── POMODORO + CLOCK ──────────────────────────────────
 const POMO_WORK=1500, POMO_REST=300;
-let pomoRemaining=POMO_WORK, pomoRunning=false, pomoMode='work', hmTimerStarted=false, pomoSessions=0;
+let pomoRemaining=POMO_WORK, pomoRunning=false, pomoMode='work', hmTimerStarted=false, pomoSessions=0, pomoEndAt=null;
 function pomoCardHTML(){return `<div class="summary-card pomo-card"><div class="summary-icon">\u23f1\ufe0f</div><div class="summary-val" id="pomoTime" style="font-size:1.45rem;font-family:var(--mono);letter-spacing:0.02em">25:00</div><div class="pomo-bar"><div class="pomo-fill" id="pomoBar"></div></div><div class="pomo-row"><button class="pomo-btn" id="pomoToggleBtn" onclick="pomoToggle()">Start</button><button class="pomo-btn ghost" onclick="pomoReset()">Reset</button></div><div class="pomo-label" id="pomoLabel">WORKING</div></div>`;}
 function clockCardHTML(){return `<div class="summary-card"><div class="summary-icon">\ud83d\udd50</div><div class="summary-lbl">Current time</div><div class="summary-val" id="clockTime" style="font-size:1.45rem;font-family:var(--mono)">--:--</div></div>`;}
 function pomoRender(){
@@ -2951,8 +2951,19 @@ function pomoRender(){
   if(btn)btn.textContent=pomoRunning?'Pause':'Start';
 }
 function clockRender(){const c=document.getElementById('clockTime');if(!c)return;const d=new Date();c.textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
-window.pomoToggle=function(){pomoRunning=!pomoRunning;ensureHmTimers();pomoRender();};
-window.pomoReset=function(){pomoRunning=false;pomoMode='work';pomoRemaining=POMO_WORK;pomoRender();};
+window.pomoToggle=function(){
+  if(!pomoRunning){
+    // Starting: compute the real end timestamp from current remaining seconds
+    pomoEndAt=Date.now()+pomoRemaining*1000;
+    pomoRunning=true;
+  }else{
+    // Pausing: freeze remaining at current value, drop the end timestamp
+    pomoRunning=false;
+    pomoEndAt=null;
+  }
+  ensureHmTimers();pomoRender();
+};
+window.pomoReset=function(){pomoRunning=false;pomoMode='work';pomoRemaining=POMO_WORK;pomoEndAt=null;pomoRender();};
 function pomoBeep(){try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();[0,0.22,0.44].forEach(off=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=880;const st=ctx.currentTime+off;g.gain.setValueAtTime(0.0001,st);g.gain.exponentialRampToValueAtTime(0.35,st+0.02);g.gain.exponentialRampToValueAtTime(0.0001,st+0.18);o.start(st);o.stop(st+0.2);});}catch(e){}}
 function pomoFlash(){const el=document.getElementById('appScreen')||document.body;if(!el)return;el.classList.remove('pomo-flash');void el.offsetWidth;el.classList.add('pomo-flash');setTimeout(()=>el.classList.remove('pomo-flash'),1600);}
 function pomoPopup(msg){
@@ -2969,17 +2980,28 @@ function pomoComplete(){
   pomoMode=wasWork?'rest':'work';
   pomoRemaining=pomoMode==='work'?POMO_WORK:POMO_REST;
   pomoRunning=false;
+  pomoEndAt=null;
   pomoRender();
 }
 function hmTick(){
   renderClocks();
-  if(pomoRunning){
-    pomoRemaining--;
-    if(pomoRemaining<=0){pomoRemaining=0;pomoComplete();}
+  if(pomoRunning&&pomoEndAt){
+    // Timestamp-based: always derive remaining from real elapsed wall-clock time.
+    // This is immune to setInterval throttling when the tab is backgrounded —
+    // even if ticks are skipped, the next tick that DOES fire recalculates correctly.
+    const remainingMs=pomoEndAt-Date.now();
+    pomoRemaining=Math.max(0,Math.ceil(remainingMs/1000));
+    if(pomoRemaining<=0){pomoComplete();}
     else pomoRender();
   }
 }
-function ensureHmTimers(){if(hmTimerStarted)return;hmTimerStarted=true;setInterval(hmTick,1000);setInterval(()=>{if(document.getElementById('page-home').style.display!=='none')fetchFXRates();},1800000);renderClocks();}
+function ensureHmTimers(){
+  if(hmTimerStarted)return;hmTimerStarted=true;
+  setInterval(hmTick,1000);
+  setInterval(()=>{if(document.getElementById('page-home').style.display!=='none')fetchFXRates();},1800000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)hmTick();});
+  renderClocks();
+}
 
 // ── WORLD CLOCKS + WEEK + CHECKLIST ───────────────────
 function hmWeekRange(){
