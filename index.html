@@ -3205,8 +3205,21 @@ function renderDashboard(){
   let inc=0,exp=0;txs.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else if(t.type==='expense')exp+=Number(t.amount)||0;});
   const net=inc-exp;
   const nw=hmNetWorth();
-  const tasksToday=(state.todos||[]).filter(t=>!t.done&&t.due===tod).length;
-  const overdue=(state.todos||[]).filter(t=>!t.done&&t.due&&t.due<tod).length;
+  // Collect "due today" / "overdue" items from BOTH parent tasks and their sub-tasks.
+  // A parent task whose own due date is in the future can still have sub-tasks due today
+  // (e.g. a multi-day project task) — these must surface here too, not just get silently counted.
+  const hmTodayItems=[]; // {kind:'task'|'subtask', id, tid, si, title, parentTitle, priority, done}
+  let overdue=0;
+  (state.todos||[]).forEach(t=>{
+    if(!t.done&&t.due===tod)hmTodayItems.push({kind:'task',id:t.id,title:t.title,priority:t.priority,done:false});
+    if(!t.done&&t.due&&t.due<tod)overdue++;
+    (t.subtasks||[]).forEach((s,si)=>{
+      if(s.done)return;
+      if(s.due===tod)hmTodayItems.push({kind:'subtask',tid:t.id,si,id:t.id+'-'+si,title:s.title,parentTitle:t.title,priority:t.priority,done:false});
+      if(s.due&&s.due<tod)overdue++;
+    });
+  });
+  const tasksToday=hmTodayItems.length;
   const billsToday=(state.futures||[]).filter(f=>!f.paid&&f.date===tod);
   const billsTodayAmt=billsToday.reduce((s,f)=>s+(Number(f.amount)||0),0);
   const mEl=document.getElementById('hmMetrics');
@@ -3233,12 +3246,17 @@ function renderDashboard(){
   renderClocks();ensureHmTimers();
   if(!nzWeatherData)fetchNZWeather();else renderNZWeatherCard();
   if(!fxData)fetchFXRates();else renderFXCard();
-  // tasks due today
+  // tasks due today (parents + sub-tasks)
   const tEl=document.getElementById('hmTasks');
   if(tEl){
-    const list=(state.todos||[]).filter(t=>t.due===tod).sort((a,b)=>(a.done?1:0)-(b.done?1:0));
     const PRI={high:'#BF0000',medium:'#C06000',low:'#0A7A5A'};
-    tEl.innerHTML=list.length?list.map(t=>`<div class="hm-row"><div class="hm-check ${t.done?'on':''}" onclick="hmToggleTask(${t.id})">${t.done?'\u2713':''}</div><span class="hm-pri" style="background:${PRI[t.priority]||'#888'}"></span><span class="hm-task-name ${t.done?'done':''}">${esc(t.title)}</span></div>`).join(''):(overdue>0?`<div class="empty" style="color:var(--red)">No tasks due today \u2014 but ${overdue} overdue. <a onclick="switchAppTab('todo')" style="color:var(--red);cursor:pointer;text-decoration:underline">review →</a></div>`:'<div class="empty">Nothing due today. Enjoy \ud83c\udf3f</div>');
+    tEl.innerHTML=hmTodayItems.length?hmTodayItems.map(it=>{
+      const checkFn=it.kind==='task'?`hmToggleTask(${it.id})`:`hmToggleSubtask(${it.tid},${it.si})`;
+      const nameHtml=it.kind==='subtask'
+        ?`<span class="hm-task-name">${esc(it.title)} <span style="color:var(--t4);font-weight:600;font-size:0.68rem">— ${esc(it.parentTitle)}</span></span>`
+        :`<span class="hm-task-name">${esc(it.title)}</span>`;
+      return`<div class="hm-row"><div class="hm-check" onclick="${checkFn}"></div><span class="hm-pri" style="background:${PRI[it.priority]||'#888'}"></span>${nameHtml}</div>`;
+    }).join(''):(overdue>0?`<div class="empty" style="color:var(--red)">No tasks due today \u2014 but ${overdue} overdue. <a onclick="switchAppTab('todo')" style="color:var(--red);cursor:pointer;text-decoration:underline">review →</a></div>`:'<div class="empty">Nothing due today. Enjoy \ud83c\udf3f</div>');
   }
   // bills due today
   const bEl=document.getElementById('hmBills');
@@ -3252,6 +3270,7 @@ function renderDashboard(){
   }
 }
 window.hmToggleTask=async function(id){if(window.toggleTodo){await toggleTodo(id);}renderDashboard();};
+window.hmToggleSubtask=async function(tid,si){if(window.toggleSubtask){await toggleSubtask(tid,si);}renderDashboard();};
 
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
