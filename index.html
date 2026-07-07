@@ -579,6 +579,14 @@ input,select,button,textarea{font-family:var(--sans)}
 .st-del:hover{color:var(--red)}
 .subtask-add-row{display:flex;gap:6px;margin-top:7px}
 .subtask-input{flex:1;background:rgba(255,255,255,0.9);border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:5px 10px;font-size:0.75rem;color:var(--t1);outline:none;font-weight:600;font-family:var(--sans)}
+.subtask-date-input{background:rgba(255,255,255,0.9);border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:5px 6px;font-size:0.68rem;color:var(--t2);outline:none;font-weight:600;max-width:120px}
+.st-due{font-size:0.58rem;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:4px;white-space:nowrap}
+.st-due.overdue{background:rgba(200,30,30,0.12);color:var(--red)}
+.st-due.today{background:rgba(230,140,0,0.14);color:#c77700}
+.st-due.soon{background:rgba(0,90,200,0.1);color:var(--blue)}
+.st-due.future{background:rgba(0,0,0,0.06);color:var(--t3)}
+.st-date-btn{background:none;border:none;cursor:pointer;font-size:0.72rem;padding:2px 4px;opacity:0.55}
+.st-date-btn:hover{opacity:1}
 .subtask-input:focus{border-color:var(--red)}
 .st-add-btn{background:var(--red-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;color:var(--red);font-size:0.72rem;font-weight:800;white-space:nowrap}
 .st-add-btn:hover{background:var(--red-mid)}
@@ -2150,13 +2158,18 @@ function todoItemHtml(t){
         <span class="subtasks-toggle" id="st-toggle-${t.id}">${subs.length>0?'▾ hide':'▸ show'}</span>
       </div>
       <div id="st-list-${t.id}" style="${subs.length===0?'display:none':''}">
-        ${subs.map((s,si)=>`<div class="subtask-item">
+        ${subs.map((s,si)=>{
+          const sDue=s.due?getDueLabel(s.due):null;
+          return`<div class="subtask-item">
           <button class="st-check${s.done?' done':''}" onclick="toggleSubtask(${t.id},${si})">${s.done?'✓':''}</button>
           <span class="st-title${s.done?' done':''}">${esc(s.title)}</span>
+          ${sDue&&!s.done?`<span class="st-due ${sDue.cls}">${sDue.label}</span>`:''}
+          <button class="st-date-btn" title="Set due date" onclick="editSubtaskDue(${t.id},${si})">📅</button>
           <button class="st-del" onclick="delSubtask(${t.id},${si})">✕</button>
-        </div>`).join('')}
+        </div>`;}).join('')}
         <div class="subtask-add-row">
           <input class="subtask-input" type="text" id="st-input-${t.id}" placeholder="Add sub-task..." onkeydown="if(event.key==='Enter')addSubtask(${t.id})">
+          <input class="subtask-date-input" type="date" id="st-date-${t.id}" title="Optional due date">
           <button class="st-add-btn" onclick="addSubtask(${t.id})">+ Add</button>
         </div>
       </div>
@@ -2193,13 +2206,16 @@ window.toggleSubtask=async function(tid,si){
   const allDone=t.subtasks.length>0&&t.subtasks.every(s=>s.done);
   if(allDone&&!t.done&&t.recur&&t.recur!=='none'){
     t.done=true;t.doneAt=new Date().toISOString();
-    const baseDue=t.due||todayStr();
-    const nextDue=nextDueDate(baseDue,t.recur);
-    if(nextDue){
+    // Only compute a forward due date if the task originally had one.
+    // Undated recurring checklists (e.g. daily ops lists) stay undated on
+    // respawn — otherwise they'd jump above other undated same-priority
+    // tasks in sort order instead of staying at the bottom where they were.
+    const nextDue=t.due?nextDueDate(t.due,t.recur):'';
+    {
       state.todos.unshift({
         id:Date.now(),title:t.title,note:t.note,category:t.category,
-        priority:t.priority,due:nextDue,dueTime:t.dueTime,recur:t.recur,done:false,doneAt:null,
-        subtasks:(t.subtasks||[]).map((s,si2)=>({title:s.title,done:false,id:Date.now()+si2+1}))
+        priority:t.priority,due:nextDue,dueTime:t.due?t.dueTime:'',recur:t.recur,done:false,doneAt:null,
+        subtasks:(t.subtasks||[]).map((s,si2)=>({title:s.title,done:false,id:Date.now()+si2+1,due:''}))
       });
       state.todos=state.todos.filter(x=>x.id!==t.id);
     }
@@ -2216,11 +2232,24 @@ window.addSubtask=async function(tid){
   const t=state.todos.find(t=>t.id===tid);
   if(!t)return;
   const input=document.getElementById('st-input-'+tid);
+  const dateInput=document.getElementById('st-date-'+tid);
   const title=input.value.trim();
   if(!title)return;
   if(!t.subtasks)t.subtasks=[];
-  t.subtasks.push({title,done:false,id:Date.now()});
+  t.subtasks.push({title,done:false,id:Date.now(),due:dateInput?dateInput.value:''});
   input.value='';
+  if(dateInput)dateInput.value='';
+  renderTodos();await saveData();
+};
+window.editSubtaskDue=async function(tid,si){
+  const t=state.todos.find(t=>t.id===tid);
+  if(!t||!t.subtasks||!t.subtasks[si])return;
+  const cur=t.subtasks[si].due||'';
+  const val=prompt('Due date for this sub-task (YYYY-MM-DD), blank to clear:',cur);
+  if(val===null)return; // cancelled
+  const trimmed=val.trim();
+  if(trimmed&&!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)){alert('Use format YYYY-MM-DD, e.g. 2026-07-15');return;}
+  t.subtasks[si].due=trimmed;
   renderTodos();await saveData();
 };
 window.toggleTodo=async function(id){
@@ -2229,17 +2258,18 @@ window.toggleTodo=async function(id){
   if(!t.done){
     t.done=true;t.doneAt=new Date().toISOString();
     if(t.recur&&t.recur!=='none'){
-      const baseDue=t.due||todayStr(); // use today if no due date set
-      const nextDue=nextDueDate(baseDue,t.recur);
-      if(nextDue){
-        state.todos.unshift({
-          id:Date.now(),title:t.title,note:t.note,category:t.category,
-          priority:t.priority,due:nextDue,dueTime:t.dueTime,recur:t.recur,done:false,doneAt:null,
-          subtasks:(t.subtasks||[]).map((s,si)=>({title:s.title,done:false,id:Date.now()+si+1}))
-        });
-        // auto-remove the completed recurring instance to keep list clean
-        state.todos=state.todos.filter(x=>x.id!==t.id);
-      }
+      // Only compute a forward due date if the task originally had one.
+      // Undated recurring checklists stay undated on respawn — otherwise
+      // they'd jump above other undated same-priority tasks in sort order
+      // instead of staying at the bottom where they were.
+      const nextDue=t.due?nextDueDate(t.due,t.recur):'';
+      state.todos.unshift({
+        id:Date.now(),title:t.title,note:t.note,category:t.category,
+        priority:t.priority,due:nextDue,dueTime:t.due?t.dueTime:'',recur:t.recur,done:false,doneAt:null,
+        subtasks:(t.subtasks||[]).map((s,si)=>({title:s.title,done:false,id:Date.now()+si+1,due:''}))
+      });
+      // auto-remove the completed recurring instance to keep list clean
+      state.todos=state.todos.filter(x=>x.id!==t.id);
     }
   }else{
     t.done=false;t.doneAt=null;
