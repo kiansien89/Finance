@@ -3099,6 +3099,25 @@ function renderCHCWeatherCard(){
   const[emoji,desc]=WMO[chcWeatherData.code]||['🌡️','Unknown'];
   el.innerHTML='<div class="summary-lbl">🌿 Christchurch NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+chcWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+chcWeatherData.rain+'% · 💨'+chcWeatherData.wind+'km/h</div>';
 }
+let aklWeatherData=null;
+async function fetchAKLWeather(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude=-36.8485&longitude=174.7633&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&timezone=Pacific/Auckland&wind_speed_unit=kmh';
+    const r=await fetch(url);
+    if(!r.ok)throw new Error('fetch failed');
+    const d=await r.json();
+    const c=d.current;
+    aklWeatherData={temp:Math.round(c.temperature_2m),code:c.weathercode,wind:Math.round(c.windspeed_10m),rain:c.precipitation_probability??0};
+    renderAKLWeatherCard();
+  }catch(e){aklWeatherData={error:true};renderAKLWeatherCard();}
+}
+function renderAKLWeatherCard(){
+  const el=document.getElementById('aklWeatherCard');if(!el)return;
+  if(!aklWeatherData){el.innerHTML='<div class="summary-lbl">Auckland</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div>';return;}
+  if(aklWeatherData.error){el.innerHTML='<div class="summary-lbl">Auckland</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
+  const[emoji,desc]=WMO[aklWeatherData.code]||['🌡️','Unknown'];
+  el.innerHTML='<div class="summary-lbl">🌤 Auckland NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+aklWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+aklWeatherData.rain+'% · 💨'+aklWeatherData.wind+'km/h</div>';
+}
 
 // ── CURRENCY RATES (MYR/USD · MYR/NZD) ───────────────
 let fxData=null,fxLastFetch=0;
@@ -3248,11 +3267,11 @@ function renderDashboard(){
   const sc=(icon,label,value,mini,color)=>'<div class="summary-card"><div class="summary-icon">'+icon+'</div><div class="summary-lbl">'+label+'</div><div class="summary-val" style="font-size:1rem;color:'+(color||'var(--t1)')+'">'+value+'</div>'+(mini?'<div class="hm-metric-mini">'+mini+'</div>':'')+'</div>';
   if(mEl)mEl.innerHTML=[
     sc('\u2705','Tasks today',tasksToday,overdue>0?overdue+' overdue':'all clear',overdue>0?'var(--red)':'var(--t1)'),
-    sc('\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)'),
+    '<div class="summary-card" id="fxCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">💱 Currency</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
     sc('\ud83d\udcda','ACCA',accaPct===null?'\u2014':accaPct+'%',accaPct===null?'Add ACCA goal':'Progress','var(--blue)'),
     '<div class="summary-card" id="qtWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
     '<div class="summary-card" id="chcWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🌿 Christchurch NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
-    '<div class="summary-card" id="fxCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">💱 Currency</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
+    '<div class="summary-card" id="aklWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🌤 Auckland NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
     clockCard('NZ time','Pacific/Auckland','\ud83c\udfe1'),
     clockCard('Current (GMT+8)','Asia/Kuala_Lumpur','\ud83d\udd50'),
     clockCard('Kagoshima','Asia/Tokyo','\ud83c\udfef')
@@ -3260,6 +3279,7 @@ function renderDashboard(){
   renderClocks();ensureHmTimers();
   if(!qtWeatherData)fetchQTWeather();else renderQTWeatherCard();
   if(!chcWeatherData)fetchCHCWeather();else renderCHCWeatherCard();
+  if(!aklWeatherData)fetchAKLWeather();else renderAKLWeatherCard();
   if(!fxData)fetchFXRates();else renderFXCard();
   // tasks due today (parents + sub-tasks)
   const tEl=document.getElementById('hmTasks');
