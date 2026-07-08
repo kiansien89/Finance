@@ -3062,29 +3062,42 @@ function dailyChecklistCardHTML(){
 
 // ── NZ WEATHER ────────────────────────────────────────
 const WMO={0:['☀️','Clear'],1:['🌤️','Mostly clear'],2:['⛅','Partly cloudy'],3:['☁️','Overcast'],45:['🌫️','Foggy'],48:['🌫️','Icy fog'],51:['🌦️','Light drizzle'],53:['🌦️','Drizzle'],55:['🌧️','Heavy drizzle'],61:['🌧️','Light rain'],63:['🌧️','Rain'],65:['🌧️','Heavy rain'],71:['🌨️','Light snow'],73:['🌨️','Snow'],75:['❄️','Heavy snow'],77:['🌨️','Snow grains'],80:['🌦️','Showers'],81:['🌧️','Rain showers'],82:['⛈️','Heavy showers'],85:['🌨️','Snow showers'],86:['❄️','Heavy snow showers'],95:['⛈️','Thunderstorm'],96:['⛈️','Thunderstorm+hail'],99:['⛈️','Severe thunderstorm']};
-let nzWeatherData=null;
-async function fetchNZWeather(){
+let qtWeatherData=null, chcWeatherData=null;
+async function fetchQTWeather(){
   try{
     const url='https://api.open-meteo.com/v1/forecast?latitude=-45.0312&longitude=168.6626&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&timezone=Pacific/Auckland&wind_speed_unit=kmh';
     const r=await fetch(url);
     if(!r.ok)throw new Error('fetch failed');
     const d=await r.json();
     const c=d.current;
-    nzWeatherData={
-      temp:Math.round(c.temperature_2m),
-      code:c.weathercode,
-      wind:Math.round(c.windspeed_10m),
-      rain:c.precipitation_probability??0
-    };
-    renderNZWeatherCard();
-  }catch(e){nzWeatherData={error:true};;renderNZWeatherCard();}
+    qtWeatherData={temp:Math.round(c.temperature_2m),code:c.weathercode,wind:Math.round(c.windspeed_10m),rain:c.precipitation_probability??0};
+    renderQTWeatherCard();
+  }catch(e){qtWeatherData={error:true};renderQTWeatherCard();}
 }
-function renderNZWeatherCard(){
-  const el=document.getElementById('nzWeatherCard');if(!el)return;
-  if(!nzWeatherData){el.innerHTML='<div class="summary-lbl">NZ Weather</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div>';return;}
-  if(nzWeatherData.error){el.innerHTML='<div class="summary-lbl">NZ Weather</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
-  const[emoji,desc]=WMO[nzWeatherData.code]||['🌡️','Unknown'];
-  el.innerHTML='<div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+nzWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+nzWeatherData.rain+'% · 💨'+nzWeatherData.wind+'km/h</div>';
+function renderQTWeatherCard(){
+  const el=document.getElementById('qtWeatherCard');if(!el)return;
+  if(!qtWeatherData){el.innerHTML='<div class="summary-lbl">Queenstown</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div>';return;}
+  if(qtWeatherData.error){el.innerHTML='<div class="summary-lbl">Queenstown</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
+  const[emoji,desc]=WMO[qtWeatherData.code]||['🌡️','Unknown'];
+  el.innerHTML='<div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+qtWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+qtWeatherData.rain+'% · 💨'+qtWeatherData.wind+'km/h</div>';
+}
+async function fetchCHCWeather(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude=-43.5321&longitude=172.6362&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&timezone=Pacific/Auckland&wind_speed_unit=kmh';
+    const r=await fetch(url);
+    if(!r.ok)throw new Error('fetch failed');
+    const d=await r.json();
+    const c=d.current;
+    chcWeatherData={temp:Math.round(c.temperature_2m),code:c.weathercode,wind:Math.round(c.windspeed_10m),rain:c.precipitation_probability??0};
+    renderCHCWeatherCard();
+  }catch(e){chcWeatherData={error:true};renderCHCWeatherCard();}
+}
+function renderCHCWeatherCard(){
+  const el=document.getElementById('chcWeatherCard');if(!el)return;
+  if(!chcWeatherData){el.innerHTML='<div class="summary-lbl">Christchurch</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div>';return;}
+  if(chcWeatherData.error){el.innerHTML='<div class="summary-lbl">Christchurch</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
+  const[emoji,desc]=WMO[chcWeatherData.code]||['🌡️','Unknown'];
+  el.innerHTML='<div class="summary-lbl">🌿 Christchurch NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+chcWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+chcWeatherData.rain+'% · 💨'+chcWeatherData.wind+'km/h</div>';
 }
 
 // ── CURRENCY RATES (MYR/USD · MYR/NZD) ───────────────
@@ -3237,15 +3250,16 @@ function renderDashboard(){
     sc('\u2705','Tasks today',tasksToday,overdue>0?overdue+' overdue':'all clear',overdue>0?'var(--red)':'var(--t1)'),
     sc('\ud83d\udcb8','Bills today',fmtR(billsTodayAmt),billsToday.length+' due','var(--amber)'),
     sc('\ud83d\udcda','ACCA',accaPct===null?'\u2014':accaPct+'%',accaPct===null?'Add ACCA goal':'Progress','var(--blue)'),
-    '<div class="summary-card" id="nzWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
+    '<div class="summary-card" id="qtWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🏔 Queenstown NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
+    '<div class="summary-card" id="chcWeatherCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">🌿 Christchurch NZ</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
     '<div class="summary-card" id="fxCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">💱 Currency</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
-    sc('\ud83d\udcca','This week',todosDoneWk+' tasks',msDoneWk+' milestones done','var(--t1)'),
-    clockCard('NZ time','Pacific/Auckland','\ud83c\udf0f'),
+    clockCard('NZ time','Pacific/Auckland','\ud83c\udfe1'),
     clockCard('Current (GMT+8)','Asia/Kuala_Lumpur','\ud83d\udd50'),
     clockCard('Kagoshima','Asia/Tokyo','\ud83c\udfef')
   ].join('');
   renderClocks();ensureHmTimers();
-  if(!nzWeatherData)fetchNZWeather();else renderNZWeatherCard();
+  if(!qtWeatherData)fetchQTWeather();else renderQTWeatherCard();
+  if(!chcWeatherData)fetchCHCWeather();else renderCHCWeatherCard();
   if(!fxData)fetchFXRates();else renderFXCard();
   // tasks due today (parents + sub-tasks)
   const tEl=document.getElementById('hmTasks');
