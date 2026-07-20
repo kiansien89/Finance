@@ -686,6 +686,61 @@ input,select,button,textarea{font-family:var(--sans)}
 .add-milestone-input { background: #FFFFFF !important; color: #1A1A1A !important; }
 .add-milestone-date { background: #FFFFFF !important; color: #1A1A1A !important; }
 .gantt-wrap { background: #FFFFFF !important; }
+/* TRADING TAB */
+.td-watchbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px}
+.td-search{position:relative;flex:1;min-width:160px}
+.td-search input{width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.12);font-size:0.8rem;font-weight:700;background:rgba(255,255,255,0.7)}
+.td-search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--glass);border-radius:10px;box-shadow:var(--shadow2);border:1px solid rgba(0,0,0,0.1);z-index:20;max-height:220px;overflow-y:auto;display:none}
+.td-search-results.show{display:block}
+.td-sr-item{padding:9px 12px;cursor:pointer;font-size:0.76rem;font-weight:700;color:var(--t2);display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(0,0,0,0.05)}
+.td-sr-item:last-child{border-bottom:none}
+.td-sr-item:hover{background:var(--red-light)}
+.td-sr-sym{color:var(--t1);font-weight:800}
+.td-sr-name{color:var(--t4);font-size:0.68rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-chips{display:flex;flex-wrap:wrap;gap:6px}
+.td-chip{display:flex;align-items:center;gap:5px;padding:6px 9px;border-radius:20px;border:1.5px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.6);font-size:0.72rem;font-weight:800;color:var(--t3);cursor:pointer;transition:all 0.1s;user-select:none}
+.td-chip.active{background:var(--red);border-color:var(--red);color:white}
+.td-chip .td-lock{opacity:0.55;font-size:0.68rem;cursor:pointer}
+.td-chip.locked .td-lock{opacity:1}
+.td-chip .td-x{opacity:0.4;font-size:0.68rem;cursor:pointer;margin-left:1px}
+.td-chip .td-x:hover{opacity:1;color:var(--red2)}
+.td-hdr{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.td-price{font-size:1.7rem;font-weight:900;font-family:var(--mono);color:var(--t1)}
+.td-chg{font-size:0.82rem;font-weight:800;padding:2px 8px;border-radius:8px}
+.td-chg.up{color:var(--green);background:var(--green-light)}
+.td-chg.down{color:var(--red);background:var(--red-light)}
+.td-updated{font-size:0.64rem;color:var(--t4);font-weight:700}
+.td-meter-wrap{display:flex;align-items:center;gap:12px;margin:10px 0}
+.td-meter-track{flex:1;height:14px;border-radius:8px;background:rgba(0,0,0,0.07);overflow:hidden;position:relative}
+.td-meter-fill{height:100%;border-radius:8px;transition:width 0.3s}
+.td-meter-fill.bull{background:var(--green)}
+.td-meter-fill.bear{background:var(--red)}
+.td-meter-fill.neutral{background:var(--t4)}
+.td-meter-label{font-size:0.78rem;font-weight:900;white-space:nowrap}
+.td-bias{font-size:0.62rem;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.td-bias.bull{background:var(--green-light);color:var(--green)}
+.td-bias.bear{background:var(--red-light);color:var(--red)}
+.td-bias.neutral{background:rgba(0,0,0,0.06);color:var(--t4)}
+.td-ind-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06)}
+.td-ind-row:last-child{border-bottom:none}
+.td-ind-name{font-size:0.76rem;font-weight:800;color:var(--t2);display:flex;align-items:center;gap:6px}
+.td-ind-tag{font-size:0.56rem;font-weight:800;padding:1px 6px;border-radius:8px;background:rgba(0,0,0,0.06);color:var(--t4)}
+.td-ind-val{font-size:0.7rem;color:var(--t3);font-weight:700}
+.td-ind-status{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;flex-shrink:0}
+.td-ind-status.pass-bull{background:var(--green-light);color:var(--green)}
+.td-ind-status.pass-bear{background:var(--red-light);color:var(--red)}
+.td-ind-status.fail{background:rgba(0,0,0,0.05);color:var(--t4)}
+.td-plan{border-left:3px solid var(--amber);background:var(--amber-light)}
+.td-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.td-plan-item{background:rgba(255,255,255,0.6);border-radius:8px;padding:8px 10px}
+.td-plan-item .lbl{font-size:0.6rem;font-weight:800;color:var(--t4);text-transform:uppercase}
+.td-plan-item .val{font-size:0.86rem;font-weight:900;color:var(--t1);font-family:var(--mono)}
+.td-alert-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:0.72rem}
+.td-alert-item:last-child{border-bottom:none}
+.td-alert-left{font-weight:800;color:var(--t2)}
+.td-alert-time{color:var(--t4);font-weight:600;font-size:0.64rem}
+.td-note{font-size:0.62rem;color:var(--t4);font-weight:600;line-height:1.5;margin-top:4px}
+.td-refresh-btn{background:rgba(0,0,0,0.05);border:none;border-radius:8px;padding:5px 10px;font-size:0.68rem;font-weight:800;color:var(--t3);cursor:pointer}
 </style>
 </head>
 <body>
@@ -735,6 +790,9 @@ input,select,button,textarea{font-family:var(--sans)}
     </button>
     <button class="app-top-tab" id="topTabFinance" onclick="switchAppTab('finance')">
       <div class="app-top-tab-inner">💰 Finance</div>
+    </button>
+    <button class="app-top-tab" id="topTabTrading" onclick="switchAppTab('trading')">
+      <div class="app-top-tab-inner">📈 Trading</div>
     </button>
     <button class="app-top-tab" id="topTabTodo" onclick="switchAppTab('todo')">
       <div class="app-top-tab-inner">✅ To Do <span class="tab-badge" id="todoBadge">0</span></div>
@@ -1088,6 +1146,48 @@ input,select,button,textarea{font-family:var(--sans)}
         <div id="hlLog"></div>
       </div>
     </div>
+    <div class="app-page" id="page-trading">
+      <div class="panel">
+        <div class="ph"><div class="pt">📈 Watchlist <span class="badge upcoming" id="tdWatchCount">0/6</span></div><button class="td-refresh-btn" onclick="td_refreshActive()">↻ Refresh</button></div>
+        <div class="td-watchbar">
+          <div class="td-search">
+            <input type="text" id="tdSearchInput" placeholder="Search ticker (e.g. AAPL, TSLA)..." autocomplete="off" oninput="td_onSearchInput()" onfocus="td_onSearchInput()">
+            <div class="td-search-results" id="tdSearchResults"></div>
+          </div>
+        </div>
+        <div class="td-chips" id="tdChips"></div>
+      </div>
+      <div class="panel" id="tdActivePanel" style="display:none">
+        <div class="td-hdr">
+          <div>
+            <div class="td-price" id="tdPrice">—</div>
+            <span class="td-chg" id="tdChg"></span>
+          </div>
+          <div class="td-updated" id="tdUpdated"></div>
+        </div>
+        <div class="td-meter-wrap">
+          <div class="td-meter-track"><div class="td-meter-fill neutral" id="tdMeterFill" style="width:0%"></div></div>
+          <div class="td-meter-label" id="tdMeterLabel">0/7</div>
+          <div class="td-bias neutral" id="tdBiasTag">—</div>
+        </div>
+        <div id="tdIndicators"></div>
+        <div class="td-note">Confluence counts indicators whose direction agrees with the dominant bias AND meets its own threshold. MACD and RSI are both momentum-derived and tend to move together — treat a joint pass as one confirmation, not two. Structure signal is a simplified price-action proxy, not real order-flow data.</div>
+      </div>
+      <div class="panel td-plan" id="tdPlanPanel" style="display:none">
+        <div class="ph"><div class="pt">🎯 Trade Plan <span class="td-ind-tag" id="tdPlanTier"></span></div></div>
+        <div class="td-plan-grid">
+          <div class="td-plan-item"><div class="lbl">Entry</div><div class="val" id="tdPlanEntry">—</div></div>
+          <div class="td-plan-item"><div class="lbl">Stop Loss</div><div class="val" id="tdPlanStop">—</div></div>
+          <div class="td-plan-item"><div class="lbl">Target</div><div class="val" id="tdPlanTarget">—</div></div>
+          <div class="td-plan-item"><div class="lbl">R:R</div><div class="val" id="tdPlanRR">—</div></div>
+        </div>
+        <div class="td-note">ATR(14)-based, 5-min chart multipliers. Alert-only — no order execution. Confirm manually before trading.</div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">🔔 Alert Log</div><button class="td-refresh-btn" onclick="td_clearAlerts()">Clear</button></div>
+        <div id="tdAlertLog"><div class="empty">No alerts yet</div></div>
+      </div>
+    </div>
     <div class="app-page" id="page-shuli">
       <div class="panel">
         <div class="ph"><div class="pt">🔢 81数理吉凶分析器</div></div>
@@ -1220,7 +1320,7 @@ const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
 
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[],scenario:null,shuliSaved:[],bankAccounts:[],healthLog:[],hlHeight:null};
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[],scenario:null,shuliSaved:[],bankAccounts:[],healthLog:[],hlHeight:null,trading:{watchlist:[],activeTicker:null,alertLog:[]}};
 let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
@@ -1941,6 +2041,9 @@ async function loadData(){
     state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
     state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
     state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];state.scenario=p.scenario||null;state.shuliSaved=p.shuliSaved||[];state.bankAccounts=p.bankAccounts||[];state.healthLog=p.healthLog||[];state.hlHeight=p.hlHeight||null;
+    state.trading=p.trading||{watchlist:[],activeTicker:null,alertLog:[]};
+    if(!Array.isArray(state.trading.watchlist))state.trading.watchlist=[];
+    if(!Array.isArray(state.trading.alertLog))state.trading.alertLog=[];
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
     const age=state.fxLastUpdate?Date.now()-state.fxLastUpdate:Infinity;
@@ -3307,10 +3410,346 @@ function renderDashboard(){
 window.hmToggleTask=async function(id){if(window.toggleTodo){await toggleTodo(id);}renderDashboard();};
 window.hmToggleSubtask=async function(tid,si){if(window.toggleSubtask){await toggleSubtask(tid,si);}renderDashboard();};
 
+// ── TRADING TAB (📈 confluence dashboard, alert-only, no broker keys) ──
+const TD_PROXIES=[
+  u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
+  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)
+];
+async function td_proxyFetchJSON(url){
+  let lastErr=null;
+  for(const mk of TD_PROXIES){
+    try{
+      const r=await fetch(mk(url));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return await r.json();
+    }catch(e){lastErr=e;}
+  }
+  throw lastErr||new Error('all proxies failed');
+}
+let td_searchDebounce=null;
+let td_autoRefreshTimer=null;
+function td_initTab(){
+  td_renderChips();
+  td_renderAlertLog();
+  if(state.trading.activeTicker)td_selectTicker(state.trading.activeTicker,true);
+  td_startAutoRefresh();
+}
+function td_startAutoRefresh(){
+  td_stopAutoRefresh();
+  td_autoRefreshTimer=setInterval(()=>{if(state.trading.activeTicker)td_selectTicker(state.trading.activeTicker,true);},60000);
+}
+function td_stopAutoRefresh(){if(td_autoRefreshTimer){clearInterval(td_autoRefreshTimer);td_autoRefreshTimer=null;}}
+function td_refreshActive(){if(state.trading.activeTicker)td_selectTicker(state.trading.activeTicker,true);}
+
+function td_onSearchInput(){
+  const q=document.getElementById('tdSearchInput').value.trim();
+  const box=document.getElementById('tdSearchResults');
+  if(td_searchDebounce)clearTimeout(td_searchDebounce);
+  if(!q){box.classList.remove('show');box.innerHTML='';return;}
+  td_searchDebounce=setTimeout(async()=>{
+    try{
+      const d=await td_proxyFetchJSON('https://query1.finance.yahoo.com/v1/finance/search?q='+encodeURIComponent(q)+'&quotesCount=8&newsCount=0');
+      const quotes=(d.quotes||[]).filter(x=>x.symbol&&(x.quoteType==='EQUITY'||x.quoteType==='ETF'));
+      if(!quotes.length){box.innerHTML='<div class="td-sr-item"><span class="td-sr-name">No matches</span></div>';box.classList.add('show');return;}
+      box.innerHTML=quotes.map(x=>`<div class="td-sr-item" onclick="td_addTicker('${x.symbol.replace(/'/g,"\\'")}')"><span class="td-sr-sym">${x.symbol}</span><span class="td-sr-name">${(x.shortname||x.longname||'').replace(/</g,'&lt;')}</span></div>`).join('');
+      box.classList.add('show');
+    }catch(e){box.innerHTML='<div class="td-sr-item"><span class="td-sr-name">Search unavailable — proxy error</span></div>';box.classList.add('show');}
+  },350);
+}
+function td_addTicker(symbol){
+  symbol=symbol.toUpperCase();
+  document.getElementById('tdSearchInput').value='';
+  document.getElementById('tdSearchResults').classList.remove('show');
+  const wl=state.trading.watchlist;
+  if(wl.find(t=>t.ticker===symbol)){td_selectTicker(symbol);return;}
+  if(wl.length<6){
+    wl.push({ticker:symbol,locked:false});
+  }else{
+    const idx=wl.findIndex(t=>!t.locked);
+    if(idx===-1){td_toast('All 6 slots locked — unlock one to add '+symbol+'.');return;}
+    wl.splice(idx,1,{ticker:symbol,locked:false});
+  }
+  saveData();
+  td_renderChips();
+  td_selectTicker(symbol);
+}
+function td_toggleLock(symbol,ev){
+  ev&&ev.stopPropagation();
+  const e=state.trading.watchlist.find(t=>t.ticker===symbol);
+  if(e){e.locked=!e.locked;saveData();td_renderChips();}
+}
+function td_removeTicker(symbol,ev){
+  ev&&ev.stopPropagation();
+  state.trading.watchlist=state.trading.watchlist.filter(t=>t.ticker!==symbol);
+  if(state.trading.activeTicker===symbol){state.trading.activeTicker=null;document.getElementById('tdActivePanel').style.display='none';document.getElementById('tdPlanPanel').style.display='none';}
+  saveData();
+  td_renderChips();
+}
+function td_toast(msg){
+  const b=document.getElementById('tdWatchCount');
+  if(!b)return;
+  const orig=b.textContent;
+  b.textContent='⚠';b.title=msg;
+  setTimeout(()=>{b.textContent=orig;b.title='';},2200);
+  console.warn('[Trading] '+msg);
+}
+function td_renderChips(){
+  const wl=state.trading.watchlist;
+  document.getElementById('tdWatchCount').textContent=wl.length+'/6';
+  document.getElementById('tdChips').innerHTML=wl.length?wl.map(t=>`<div class="td-chip ${t.locked?'locked':''} ${state.trading.activeTicker===t.ticker?'active':''}" onclick="td_selectTicker('${t.ticker}')">
+    <span class="td-lock" onclick="td_toggleLock('${t.ticker}',event)" title="${t.locked?'Unlock':'Lock'}">${t.locked?'🔒':'🔓'}</span>
+    <span>${t.ticker}</span>
+    <span class="td-x" onclick="td_removeTicker('${t.ticker}',event)" title="Remove">✕</span>
+  </div>`).join(''):'<div class="empty">No tickers yet — search above to add up to 6</div>';
+}
+async function td_selectTicker(symbol,silent){
+  state.trading.activeTicker=symbol;
+  if(!silent)saveData();
+  td_renderChips();
+  document.getElementById('tdActivePanel').style.display='block';
+  document.getElementById('tdUpdated').textContent='Loading...';
+  try{
+    const [dailyD,intraD]=await Promise.all([
+      td_proxyFetchJSON(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=6mo`),
+      td_proxyFetchJSON(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`)
+    ]);
+    const daily=td_parseChart(dailyD);
+    const intra=td_parseChart(intraD,true);
+    if(!daily||daily.close.length<60){td_showError('Not enough daily history for '+symbol);return;}
+    const res=td_computeIndicators(daily,intra);
+    td_renderDashboard(symbol,res);
+    td_checkAlert(symbol,res);
+  }catch(e){
+    console.error('td fetch',e);
+    td_showError('Data unavailable for '+symbol+' — proxy or symbol issue');
+  }
+}
+function td_showError(msg){
+  document.getElementById('tdUpdated').textContent=msg;
+  document.getElementById('tdPrice').textContent='—';
+  document.getElementById('tdChg').textContent='';
+}
+function td_parseChart(d,regularHoursOnly){
+  try{
+    const r=d.chart.result[0];
+    const ts=r.timestamp||[];
+    const q=r.indicators.quote[0];
+    const out={t:[],open:[],high:[],low:[],close:[],volume:[]};
+    for(let i=0;i<ts.length;i++){
+      if(q.close[i]==null)continue;
+      out.t.push(ts[i]*1000);out.open.push(q.open[i]);out.high.push(q.high[i]);out.low.push(q.low[i]);out.close.push(q.close[i]);out.volume.push(q.volume[i]||0);
+    }
+    out.meta=r.meta;
+    return out;
+  }catch(e){return null;}
+}
+// ── indicator math ──
+function td_ema(arr,period){
+  const k=2/(period+1);const out=new Array(arr.length).fill(null);
+  let sum=0;for(let i=0;i<period&&i<arr.length;i++)sum+=arr[i];
+  if(arr.length<period)return out;
+  out[period-1]=sum/period;
+  for(let i=period;i<arr.length;i++)out[i]=arr[i]*k+out[i-1]*(1-k);
+  return out;
+}
+function td_rsi(closes,period){
+  const out=new Array(closes.length).fill(null);
+  if(closes.length<period+1)return out;
+  let gain=0,loss=0;
+  for(let i=1;i<=period;i++){const d=closes[i]-closes[i-1];if(d>0)gain+=d;else loss-=d;}
+  gain/=period;loss/=period;
+  out[period]=loss===0?100:100-100/(1+gain/loss);
+  for(let i=period+1;i<closes.length;i++){
+    const d=closes[i]-closes[i-1];
+    gain=(gain*(period-1)+(d>0?d:0))/period;
+    loss=(loss*(period-1)+(d<0?-d:0))/period;
+    out[i]=loss===0?100:100-100/(1+gain/loss);
+  }
+  return out;
+}
+function td_macd(closes){
+  const e12=td_ema(closes,12),e26=td_ema(closes,26);
+  const macdLine=closes.map((_,i)=>(e12[i]!=null&&e26[i]!=null)?e12[i]-e26[i]:null);
+  const valid=macdLine.filter(x=>x!=null);
+  const sig=td_ema(valid,9);
+  const sigFull=new Array(macdLine.length).fill(null);
+  let vi=0;
+  for(let i=0;i<macdLine.length;i++){if(macdLine[i]!=null){sigFull[i]=sig[vi];vi++;}}
+  const hist=macdLine.map((v,i)=>(v!=null&&sigFull[i]!=null)?v-sigFull[i]:null);
+  return{macdLine,signal:sigFull,hist};
+}
+function td_atr(high,low,close,period){
+  const tr=high.map((h,i)=>i===0?h-low[i]:Math.max(h-low[i],Math.abs(h-close[i-1]),Math.abs(low[i]-close[i-1])));
+  const out=new Array(tr.length).fill(null);
+  if(tr.length<period)return out;
+  let sum=0;for(let i=0;i<period;i++)sum+=tr[i];
+  out[period-1]=sum/period;
+  for(let i=period;i<tr.length;i++)out[i]=(out[i-1]*(period-1)+tr[i])/period;
+  return out;
+}
+function td_adx(high,low,close,period){
+  const n=high.length;const plusDM=new Array(n).fill(0),minusDM=new Array(n).fill(0),tr=new Array(n).fill(0);
+  for(let i=1;i<n;i++){
+    const up=high[i]-high[i-1],dn=low[i-1]-low[i];
+    plusDM[i]=(up>dn&&up>0)?up:0;
+    minusDM[i]=(dn>up&&dn>0)?dn:0;
+    tr[i]=Math.max(high[i]-low[i],Math.abs(high[i]-close[i-1]),Math.abs(low[i]-close[i-1]));
+  }
+  function smooth(arr){const out=new Array(n).fill(null);let sum=0;for(let i=1;i<=period;i++)sum+=arr[i];out[period]=sum;for(let i=period+1;i<n;i++)out[i]=out[i-1]-(out[i-1]/period)+arr[i];return out;}
+  const trS=smooth(tr),pS=smooth(plusDM),mS=smooth(minusDM);
+  const pDI=new Array(n).fill(null),mDI=new Array(n).fill(null),dx=new Array(n).fill(null);
+  for(let i=period;i<n;i++){
+    if(trS[i]){pDI[i]=100*pS[i]/trS[i];mDI[i]=100*mS[i]/trS[i];dx[i]=(pDI[i]+mDI[i])?100*Math.abs(pDI[i]-mDI[i])/(pDI[i]+mDI[i]):0;}
+  }
+  const adx=new Array(n).fill(null);
+  let sum=0,cnt=0;
+  for(let i=period;i<Math.min(2*period,n);i++){if(dx[i]!=null){sum+=dx[i];cnt++;}}
+  if(cnt<period)return{adx,pDI,mDI};
+  adx[2*period-1]=sum/period;
+  for(let i=2*period;i<n;i++)adx[i]=((adx[i-1]*(period-1))+dx[i])/period;
+  return{adx,pDI,mDI};
+}
+function td_vwapRvol(intra,dailyVolumes){
+  if(!intra||!intra.close.length)return{vwap:null,priceVsVwap:null,rvol:null,vwapReject:false};
+  let cumPV=0,cumV=0;const series=[];
+  for(let i=0;i<intra.close.length;i++){
+    const tp=(intra.high[i]+intra.low[i]+intra.close[i])/3;
+    cumPV+=tp*intra.volume[i];cumV+=intra.volume[i];
+    series.push(cumV?cumPV/cumV:null);
+  }
+  const vwap=series[series.length-1];
+  const lastClose=intra.close[intra.close.length-1];
+  const prevClose=intra.close.length>1?intra.close[intra.close.length-2]:lastClose;
+  const prevVwap=series.length>1?series[series.length-2]:vwap;
+  const vwapReject=(prevClose<prevVwap&&lastClose>vwap)||(prevClose>prevVwap&&lastClose<vwap);
+  const todayVolSoFar=cumV;
+  const last20=dailyVolumes.slice(-21,-1).filter(v=>v>0);
+  const avgDailyVol=last20.length?last20.reduce((a,b)=>a+b,0)/last20.length:null;
+  const totalBarsExpected=78; // ~6.5h session / 5min bars
+  const elapsedFrac=Math.min(1,intra.close.length/totalBarsExpected);
+  const projectedFullDay=elapsedFrac>0?todayVolSoFar/elapsedFrac:todayVolSoFar;
+  const rvol=avgDailyVol?projectedFullDay/avgDailyVol:null;
+  return{vwap,priceVsVwap:lastClose>vwap?'bull':'bear',rvol,vwapReject};
+}
+function td_structure(daily,lookback){
+  const n=daily.close.length;
+  const win=daily.high.slice(Math.max(0,n-lookback-1),n-1);
+  const winL=daily.low.slice(Math.max(0,n-lookback-1),n-1);
+  const swingHigh=Math.max(...win);
+  const swingLow=Math.min(...winL);
+  const last=daily.close[n-1];
+  if(last>swingHigh)return{dir:'bull',pass:true,level:swingHigh};
+  if(last<swingLow)return{dir:'bear',pass:true,level:swingLow};
+  return{dir:last>=(swingHigh+swingLow)/2?'bull':'bear',pass:false,level:null};
+}
+function td_computeIndicators(daily,intra){
+  const c=daily.close,h=daily.high,l=daily.low;
+  const n=c.length;
+  const e8=td_ema(c,8),e21=td_ema(c,21),e55=td_ema(c,55);
+  const ribbonBull=e8[n-1]>e21[n-1]&&e21[n-1]>e55[n-1];
+  const ribbonBear=e8[n-1]<e21[n-1]&&e21[n-1]<e55[n-1];
+  const ribbonDir=ribbonBull?'bull':(ribbonBear?'bear':'neutral');
+  const {adx,pDI,mDI}=td_adx(h,l,c,14);
+  const adxVal=adx[n-1];
+  const adxDir=(pDI[n-1]>mDI[n-1])?'bull':'bear';
+  const adxPass=adxVal!=null&&adxVal>25;
+  const macd=td_macd(c);
+  const histLast=macd.hist[n-1],histPrev=macd.hist[n-2];
+  const macdDir=histLast>0?'bull':'bear';
+  const macdPass=histLast!=null&&histPrev!=null&&Math.sign(histLast)===Math.sign(histPrev===0?histLast:histPrev)&&Math.abs(histLast)>=Math.abs(histPrev)*0.0+0;
+  const macdPassSimple=histLast!=null&&((histLast>0&&histLast>=histPrev)||(histLast<0&&histLast<=histPrev));
+  const rsiArr=td_rsi(c,7);const rsiVal=rsiArr[n-1];
+  const rsiDir=rsiVal>50?'bull':'bear';
+  const rsiPass=rsiVal!=null&&(rsiVal>80||rsiVal<20);
+  const vw=td_vwapRvol(intra,daily.volume);
+  const rvolPass=vw.rvol!=null&&vw.rvol>=1.5;
+  const rvolTier=vw.rvol!=null&&vw.rvol>=2.0?'strong':'moderate';
+  const struct=td_structure(daily,20);
+  const dirVotes={bull:0,bear:0};
+  [ribbonDir,adxDir,macdDir,rsiDir,vw.priceVsVwap,struct.dir].forEach(d=>{if(d==='bull')dirVotes.bull++;else if(d==='bear')dirVotes.bear++;});
+  const bias=dirVotes.bull===dirVotes.bear?'neutral':(dirVotes.bull>dirVotes.bear?'bull':'bear');
+  const inds=[
+    {key:'ema',name:'EMA Ribbon 8/21/55',tag:'trend',dir:ribbonDir,pass:ribbonDir!=='neutral',val:ribbonDir==='neutral'?'flat':(ribbonDir==='bull'?'8>21>55':'8<21<55')},
+    {key:'adx',name:'ADX (14)',tag:'trend',dir:adxDir,pass:adxPass,val:adxVal!=null?adxVal.toFixed(1):'—'},
+    {key:'macd',name:'MACD (12,26,9)',tag:'momentum',dir:macdDir,pass:macdPassSimple,val:histLast!=null?histLast.toFixed(3):'—'},
+    {key:'rsi',name:'RSI (7)',tag:'momentum',dir:rsiDir,pass:rsiPass,val:rsiVal!=null?rsiVal.toFixed(1):'—'},
+    {key:'vwap',name:'VWAP'+(vw.vwapReject?' (reject)':''),tag:'value',dir:vw.priceVsVwap,pass:vw.priceVsVwap!=null,val:vw.vwap!=null?vw.vwap.toFixed(2):'—'},
+    {key:'rvol',name:'RVOL',tag:'volume',dir:bias==='neutral'?'bull':bias,pass:rvolPass,val:vw.rvol!=null?vw.rvol.toFixed(2)+'x '+(rvolPass?rvolTier:''):'—'},
+    {key:'structure',name:'Structure (BoS proxy)',tag:'structure',dir:struct.dir,pass:struct.pass,val:struct.level!=null?struct.level.toFixed(2):'range'}
+  ];
+  const score=inds.filter(x=>x.pass&&x.dir===bias).length;
+  const atrArr=td_atr(h,l,c,14);const atr=atrArr[n-1];
+  const price=daily.meta.regularMarketPrice||c[n-1];
+  const prevClose=daily.meta.chartPreviousClose||c[n-2];
+  return{inds,bias,score,price,prevClose,atr,vw};
+}
+function td_renderDashboard(symbol,res){
+  const chg=res.price-res.prevClose;
+  const chgPct=res.prevClose?(chg/res.prevClose*100):0;
+  document.getElementById('tdPrice').textContent=symbol+' '+res.price.toFixed(2);
+  const chgEl=document.getElementById('tdChg');
+  chgEl.textContent=(chg>=0?'+':'')+chg.toFixed(2)+' ('+(chgPct>=0?'+':'')+chgPct.toFixed(2)+'%)';
+  chgEl.className='td-chg '+(chg>=0?'up':'down');
+  document.getElementById('tdUpdated').textContent='Updated '+new Date().toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const pct=Math.round(res.score/7*100);
+  const fill=document.getElementById('tdMeterFill');
+  fill.style.width=pct+'%';
+  fill.className='td-meter-fill '+(res.bias==='neutral'?'neutral':res.bias);
+  document.getElementById('tdMeterLabel').textContent=res.score+'/7';
+  const bt=document.getElementById('tdBiasTag');
+  bt.textContent=res.bias==='neutral'?'No dominant bias':(res.bias==='bull'?'Bullish bias':'Bearish bias');
+  bt.className='td-bias '+res.bias;
+  document.getElementById('tdIndicators').innerHTML=res.inds.map(x=>{
+    const st=x.pass?('pass-'+(x.dir==='bull'?'bull':'bear')):'fail';
+    const icon=x.pass?(x.dir==='bull'?'▲':'▼'):'·';
+    return `<div class="td-ind-row"><div class="td-ind-name">${x.name}<span class="td-ind-tag">${x.tag}</span></div><div style="display:flex;align-items:center;gap:8px"><span class="td-ind-val">${x.val}</span><span class="td-ind-status ${st}">${icon}</span></div></div>`;
+  }).join('');
+  const planPanel=document.getElementById('tdPlanPanel');
+  if(res.score>=6&&res.bias!=='neutral'&&res.atr){
+    planPanel.style.display='block';
+    const entry=res.price;
+    const stopMult=1.75,targetMult=2.5;
+    const stop=res.bias==='bull'?entry-res.atr*stopMult:entry+res.atr*stopMult;
+    const target=res.bias==='bull'?entry+res.atr*targetMult:entry-res.atr*targetMult;
+    const rr=(Math.abs(target-entry)/Math.abs(entry-stop)).toFixed(2);
+    document.getElementById('tdPlanTier').textContent=res.score+'/7 confluence';
+    document.getElementById('tdPlanEntry').textContent=entry.toFixed(2);
+    document.getElementById('tdPlanStop').textContent=stop.toFixed(2);
+    document.getElementById('tdPlanTarget').textContent=target.toFixed(2);
+    document.getElementById('tdPlanRR').textContent='1 : '+rr;
+  }else{
+    planPanel.style.display='none';
+  }
+}
+function td_checkAlert(symbol,res){
+  if(res.score<6||res.bias==='neutral')return;
+  const dateStr=new Date().toISOString().slice(0,10);
+  const dup=state.trading.alertLog.find(a=>a.ticker===symbol&&a.date===dateStr&&a.score===res.score&&a.bias===res.bias);
+  if(dup)return;
+  state.trading.alertLog.unshift({ts:Date.now(),date:dateStr,ticker:symbol,score:res.score,bias:res.bias,price:res.price});
+  if(state.trading.alertLog.length>200)state.trading.alertLog.length=200;
+  saveData();
+  td_renderAlertLog();
+}
+function td_renderAlertLog(){
+  const log=state.trading.alertLog||[];
+  document.getElementById('tdAlertLog').innerHTML=log.length?log.slice(0,30).map(a=>`<div class="td-alert-item"><span class="td-alert-left">${a.ticker} · ${a.score}/7 · ${a.bias==='bull'?'▲ Bull':'▼ Bear'} @ ${a.price.toFixed(2)}</span><span class="td-alert-time">${new Date(a.ts).toLocaleString('en-MY',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span></div>`).join(''):'<div class="empty">No alerts yet</div>';
+}
+function td_clearAlerts(){
+  if(!confirm('Clear all alert log entries?'))return;
+  state.trading.alertLog=[];
+  saveData();
+  td_renderAlertLog();
+}
+document.addEventListener('click',e=>{
+  const box=document.getElementById('tdSearchResults');
+  if(box&&!e.target.closest('.td-search'))box.classList.remove('show');
+});
+
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
   // Use explicit add/remove instead of toggle for reliability
-  ['home','finance','todo','goals','pomo','health','shuli','bazi'].forEach(n=>{
+  ['home','finance','todo','goals','pomo','health','shuli','bazi','trading'].forEach(n=>{
     const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
     const page=document.getElementById('page-'+n);
     if(n===name){
@@ -3331,7 +3770,9 @@ function switchAppTab(name){
   else if(name==='health'){try{renderHealth();}catch(e){console.error('health render',e);}}
   else if(name==='shuli'){try{renderShuli();}catch(e){console.error('shuli render',e);}}
   else if(name==='bazi'){try{bz_initTab();}catch(e){console.error('bazi render',e);}}
+  else if(name==='trading'){try{td_initTab();}catch(e){console.error('trading render',e);}}
   else render();
+  if(name!=='trading'&&window.td_stopAutoRefresh)td_stopAutoRefresh();
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>{const names=['overview','transactions','budget','goals','fx','report','balance','transfers','planner'];t.classList.toggle('active',names[i]===name);});document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');}
 function showApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appScreen').style.display='block';render();try{switchAppTab('home');}catch(e){console.error('land home',e);}}
