@@ -3412,19 +3412,29 @@ window.hmToggleSubtask=async function(tid,si){if(window.toggleSubtask){await tog
 
 // ── TRADING TAB (📈 confluence dashboard, alert-only, no broker keys) ──
 const TD_PROXIES=[
+  u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u),
   u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
-  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)
+  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+  u=>'https://thingproxy.freeboard.io/fetch/'+u
 ];
+const TD_PROXY_TIMEOUT_MS=6000;
+function td_fetchWithTimeout(url,ms){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),ms);
+  return fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(t));
+}
 async function td_proxyFetchJSON(url){
-  let lastErr=null;
-  for(const mk of TD_PROXIES){
-    try{
-      const r=await fetch(mk(url));
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      return await r.json();
-    }catch(e){lastErr=e;}
+  // Race all proxies in parallel — first valid JSON response wins, rest are abandoned.
+  // Fixes serial-fallback latency: a single slow/dead proxy no longer blocks the others.
+  const attempts=TD_PROXIES.map(mk=>
+    td_fetchWithTimeout(mk(url),TD_PROXY_TIMEOUT_MS)
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  );
+  try{
+    return await Promise.any(attempts);
+  }catch(e){
+    throw new Error('All proxies failed or timed out ('+TD_PROXY_TIMEOUT_MS/1000+'s)');
   }
-  throw lastErr||new Error('all proxies failed');
 }
 let td_searchDebounce=null;
 let td_autoRefreshTimer=null;
