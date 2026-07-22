@@ -3411,6 +3411,8 @@ window.hmToggleTask=async function(id){if(window.toggleTodo){await toggleTodo(id
 window.hmToggleSubtask=async function(tid,si){if(window.toggleSubtask){await toggleSubtask(tid,si);}renderDashboard();};
 
 // ── TRADING TAB (📈 confluence dashboard, alert-only, no broker keys) ──
+// Single-file: all fetching happens in-browser via a parallel CORS-proxy race.
+// No external repo files, no GitHub Action, no separate hosting piece.
 const TD_PROXIES=[
   u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u),
   u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
@@ -3424,8 +3426,7 @@ function td_fetchWithTimeout(url,ms){
   return fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(t));
 }
 async function td_proxyFetchJSON(url){
-  // Race all proxies in parallel — first valid JSON response wins, rest are abandoned.
-  // Fixes serial-fallback latency: a single slow/dead proxy no longer blocks the others.
+  // Fires all proxies in parallel — first valid JSON response wins, rest are abandoned.
   const attempts=TD_PROXIES.map(mk=>
     td_fetchWithTimeout(mk(url),TD_PROXY_TIMEOUT_MS)
       .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
@@ -3438,6 +3439,8 @@ async function td_proxyFetchJSON(url){
 }
 let td_searchDebounce=null;
 let td_autoRefreshTimer=null;
+let td_quoteCache={}; // {SYMBOL:{daily,intra,ts}} — 30s client-side cache so rapid chip-tapping doesn't re-fetch
+const TD_CACHE_MS=30000;
 function td_initTab(){
   td_renderChips();
   td_renderAlertLog();
@@ -3449,7 +3452,7 @@ function td_startAutoRefresh(){
   td_autoRefreshTimer=setInterval(()=>{if(state.trading.activeTicker)td_selectTicker(state.trading.activeTicker,true);},60000);
 }
 function td_stopAutoRefresh(){if(td_autoRefreshTimer){clearInterval(td_autoRefreshTimer);td_autoRefreshTimer=null;}}
-function td_refreshActive(){if(state.trading.activeTicker)td_selectTicker(state.trading.activeTicker,true);}
+function td_refreshActive(){if(state.trading.activeTicker){delete td_quoteCache[state.trading.activeTicker];td_selectTicker(state.trading.activeTicker,true);}}
 
 function td_onSearchInput(){
   const q=document.getElementById('tdSearchInput').value.trim();
@@ -3463,7 +3466,7 @@ function td_onSearchInput(){
       if(!quotes.length){box.innerHTML='<div class="td-sr-item"><span class="td-sr-name">No matches</span></div>';box.classList.add('show');return;}
       box.innerHTML=quotes.map(x=>`<div class="td-sr-item" onclick="td_addTicker('${x.symbol.replace(/'/g,"\\'")}')"><span class="td-sr-sym">${x.symbol}</span><span class="td-sr-name">${(x.shortname||x.longname||'').replace(/</g,'&lt;')}</span></div>`).join('');
       box.classList.add('show');
-    }catch(e){box.innerHTML='<div class="td-sr-item"><span class="td-sr-name">Search unavailable — proxy error</span></div>';box.classList.add('show');}
+    }catch(e){box.innerHTML='<div class="td-sr-item"><span class="td-sr-name">Search unavailable — all proxies failed</span></div>';box.classList.add('show');}
   },350);
 }
 function td_addTicker(symbol){
@@ -3517,6 +3520,13 @@ async function td_selectTicker(symbol,silent){
   if(!silent)saveData();
   td_renderChips();
   document.getElementById('tdActivePanel').style.display='block';
+  const cached=td_quoteCache[symbol];
+  if(cached&&(Date.now()-cached.ts)<TD_CACHE_MS){
+    const res=td_computeIndicators(cached.daily,cached.intra);
+    td_renderDashboard(symbol,res,cached.ts);
+    td_checkAlert(symbol,res);
+    return;
+  }
   document.getElementById('tdUpdated').textContent='Loading...';
   try{
     const [dailyD,intraD]=await Promise.all([
@@ -3526,8 +3536,9 @@ async function td_selectTicker(symbol,silent){
     const daily=td_parseChart(dailyD);
     const intra=td_parseChart(intraD,true);
     if(!daily||daily.close.length<60){td_showError('Not enough daily history for '+symbol);return;}
+    td_quoteCache[symbol]={daily,intra,ts:Date.now()};
     const res=td_computeIndicators(daily,intra);
-    td_renderDashboard(symbol,res);
+    td_renderDashboard(symbol,res,Date.now());
     td_checkAlert(symbol,res);
   }catch(e){
     console.error('td fetch',e);
@@ -3693,14 +3704,16 @@ function td_computeIndicators(daily,intra){
   const prevClose=daily.meta.chartPreviousClose||c[n-2];
   return{inds,bias,score,price,prevClose,atr,vw};
 }
-function td_renderDashboard(symbol,res){
+function td_renderDashboard(symbol,res,fetchedAt){
   const chg=res.price-res.prevClose;
   const chgPct=res.prevClose?(chg/res.prevClose*100):0;
   document.getElementById('tdPrice').textContent=symbol+' '+res.price.toFixed(2);
   const chgEl=document.getElementById('tdChg');
   chgEl.textContent=(chg>=0?'+':'')+chg.toFixed(2)+' ('+(chgPct>=0?'+':'')+chgPct.toFixed(2)+'%)';
   chgEl.className='td-chg '+(chg>=0?'up':'down');
-  document.getElementById('tdUpdated').textContent='Updated '+new Date().toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const asOf=fetchedAt?new Date(fetchedAt):null;
+  const ageMin=asOf?Math.round((Date.now()-asOf.getTime())/60000):null;
+  document.getElementById('tdUpdated').textContent=asOf?('As of '+asOf.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'})+' ('+ageMin+'min ago)'):'Timestamp unavailable';
   const pct=Math.round(res.score/7*100);
   const fill=document.getElementById('tdMeterFill');
   fill.style.width=pct+'%';
