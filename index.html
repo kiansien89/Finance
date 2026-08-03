@@ -1266,6 +1266,35 @@ input,select,button,textarea{font-family:var(--sans)}
           <div class="ph"><div class="pt">📚 Saved Charts</div></div>
           <div id="bzSavedList"></div>
         </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">💞 Love Compatibility</div><span style="font-size:0.62rem;font-weight:700;color:var(--t3)">Day Master · Spouse Palace · Zodiac</span></div>
+          <div class="bz-form-row">
+            <div class="field"><label>Person A</label><select id="bzCompASel" onchange="bz_compSelChange('A')"></select></div>
+            <div class="field"><label>Person B</label><select id="bzCompBSel" onchange="bz_compSelChange('B')"></select></div>
+          </div>
+          <div class="bz-comp-new" id="bzCompANew" style="display:none">
+            <div class="bz-form-row">
+              <div class="field"><label>Name <span style="color:var(--t4)">(optional)</span></label><input type="text" id="bzCompAName" placeholder="Person A"></div>
+              <div class="field"><label>Birth Date <span style="color:var(--red)">*</span></label><input type="date" id="bzCompADate"></div>
+            </div>
+            <div class="bz-form-row">
+              <div class="field"><label>Birth Time <span style="color:var(--t4)">(optional)</span></label><input type="time" id="bzCompATime"></div>
+              <div class="field"><label>Gender <span style="color:var(--red)">*</span></label><select id="bzCompAGender"><option value="M">Male</option><option value="F">Female</option></select></div>
+            </div>
+          </div>
+          <div class="bz-comp-new" id="bzCompBNew" style="display:none">
+            <div class="bz-form-row">
+              <div class="field"><label>Name <span style="color:var(--t4)">(optional)</span></label><input type="text" id="bzCompBName" placeholder="Person B"></div>
+              <div class="field"><label>Birth Date <span style="color:var(--red)">*</span></label><input type="date" id="bzCompBDate"></div>
+            </div>
+            <div class="bz-form-row">
+              <div class="field"><label>Birth Time <span style="color:var(--t4)">(optional)</span></label><input type="time" id="bzCompBTime"></div>
+              <div class="field"><label>Gender <span style="color:var(--red)">*</span></label><select id="bzCompBGender"><option value="M">Male</option><option value="F">Female</option></select></div>
+            </div>
+          </div>
+          <button class="btn btn-red" onclick="bz_compCalculate()" style="width:100%;margin-top:4px">💞 Check Compatibility</button>
+          <div id="bzCompResult"></div>
+        </div>
         <div id="bzResult"></div>
       </div>
     </div>
@@ -5136,13 +5165,112 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     const s=document.createElement('style');s.id='bz-css';
     s.textContent=`.bz-wrap{padding:0 4px}.bz-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}.bz-unk{display:flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:700;color:var(--t2);margin-bottom:10px}.bz-pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.bz-pil{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.07);border-radius:12px;padding:12px 6px;text-align:center}.bz-upil{opacity:.35}.bz-pl{font-size:0.5rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}.bz-ps{font-size:2rem;font-weight:800;line-height:1}.bz-pb{font-size:1.6rem;font-weight:800;margin-top:6px}.bz-sub{font-size:0.5rem;font-weight:700;color:var(--t3);margin:2px 0}.bz-pg{font-size:0.54rem;font-weight:800;background:rgba(0,0,0,0.06);border-radius:6px;padding:3px 5px;margin-top:6px;color:var(--t2);cursor:help}.bz-pmean{font-size:0.5rem;font-weight:700;color:var(--t4);margin-top:5px;line-height:1.3}.bz-sec{font-size:0.6rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px;border-top:1px solid rgba(0,0,0,0.06);padding-top:10px}.bz-card{background:rgba(0,0,0,0.03);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}.bz-row{font-size:0.7rem;font-weight:700;color:var(--t2);line-height:1.5}.bz-adv{background:rgba(0,0,0,0.04);border-radius:8px;padding:8px;font-weight:800;color:var(--t1)}.bz-egrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.bz-ecard{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.06);border-radius:10px;padding:9px 4px;text-align:center}.bz-tgrid{display:flex;flex-direction:column;gap:4px}.bz-trow{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05)}.bz-tl{font-size:0.6rem;font-weight:800;color:var(--t3);min-width:56px}.bz-tg{font-size:0.7rem;font-weight:800;min-width:110px;line-height:1.3}.bz-td{font-size:0.6rem;font-weight:700;color:var(--t3);line-height:1.4}.bz-lscroll{overflow-x:auto;padding-bottom:6px}.bz-lprow{display:flex;gap:7px;min-width:max-content}.bz-lp{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.06);border-radius:10px;padding:10px 6px;text-align:center;min-width:82px}.bz-lage{font-size:0.54rem;font-weight:800;color:var(--t3);margin-bottom:2px}.bz-lyr{font-size:0.5rem;font-weight:700;color:var(--t4);margin-bottom:6px;font-family:var(--mono)}.bz-ls{font-size:1.7rem;font-weight:800;line-height:1}.bz-lb{font-size:1.3rem;font-weight:800}.bz-le{font-size:0.58rem;font-weight:800;margin-top:3px}.bz-si{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer}.bz-si:hover{opacity:.75}.bz-sn{font-size:0.74rem;font-weight:800;color:var(--t1)}.bz-sm{font-size:0.6rem;font-weight:700;color:var(--t3)}
 .bz-hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bz-hcol{display:flex;flex-direction:column;gap:4px;align-items:center}.bz-hlbl{font-size:0.54rem;font-weight:800;color:var(--t3);text-transform:uppercase;margin-bottom:2px}.bz-hchip{font-size:0.6rem;font-weight:700;color:var(--t2);border:1.5px solid rgba(0,0,0,0.12);border-radius:8px;padding:3px 7px;width:100%;text-align:center;cursor:help}
+.bz-comp-new{margin:2px 0 10px;padding:10px;background:rgba(0,0,0,0.025);border-radius:10px;border:1px dashed rgba(0,0,0,0.12)}.bz-comp-dm{display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0 4px}.bz-comp-dmcol{text-align:center}.bz-comp-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}.bz-comp-row{background:rgba(0,0,0,0.03);border-radius:10px;padding:10px}.bz-comp-rt{font-size:0.56rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}.bz-comp-rl{font-size:0.82rem;font-weight:800;margin:3px 0}.bz-comp-rd{font-size:0.66rem;color:var(--t3);font-weight:700;line-height:1.5}.bz-comp-note{font-size:0.6rem;color:var(--t4);font-weight:700;line-height:1.5;margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06)}
 @media(max-width:600px){.bz-pgrid{grid-template-columns:repeat(2,1fr)}.bz-egrid{grid-template-columns:repeat(3,1fr)}.bz-form-row{grid-template-columns:1fr}.bz-hgrid{grid-template-columns:repeat(2,1fr)}}`;
     document.head.appendChild(s);
   }
 
   let _cur=null;
 
-  window.bz_initTab=function(){injectCSS();bz_renderSaved();};
+  // ── LOVE COMPATIBILITY ──
+  // Classical Earthly Branch relationship tables. Branch index order matches BRANCHES (子丑寅卯辰巳午未申酉戌亥).
+  const BR_COMBINE=[[0,1],[2,11],[3,10],[4,9],[5,8],[6,7]];       // 六合 Six Combinations
+  const BR_TRINE=[[8,0,4],[11,3,7],[2,6,10],[5,9,1]];             // 三合 Three Harmony groups
+  const BR_CLASH=[[0,6],[1,7],[2,8],[3,9],[4,10],[5,11]];         // 六沖 Six Clashes
+  const BR_HARM=[[0,7],[1,6],[2,5],[3,4],[8,11],[9,10]];          // 六害 Six Harms
+  const BR_PUNISH_TRIO=[[2,5,8],[1,10,7]];                        // 相刑 三刑 (寅巳申 / 丑戌未)
+  const BR_PUNISH_PAIR=[[0,3]];                                   // 相刑 (子卯)
+  const BR_SELF_PUNISH=[4,6,9,11];                                // 自刑 (辰午酉亥)
+
+  function branchRelation(a,b){
+    if(a===b){
+      if(BR_SELF_PUNISH.includes(a))return{label:'Same Branch — Self-Punishment 自刑',tone:'caution',desc:'Identical branch, and one prone to self-punishment — strong familiarity, but can amplify shared stress rather than balance it.'};
+      return{label:'Same Branch',tone:'neutral',desc:'Identical branch — strong shared rhythm, though it can also mean shared blind spots.'};
+    }
+    for(const p of BR_CLASH)if(p.includes(a)&&p.includes(b))return{label:'Six Clash 六沖',tone:'caution',desc:'A classic clash pairing — expect friction or push-pull dynamics that need active management.'};
+    for(const t of BR_TRINE)if(t.includes(a)&&t.includes(b))return{label:'Three Harmony 三合',tone:'good',desc:'Part of the same elemental trine — a naturally easy, complementary bond.'};
+    for(const p of BR_COMBINE)if(p.includes(a)&&p.includes(b))return{label:'Six Combination 六合',tone:'good',desc:'A classic combination pairing — strong natural attraction and bonding potential.'};
+    for(const t of BR_PUNISH_TRIO)if(t.includes(a)&&t.includes(b))return{label:'Punishment 相刑',tone:'caution',desc:'A punishment relationship — power-struggle or ingratitude themes are classically associated with this pairing.'};
+    for(const p of BR_PUNISH_PAIR)if(p.includes(a)&&p.includes(b))return{label:'Punishment 相刑',tone:'caution',desc:'A punishment relationship — friction around respect or courtesy is classically associated with this pairing.'};
+    for(const p of BR_HARM)if(p.includes(a)&&p.includes(b))return{label:'Six Harm 六害',tone:'caution',desc:'A harm pairing — subtle undermining or miscommunication can build up if unaddressed.'};
+    return{label:'Neutral',tone:'neutral',desc:'No classical combination or clash between these two branches — an open, undefined dynamic.'};
+  }
+
+  function elementRelation(elA,elB,nameA,nameB){
+    if(elA===elB)return{label:'Same Element',tone:'neutral',desc:'Both Day Masters share the same element — deep mutual understanding, but can tip into rivalry or too much sameness.'};
+    if(PRODUCE[elA]===elB)return{label:EL[elA]+' generates '+EL[elB],tone:'good',desc:nameA+"'s element naturally nurtures "+nameB+"'s — a supportive, giving dynamic."};
+    if(PRODUCE[elB]===elA)return{label:EL[elB]+' generates '+EL[elA],tone:'good',desc:nameB+"'s element naturally nurtures "+nameA+"'s — a supportive, giving dynamic."};
+    if(CONTROL[elA]===elB)return{label:EL[elA]+' controls '+EL[elB],tone:'caution',desc:nameA+"'s element restrains "+nameB+"'s — can mean structure and guidance, or control and pressure, depending on balance."};
+    if(CONTROL[elB]===elA)return{label:EL[elB]+' controls '+EL[elA],tone:'caution',desc:nameB+"'s element restrains "+nameA+"'s — can mean structure and guidance, or control and pressure, depending on balance."};
+    return{label:'Neutral',tone:'neutral',desc:''};
+  }
+
+  function renderCompat(nameA,chartA,nameB,chartB){
+    const elA=chartA.dm.dei,elB=chartB.dm.dei;
+    const elRel=elementRelation(elA,elB,nameA,nameB);
+    const dayBr=branchRelation(chartA.dp.bi,chartB.dp.bi);
+    const yearBr=branchRelation(chartA.yp.bi,chartB.yp.bi);
+    const TONE={good:'var(--green)',caution:'var(--amber)',neutral:'var(--t3)'};
+    const row=(title,rel,note)=>`<div class="bz-comp-row"><div class="bz-comp-rt">${title}</div><div class="bz-comp-rl" style="color:${TONE[rel.tone]}">${rel.label}</div><div class="bz-comp-rd">${rel.desc}${note?' '+note:''}</div></div>`;
+    let h=`<div class="panel bz-res" style="margin-top:10px"><div class="ph"><div class="pt">💞 ${esc(nameA)} × ${esc(nameB)}</div></div>`;
+    h+=`<div class="bz-comp-dm"><div class="bz-comp-dmcol"><div style="font-size:1.6rem;font-weight:800;color:${EL_COL[elA]}">${chartA.dp.s}</div><div class="bz-sub">${esc(nameA)}'s Day Master</div></div><div style="font-size:1.3rem;color:var(--t4)">⇄</div><div class="bz-comp-dmcol"><div style="font-size:1.6rem;font-weight:800;color:${EL_COL[elB]}">${chartB.dp.s}</div><div class="bz-sub">${esc(nameB)}'s Day Master</div></div></div>`;
+    h+=`<div class="bz-comp-rows">`;
+    h+=row('Day Master 日主',elRel);
+    h+=row('Spouse Palace 夫妻宮 (Day Branch)',dayBr,'— classically weighted most heavily for romantic pairing.');
+    h+=row('Zodiac 生肖 (Year Branch)',yearBr);
+    h+=`</div><div class="bz-comp-note">Quick structural read only — Day Master, Spouse Palace, and Zodiac branch relationships. A full reading also weighs Ten Gods interaction across both charts, current Luck Pillars, and both Hour Pillars where known. Treat this as a conversation starter, not a verdict.</div></div>`;
+    return h;
+  }
+
+  window.bz_compPopulateSelects=function(){
+    const charts=state.baziCharts||[];
+    ['A','B'].forEach((which,wi)=>{
+      const sel=document.getElementById('bzComp'+which+'Sel');
+      if(!sel)return;
+      const prev=sel.value;
+      sel.innerHTML=charts.map((c,i)=>`<option value="${i}">${esc(c.name||'Unnamed')} · ${c.dateStr}</option>`).join('')+'<option value="__new__">+ Add new person…</option>';
+      const hasPrev=Array.from(sel.options).some(o=>o.value===prev);
+      sel.value=hasPrev?prev:(charts.length>wi?String(wi):'__new__');
+      bz_compSelChange(which);
+    });
+  };
+
+  window.bz_compSelChange=function(which){
+    const sel=document.getElementById('bzComp'+which+'Sel');
+    const box=document.getElementById('bzComp'+which+'New');
+    if(!sel||!box)return;
+    box.style.display=sel.value==='__new__'?'block':'none';
+  };
+
+  window.bz_compGetChart=function(which){
+    const sel=document.getElementById('bzComp'+which+'Sel');
+    if(!sel)return null;
+    if(sel.value==='__new__'){
+      const name=(document.getElementById('bzComp'+which+'Name')||{}).value||('Person '+which);
+      const dateStr=(document.getElementById('bzComp'+which+'Date')||{}).value||'';
+      const timeStr=(document.getElementById('bzComp'+which+'Time')||{}).value||'';
+      const gender=(document.getElementById('bzComp'+which+'Gender')||{}).value||'M';
+      if(!dateStr)return null;
+      return buildChart(name.trim()||('Person '+which),dateStr,timeStr||null,!timeStr,gender);
+    }
+    const idx=parseInt(sel.value,10);
+    if(isNaN(idx)||!state.baziCharts||!state.baziCharts[idx])return null;
+    return state.baziCharts[idx];
+  };
+
+  window.bz_compCalculate=function(){
+    injectCSS();
+    const a=bz_compGetChart('A'),b=bz_compGetChart('B');
+    const res=document.getElementById('bzCompResult');
+    if(!res)return;
+    if(!a||!b){res.innerHTML='<div class="empty" style="margin-top:10px">Please pick or enter both people\'s birth dates.</div>';return;}
+    const nameA=document.getElementById('bzCompASel').value==='__new__'?((document.getElementById('bzCompAName')||{}).value||'Person A'):(a.name||'Person A');
+    const nameB=document.getElementById('bzCompBSel').value==='__new__'?((document.getElementById('bzCompBName')||{}).value||'Person B'):(b.name||'Person B');
+    res.innerHTML=renderCompat(nameA,a,nameB,b);
+    res.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+
+  window.bz_initTab=function(){injectCSS();bz_renderSaved();bz_compPopulateSelects();};
 
   window.bz_toggleTime=function(){
     const u=document.getElementById('bzUnknown').checked;
@@ -5174,6 +5302,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     if(idx>=0)state.baziCharts[idx]=_cur;else state.baziCharts.unshift(_cur);
     if(typeof saveData==='function')await saveData();
     bz_renderSaved();
+    bz_compPopulateSelects();
     const sb=document.getElementById('bzSaveBtn');
     if(sb)sb.textContent='✓ Saved to Drive';
   };
@@ -5197,6 +5326,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     state.baziCharts.splice(idx,1);
     if(typeof saveData==='function')await saveData();
     bz_renderSaved();
+    bz_compPopulateSelects();
   };
 
   window.bz_renderSaved=function(){
