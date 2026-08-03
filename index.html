@@ -4979,6 +4979,33 @@ document.getElementById('saveGoalPlan').onclick=async function(){
   // Hidden Stems (藏干) per Earthly Branch — standard classical table, ordered [main, middle, residual].
   // Branch index order matches BRANCHES array (子丑寅卯辰巳午未申酉戌亥).
   const HIDDEN=[[9],[5,9,7],[0,2,4],[1],[4,1,9],[2,4,6],[3,5],[5,3,1],[6,8,4],[7],[4,7,3],[8,0]];
+  // Shen Sha (神煞) — classical fixed lookup tables keyed off the Day Stem or Day Branch's trine group.
+  const NOBLEMAN=[[1,7],[0,8],[11,9],[11,9],[1,7],[0,8],[1,7],[2,6],[5,3],[5,3]]; // 天乙貴人, by day stem
+  const ACADEMIC=[5,6,8,9,8,9,11,0,2,3]; // 文昌貴人, by day stem
+  function trineGroup(bi){
+    if([8,0,4].includes(bi))return'water';
+    if([11,3,7].includes(bi))return'wood';
+    if([2,6,10].includes(bi))return'fire';
+    if([5,9,1].includes(bi))return'metal';
+    return null;
+  }
+  const PEACH_TARGET={water:9,wood:0,fire:3,metal:6};   // 桃花, by Day Branch's trine group
+  const HORSE_TARGET={water:2,wood:5,fire:8,metal:11};  // 驛馬, by Day Branch's trine group
+  function shenSha(dp,pillars){
+    const stars=[];
+    const findIn=(targets,name,zh,desc)=>{
+      const found=pillars.filter(x=>x.p&&targets.includes(x.p.bi));
+      if(found.length)stars.push({name,zh,desc,loc:found.map(f=>f.l).join(', ')});
+    };
+    findIn(NOBLEMAN[dp.si],'Nobleman','天乙貴人','Attracts helpful mentors and timely lucky breaks — someone tends to step in when needed.');
+    findIn([ACADEMIC[dp.si]],'Academic Star','文昌貴人','Supports study, exams, and articulate communication.');
+    const tg=trineGroup(dp.bi);
+    if(tg){
+      findIn([PEACH_TARGET[tg]],'Peach Blossom','桃花','Romantic magnetism and social charm — classically also a flag for relationship complexity.');
+      findIn([HORSE_TARGET[tg]],'Travel Horse','驛馬','Movement, relocation, and change — career or geographic mobility.');
+    }
+    return stars;
+  }
   // Precise solar-term (節, Jie) boundary dates 1900–2050 — MMDD per year, chronological:
   // [小寒,立春,惊蛰,清明,立夏,芒种,小暑,立秋,白露,寒露,立冬,大雪]. Sourced from an offline VSOP-based
   // Chinese calendar ephemeris (day-level precision) so Year/Month pillar cutoffs match real solar terms
@@ -5154,7 +5181,10 @@ document.getElementById('saveGoalPlan').onclick=async function(){
       const col=r.p?EL_COL[STEM_EL[r.p.si]]:'var(--t3)';
       h+=`<div class="bz-trow"><div class="bz-tl">${r.l}</div><div class="bz-tg" style="color:${col}">${r.g||'?'}</div><div class="bz-td">${TG_DESC[r.g]||'—'}</div></div>`;
     });
-    h+=`</div><div class="bz-sec">Major Luck Pillars 大運 · Starts age ${lp.startAge} · ${lp.fwd?'↗ Forward':'↙ Reverse'} cycle</div><div class="bz-lscroll"><div class="bz-lprow">`;
+    h+=`</div><div class="bz-sec">Shen Sha 神煞 <span style="font-weight:600;color:var(--t4);text-transform:none;letter-spacing:0">— classical stars, by Day Stem/Branch position</span></div>`;
+    const stars=shenSha(dp,[{l:'Year',p:yp},{l:'Month',p:mp},{l:'Day',p:dp},{l:'Hour',p:hp}]);
+    h+=stars.length?`<div class="bz-stargrid">`+stars.map(s=>`<div class="bz-star"><div class="bz-star-name">${s.zh} <span style="font-weight:700;color:var(--t3);font-size:0.58rem">${s.name}</span></div><div class="bz-star-loc">in ${s.loc} pillar</div><div class="bz-star-desc">${s.desc}</div></div>`).join('')+`</div>`:`<div class="empty">None of the tracked stars (Nobleman, Academic, Peach Blossom, Travel Horse) land in this chart.</div>`;
+    h+=`<div class="bz-sec">Major Luck Pillars 大運 · Starts age ${lp.startAge} · ${lp.fwd?'↗ Forward':'↙ Reverse'} cycle</div><div class="bz-lscroll"><div class="bz-lprow">`;
     lp.pillars.forEach(p=>{const sC=EL_COL[STEM_EL[p.si]],bC=EL_COL[BRANCH_EL[p.bi]];h+=`<div class="bz-lp"><div class="bz-lage">Age ${p.age}–${p.ageEnd}</div><div class="bz-lyr">${p.yr}–${p.yrEnd}</div><div class="bz-ls" style="color:${sC}">${p.s}</div><div class="bz-lb" style="color:${bC}">${p.b}</div><div class="bz-le" style="color:${sC}">${EL_ZH[p.eli]}${EL[p.eli]}</div></div>`;});
     h+=`</div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-red" id="bzSaveBtn" style="flex:1">💾 Save Chart to Drive</button></div></div>`;
     return h;
@@ -5165,7 +5195,9 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     const s=document.createElement('style');s.id='bz-css';
     s.textContent=`.bz-wrap{padding:0 4px}.bz-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}.bz-unk{display:flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:700;color:var(--t2);margin-bottom:10px}.bz-pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.bz-pil{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.07);border-radius:12px;padding:12px 6px;text-align:center}.bz-upil{opacity:.35}.bz-pl{font-size:0.5rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}.bz-ps{font-size:2rem;font-weight:800;line-height:1}.bz-pb{font-size:1.6rem;font-weight:800;margin-top:6px}.bz-sub{font-size:0.5rem;font-weight:700;color:var(--t3);margin:2px 0}.bz-pg{font-size:0.54rem;font-weight:800;background:rgba(0,0,0,0.06);border-radius:6px;padding:3px 5px;margin-top:6px;color:var(--t2);cursor:help}.bz-pmean{font-size:0.5rem;font-weight:700;color:var(--t4);margin-top:5px;line-height:1.3}.bz-sec{font-size:0.6rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px;border-top:1px solid rgba(0,0,0,0.06);padding-top:10px}.bz-card{background:rgba(0,0,0,0.03);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}.bz-row{font-size:0.7rem;font-weight:700;color:var(--t2);line-height:1.5}.bz-adv{background:rgba(0,0,0,0.04);border-radius:8px;padding:8px;font-weight:800;color:var(--t1)}.bz-egrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.bz-ecard{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.06);border-radius:10px;padding:9px 4px;text-align:center}.bz-tgrid{display:flex;flex-direction:column;gap:4px}.bz-trow{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05)}.bz-tl{font-size:0.6rem;font-weight:800;color:var(--t3);min-width:56px}.bz-tg{font-size:0.7rem;font-weight:800;min-width:110px;line-height:1.3}.bz-td{font-size:0.6rem;font-weight:700;color:var(--t3);line-height:1.4}.bz-lscroll{overflow-x:auto;padding-bottom:6px}.bz-lprow{display:flex;gap:7px;min-width:max-content}.bz-lp{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.06);border-radius:10px;padding:10px 6px;text-align:center;min-width:82px}.bz-lage{font-size:0.54rem;font-weight:800;color:var(--t3);margin-bottom:2px}.bz-lyr{font-size:0.5rem;font-weight:700;color:var(--t4);margin-bottom:6px;font-family:var(--mono)}.bz-ls{font-size:1.7rem;font-weight:800;line-height:1}.bz-lb{font-size:1.3rem;font-weight:800}.bz-le{font-size:0.58rem;font-weight:800;margin-top:3px}.bz-si{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer}.bz-si:hover{opacity:.75}.bz-sn{font-size:0.74rem;font-weight:800;color:var(--t1)}.bz-sm{font-size:0.6rem;font-weight:700;color:var(--t3)}
 .bz-hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bz-hcol{display:flex;flex-direction:column;gap:4px;align-items:center}.bz-hlbl{font-size:0.54rem;font-weight:800;color:var(--t3);text-transform:uppercase;margin-bottom:2px}.bz-hchip{font-size:0.6rem;font-weight:700;color:var(--t2);border:1.5px solid rgba(0,0,0,0.12);border-radius:8px;padding:3px 7px;width:100%;text-align:center;cursor:help}
+.bz-stargrid{display:flex;flex-direction:column;gap:6px}.bz-star{background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.07);border-radius:10px;padding:9px 12px}.bz-star-name{font-size:0.8rem;font-weight:800;color:var(--t1)}.bz-star-loc{font-size:0.58rem;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.03em;margin:2px 0 4px}.bz-star-desc{font-size:0.66rem;font-weight:700;color:var(--t3);line-height:1.4}
 .bz-comp-new{margin:2px 0 10px;padding:10px;background:rgba(0,0,0,0.025);border-radius:10px;border:1px dashed rgba(0,0,0,0.12)}.bz-comp-dm{display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0 4px}.bz-comp-dmcol{text-align:center}.bz-comp-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}.bz-comp-row{background:rgba(0,0,0,0.03);border-radius:10px;padding:10px}.bz-comp-rt{font-size:0.56rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}.bz-comp-rl{font-size:0.82rem;font-weight:800;margin:3px 0}.bz-comp-rd{font-size:0.66rem;color:var(--t3);font-weight:700;line-height:1.5}.bz-comp-note{font-size:0.6rem;color:var(--t4);font-weight:700;line-height:1.5;margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06)}
+.bz-comp-score{text-align:center;padding:8px 0 14px}.bz-comp-scorenum{font-size:2.4rem;font-weight:900;font-family:var(--mono);line-height:1}.bz-comp-scorelbl{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}.bz-comp-track{height:8px;background:rgba(0,0,0,0.08);border-radius:5px;margin:10px auto 0;max-width:280px;overflow:hidden}.bz-comp-fill{height:100%;border-radius:5px;transition:width 0.3s}
 @media(max-width:600px){.bz-pgrid{grid-template-columns:repeat(2,1fr)}.bz-egrid{grid-template-columns:repeat(3,1fr)}.bz-form-row{grid-template-columns:1fr}.bz-hgrid{grid-template-columns:repeat(2,1fr)}}`;
     document.head.appendChild(s);
   }
@@ -5184,43 +5216,53 @@ document.getElementById('saveGoalPlan').onclick=async function(){
 
   function branchRelation(a,b){
     if(a===b){
-      if(BR_SELF_PUNISH.includes(a))return{label:'Same Branch — Self-Punishment 自刑',tone:'caution',desc:'Identical branch, and one prone to self-punishment — strong familiarity, but can amplify shared stress rather than balance it.'};
-      return{label:'Same Branch',tone:'neutral',desc:'Identical branch — strong shared rhythm, though it can also mean shared blind spots.'};
+      if(BR_SELF_PUNISH.includes(a))return{label:'Same Branch — Self-Punishment 自刑',tone:'caution',score:-3,desc:'Identical branch, and one prone to self-punishment — strong familiarity, but can amplify shared stress rather than balance it.'};
+      return{label:'Same Branch',tone:'neutral',score:1,desc:'Identical branch — strong shared rhythm, though it can also mean shared blind spots.'};
     }
-    for(const p of BR_CLASH)if(p.includes(a)&&p.includes(b))return{label:'Six Clash 六沖',tone:'caution',desc:'A classic clash pairing — expect friction or push-pull dynamics that need active management.'};
-    for(const t of BR_TRINE)if(t.includes(a)&&t.includes(b))return{label:'Three Harmony 三合',tone:'good',desc:'Part of the same elemental trine — a naturally easy, complementary bond.'};
-    for(const p of BR_COMBINE)if(p.includes(a)&&p.includes(b))return{label:'Six Combination 六合',tone:'good',desc:'A classic combination pairing — strong natural attraction and bonding potential.'};
-    for(const t of BR_PUNISH_TRIO)if(t.includes(a)&&t.includes(b))return{label:'Punishment 相刑',tone:'caution',desc:'A punishment relationship — power-struggle or ingratitude themes are classically associated with this pairing.'};
-    for(const p of BR_PUNISH_PAIR)if(p.includes(a)&&p.includes(b))return{label:'Punishment 相刑',tone:'caution',desc:'A punishment relationship — friction around respect or courtesy is classically associated with this pairing.'};
-    for(const p of BR_HARM)if(p.includes(a)&&p.includes(b))return{label:'Six Harm 六害',tone:'caution',desc:'A harm pairing — subtle undermining or miscommunication can build up if unaddressed.'};
-    return{label:'Neutral',tone:'neutral',desc:'No classical combination or clash between these two branches — an open, undefined dynamic.'};
+    for(const p of BR_CLASH)if(p.includes(a)&&p.includes(b))return{label:'Six Clash 六沖',tone:'caution',score:-3,desc:'A classic clash pairing — expect friction or push-pull dynamics that need active management.'};
+    for(const t of BR_TRINE)if(t.includes(a)&&t.includes(b))return{label:'Three Harmony 三合',tone:'good',score:4,desc:'Part of the same elemental trine — a naturally easy, complementary bond.'};
+    for(const p of BR_COMBINE)if(p.includes(a)&&p.includes(b))return{label:'Six Combination 六合',tone:'good',score:4,desc:'A classic combination pairing — strong natural attraction and bonding potential.'};
+    for(const t of BR_PUNISH_TRIO)if(t.includes(a)&&t.includes(b))return{label:'Punishment 相刑',tone:'caution',score:-2,desc:'A punishment relationship — power-struggle or ingratitude themes are classically associated with this pairing.'};
+    for(const p of BR_PUNISH_PAIR)if(p.includes(a)&&p.includes(b))return{label:'Punishment 相刑',tone:'caution',score:-2,desc:'A punishment relationship — friction around respect or courtesy is classically associated with this pairing.'};
+    for(const p of BR_HARM)if(p.includes(a)&&p.includes(b))return{label:'Six Harm 六害',tone:'caution',score:-2,desc:'A harm pairing — subtle undermining or miscommunication can build up if unaddressed.'};
+    return{label:'Neutral',tone:'neutral',score:0,desc:'No classical combination or clash between these two branches — an open, undefined dynamic.'};
   }
 
   function elementRelation(elA,elB,nameA,nameB){
-    if(elA===elB)return{label:'Same Element',tone:'neutral',desc:'Both Day Masters share the same element — deep mutual understanding, but can tip into rivalry or too much sameness.'};
-    if(PRODUCE[elA]===elB)return{label:EL[elA]+' generates '+EL[elB],tone:'good',desc:nameA+"'s element naturally nurtures "+nameB+"'s — a supportive, giving dynamic."};
-    if(PRODUCE[elB]===elA)return{label:EL[elB]+' generates '+EL[elA],tone:'good',desc:nameB+"'s element naturally nurtures "+nameA+"'s — a supportive, giving dynamic."};
-    if(CONTROL[elA]===elB)return{label:EL[elA]+' controls '+EL[elB],tone:'caution',desc:nameA+"'s element restrains "+nameB+"'s — can mean structure and guidance, or control and pressure, depending on balance."};
-    if(CONTROL[elB]===elA)return{label:EL[elB]+' controls '+EL[elA],tone:'caution',desc:nameB+"'s element restrains "+nameA+"'s — can mean structure and guidance, or control and pressure, depending on balance."};
-    return{label:'Neutral',tone:'neutral',desc:''};
+    if(elA===elB)return{label:'Same Element',tone:'neutral',score:1,desc:'Both Day Masters share the same element — deep mutual understanding, but can tip into rivalry or too much sameness.'};
+    if(PRODUCE[elA]===elB)return{label:EL[elA]+' generates '+EL[elB],tone:'good',score:3,desc:nameA+"'s element naturally nurtures "+nameB+"'s — a supportive, giving dynamic."};
+    if(PRODUCE[elB]===elA)return{label:EL[elB]+' generates '+EL[elA],tone:'good',score:3,desc:nameB+"'s element naturally nurtures "+nameA+"'s — a supportive, giving dynamic."};
+    if(CONTROL[elA]===elB)return{label:EL[elA]+' controls '+EL[elB],tone:'caution',score:-1,desc:nameA+"'s element restrains "+nameB+"'s — can mean structure and guidance, or control and pressure, depending on balance."};
+    if(CONTROL[elB]===elA)return{label:EL[elB]+' controls '+EL[elA],tone:'caution',score:-1,desc:nameB+"'s element restrains "+nameA+"'s — can mean structure and guidance, or control and pressure, depending on balance."};
+    return{label:'Neutral',tone:'neutral',score:0,desc:''};
   }
 
-  function renderCompat(nameA,chartA,nameB,chartB){
+  function renderCompat(nameA,chartA,nameB,chartB,isNewA,isNewB){
     const elA=chartA.dm.dei,elB=chartB.dm.dei;
     const elRel=elementRelation(elA,elB,nameA,nameB);
     const dayBr=branchRelation(chartA.dp.bi,chartB.dp.bi);
     const yearBr=branchRelation(chartA.yp.bi,chartB.yp.bi);
     const TONE={good:'var(--green)',caution:'var(--amber)',neutral:'var(--t3)'};
-    const row=(title,rel,note)=>`<div class="bz-comp-row"><div class="bz-comp-rt">${title}</div><div class="bz-comp-rl" style="color:${TONE[rel.tone]}">${rel.label}</div><div class="bz-comp-rd">${rel.desc}${note?' '+note:''}</div></div>`;
+    // Weighted score: Day Master ×1 (range -1..+3), Spouse Palace ×2 (range -3..+4, doubled = -6..+8),
+    // Zodiac ×1 (range -3..+4). Total raw range: -10..+15 (25pt span) → normalized to 0-100.
+    const raw=elRel.score*1+dayBr.score*2+yearBr.score*1;
+    const pct=Math.round(((raw+10)/25)*100);
+    const clamped=Math.max(0,Math.min(100,pct));
+    const BUCKET=clamped>=80?{l:'Exceptional',c:'var(--green)'}:clamped>=62?{l:'Strong',c:'var(--green)'}:clamped>=42?{l:'Balanced / Mixed',c:'var(--amber)'}:clamped>=22?{l:'Challenging',c:'var(--red)'}:{l:'High Friction',c:'var(--red)'};
+    const scoreChip=(s)=>`<span style="font-family:var(--mono);font-weight:800;color:${s>0?'var(--green)':s<0?'var(--red)':'var(--t4)'}">${s>0?'+':''}${s}</span>`;
+    const row=(title,rel,weight,note)=>`<div class="bz-comp-row"><div class="bz-comp-rt">${title}${weight>1?' <span style="opacity:.6">(×'+weight+' weight)</span>':''}</div><div class="bz-comp-rl" style="color:${TONE[rel.tone]}">${rel.label} ${scoreChip(rel.score)}</div><div class="bz-comp-rd">${rel.desc}${note?' '+note:''}</div></div>`;
     let h=`<div class="panel bz-res" style="margin-top:10px"><div class="ph"><div class="pt">💞 ${esc(nameA)} × ${esc(nameB)}</div></div>`;
-    h+=`<div class="bz-comp-dm"><div class="bz-comp-dmcol"><div style="font-size:1.6rem;font-weight:800;color:${EL_COL[elA]}">${chartA.dp.s}</div><div class="bz-sub">${esc(nameA)}'s Day Master</div></div><div style="font-size:1.3rem;color:var(--t4)">⇄</div><div class="bz-comp-dmcol"><div style="font-size:1.6rem;font-weight:800;color:${EL_COL[elB]}">${chartB.dp.s}</div><div class="bz-sub">${esc(nameB)}'s Day Master</div></div></div>`;
+    h+=`<div class="bz-comp-score"><div class="bz-comp-scorenum" style="color:${BUCKET.c}">${clamped}<span style="font-size:1rem;opacity:.6">/100</span></div><div class="bz-comp-scorelbl" style="color:${BUCKET.c}">${BUCKET.l}</div><div class="bz-comp-track"><div class="bz-comp-fill" style="width:${clamped}%;background:${BUCKET.c}"></div></div></div>`;
+    h+=`<div class="bz-comp-dm"><div class="bz-comp-dmcol"><div style="font-size:1.6rem;font-weight:800;color:${EL_COL[elA]}">${chartA.dp.s}</div><div class="bz-sub">${esc(nameA)}'s Day Master</div>${isNewA?'<button class="add-btn" id="bzCompSaveA" style="margin-top:6px" onclick="bz_compSaveSide(\'A\')">💾 Save '+esc(nameA)+'</button>':''}</div><div style="font-size:1.3rem;color:var(--t4)">⇄</div><div class="bz-comp-dmcol"><div style="font-size:1.6rem;font-weight:800;color:${EL_COL[elB]}">${chartB.dp.s}</div><div class="bz-sub">${esc(nameB)}'s Day Master</div>${isNewB?'<button class="add-btn" id="bzCompSaveB" style="margin-top:6px" onclick="bz_compSaveSide(\'B\')">💾 Save '+esc(nameB)+'</button>':''}</div></div>`;
     h+=`<div class="bz-comp-rows">`;
-    h+=row('Day Master 日主',elRel);
-    h+=row('Spouse Palace 夫妻宮 (Day Branch)',dayBr,'— classically weighted most heavily for romantic pairing.');
-    h+=row('Zodiac 生肖 (Year Branch)',yearBr);
-    h+=`</div><div class="bz-comp-note">Quick structural read only — Day Master, Spouse Palace, and Zodiac branch relationships. A full reading also weighs Ten Gods interaction across both charts, current Luck Pillars, and both Hour Pillars where known. Treat this as a conversation starter, not a verdict.</div></div>`;
+    h+=row('Day Master 日主',elRel,1);
+    h+=row('Spouse Palace 夫妻宮 (Day Branch)',dayBr,2,'— classically weighted most heavily for romantic pairing.');
+    h+=row('Zodiac 生肖 (Year Branch)',yearBr,1);
+    h+=`</div><div class="bz-comp-note">Score is a transparent point-tally across these three dimensions only (see the ${'+/−'} next to each) — not a validated statistical measure. A full reading also weighs Ten Gods interaction across both charts, current Luck Pillars, and both Hour Pillars where known. Treat this as a conversation starter, not a verdict.</div></div>`;
     return h;
   }
+
+  let _compChart={A:null,B:null};
 
   window.bz_compPopulateSelects=function(){
     const charts=state.baziCharts||[];
@@ -5264,10 +5306,27 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     const res=document.getElementById('bzCompResult');
     if(!res)return;
     if(!a||!b){res.innerHTML='<div class="empty" style="margin-top:10px">Please pick or enter both people\'s birth dates.</div>';return;}
-    const nameA=document.getElementById('bzCompASel').value==='__new__'?((document.getElementById('bzCompAName')||{}).value||'Person A'):(a.name||'Person A');
-    const nameB=document.getElementById('bzCompBSel').value==='__new__'?((document.getElementById('bzCompBName')||{}).value||'Person B'):(b.name||'Person B');
-    res.innerHTML=renderCompat(nameA,a,nameB,b);
+    const isNewA=document.getElementById('bzCompASel').value==='__new__';
+    const isNewB=document.getElementById('bzCompBSel').value==='__new__';
+    const nameA=isNewA?((document.getElementById('bzCompAName')||{}).value||'Person A'):(a.name||'Person A');
+    const nameB=isNewB?((document.getElementById('bzCompBName')||{}).value||'Person B'):(b.name||'Person B');
+    a.name=nameA;b.name=nameB;
+    _compChart.A=isNewA?a:null;_compChart.B=isNewB?b:null;
+    res.innerHTML=renderCompat(nameA,a,nameB,b,isNewA,isNewB);
     res.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+
+  window.bz_compSaveSide=async function(which){
+    const chart=_compChart[which];
+    if(!chart)return;
+    if(!Array.isArray(state.baziCharts))state.baziCharts=[];
+    state.baziCharts.unshift(chart);
+    if(typeof saveData==='function')await saveData();
+    bz_renderSaved();
+    bz_compPopulateSelects();
+    _compChart[which]=null;
+    const btn=document.getElementById('bzCompSave'+which);
+    if(btn){btn.textContent='✓ Saved to Drive';btn.disabled=true;}
   };
 
   window.bz_initTab=function(){injectCSS();bz_renderSaved();bz_compPopulateSelects();};
