@@ -1147,18 +1147,36 @@ input,select,button,textarea{font-family:var(--sans)}
           <div class="td-plan-item"><div class="lbl">Dividends</div><div class="val" id="tdSumDiv">RM 0.00</div></div>
           <div class="td-plan-item"><div class="lbl">Total Return</div><div class="val" id="tdSumTotal">RM 0.00</div></div>
         </div>
-        <div class="td-note">Unrealized P&amp;L requires a manual current-price entry per ticker (no auto price feed — see Positions below).</div>
+        <div class="td-note">Unrealized P&amp;L requires a manual current-price entry per ticker (no auto price feed — see Positions below). All totals converted to MYR using Finance tab's fxRates.</div>
+        <div class="td-note" id="tdSumFxNote" style="display:none;color:var(--red)">⚠ Missing MYR/USD exchange rate — some figures shown at face value, not converted. Refresh rates in Finance → Currency tab.</div>
+        <div id="tdConcentrationWarn"></div>
       </div>
       <div class="panel">
         <div class="ph"><div class="pt">📈 Cumulative P&amp;L</div></div>
         <div id="tdChartWrap"><div class="empty">Add transactions to see the chart.</div></div>
       </div>
       <div class="panel">
-        <div class="ph"><div class="pt">💼 Positions</div></div>
+        <div class="ph"><div class="pt">📅 Realized P&amp;L by Year</div></div>
+        <div id="tdYearBreakdown"><div class="empty">No realized events yet.</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">💼 Positions</div><button class="td-refresh-btn" id="tdBulkRefreshBtn">↻ Update all prices</button></div>
+        <div class="td-watchbar" id="tdPosSortBar" style="margin-bottom:6px">
+          <select id="tdPosSort" onchange="td_renderPositions()" style="padding:6px 10px;border-radius:8px;border:1.5px solid rgba(0,0,0,0.12);font-size:0.7rem;font-weight:700">
+            <option value="mktval">Sort: Market value</option>
+            <option value="pnl">Sort: Unrealized P&amp;L</option>
+            <option value="ticker">Sort: Ticker A–Z</option>
+          </select>
+        </div>
         <div id="tdPositions"><div class="empty">No open or closed positions yet.</div></div>
       </div>
       <div class="panel">
-        <div class="ph"><div class="pt">📝 Transactions <span class="badge upcoming" id="tdTxCount">0</span></div><button class="add-btn" id="tdOpenAdd">+ Add</button></div>
+        <div class="ph"><div class="pt">📝 Transactions <span class="badge upcoming" id="tdTxCount">0</span></div><div style="display:flex;gap:6px"><button class="td-refresh-btn" id="tdExportBtn">⭳ Export CSV</button><button class="td-refresh-btn" id="tdImportBtn">⭱ Import CSV</button><button class="add-btn" id="tdOpenAdd">+ Add</button></div></div>
+        <input type="file" id="tdImportFile" accept=".csv" style="display:none">
+        <div class="td-watchbar" style="margin-bottom:6px">
+          <select id="tdTxFilterSym" onchange="td_renderTxList()" style="padding:6px 10px;border-radius:8px;border:1.5px solid rgba(0,0,0,0.12);font-size:0.7rem;font-weight:700"><option value="">All tickers</option></select>
+          <select id="tdTxFilterType" onchange="td_renderTxList()" style="padding:6px 10px;border-radius:8px;border:1.5px solid rgba(0,0,0,0.12);font-size:0.7rem;font-weight:700"><option value="">All types</option><option value="buy">Buy</option><option value="sell">Sell</option><option value="dividend">Dividend</option></select>
+        </div>
         <div id="tdTxList"><div class="empty">No transactions yet.</div></div>
       </div>
     </div>
@@ -1241,7 +1259,7 @@ input,select,button,textarea{font-family:var(--sans)}
 <!-- FINANCE MODALS -->
 <div class="modal-overlay" id="txOverlay"><div class="modal"><h3>Add transaction</h3><div class="field"><label>Type</label><select id="txType"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings transfer</option></select></div><div class="field"><label>Description</label><input type="text" id="txDesc" placeholder="e.g. Grab, Tesco, salary"></div><div class="field"><label>Amount (RM)</label><input type="number" id="txAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Account</label><select id="txWallet"><option value="">— none —</option></select></div><div class="field"><label>Category</label><select id="txCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Salary</option><option>Savings</option><option>Other</option></select></div><div class="field"><label>Date</label><input type="date" id="txDate"></div><div class="field"><label>Note (optional)</label><input type="text" id="txNote" placeholder="optional"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTx">Cancel</button><button class="btn btn-red" id="saveTx">Add</button></div></div></div>
 <div class="modal-overlay" id="futureOverlay"><div class="modal"><h3>Add bill / future payment</h3><div class="field"><label>Description</label><input type="text" id="fDesc" placeholder="e.g. Astro, TNB, car loan"></div><div class="field"><label>Amount (RM)</label><input type="number" id="fAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Due date</label><input type="date" id="fDate"></div><div class="field"><label>Category</label><select id="fCat"><option>Subscription</option><option>Rent/Mortgage</option><option>Utilities</option><option>Insurance</option><option>Loan repayment</option><option>Investment</option><option>Telco</option><option>Other</option></select></div><div class="field"><label>Recurrence</label><select id="fRecur"><option value="once">One-time</option><option value="monthly">Monthly</option><option value="weekly">Weekly</option><option value="yearly">Yearly</option></select></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelFuture">Cancel</button><button class="btn btn-red" id="saveFuture">Add</button></div></div></div>
-<div class="modal-overlay" id="tdOverlay"><div class="modal"><h3>Add trade record</h3><div class="field"><label>Ticker</label><input type="text" id="tdTxTicker" placeholder="e.g. AAPL, 5225.KL" style="text-transform:uppercase"></div><div class="field"><label>Type</label><select id="tdTxType" onchange="td_onTypeChange()"><option value="buy">Buy</option><option value="sell">Sell</option><option value="dividend">Dividend</option></select></div><div class="field"><label>Date</label><input type="date" id="tdTxDate"></div><div class="field" id="tdTxQtyField"><label>Quantity</label><input type="number" id="tdTxQty" step="0.0001" min="0" placeholder="e.g. 100"></div><div class="field" id="tdTxPriceField"><label>Price / share (RM)</label><input type="number" id="tdTxPrice" step="0.0001" min="0" placeholder="0.00"></div><div class="field" id="tdTxFeesField"><label>Fees (RM)</label><input type="number" id="tdTxFees" step="0.01" min="0" value="0"></div><div class="field" id="tdTxDivAmtField" style="display:none"><label>Dividend amount (RM, total received)</label><input type="number" id="tdTxDivAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Note (optional)</label><input type="text" id="tdTxNote" placeholder="optional"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTdTx">Cancel</button><button class="btn btn-red" id="saveTdTx">Add</button></div></div></div>
+<div class="modal-overlay" id="tdOverlay"><div class="modal"><h3>Add trade record</h3><div class="field"><label>Ticker</label><input type="text" id="tdTxTicker" placeholder="e.g. AAPL, 5225.KL" style="text-transform:uppercase"></div><div class="field"><label>Market</label><select id="tdTxCurrency"><option value="MYR">🇲🇾 Malaysia (MYR)</option><option value="USD">🇺🇸 US (USD)</option></select></div><div class="field"><label>Type</label><select id="tdTxType" onchange="td_onTypeChange()"><option value="buy">Buy</option><option value="sell">Sell</option><option value="dividend">Dividend</option></select></div><div class="field"><label>Date</label><input type="date" id="tdTxDate"></div><div class="field" id="tdTxQtyField"><label>Quantity</label><input type="number" id="tdTxQty" step="0.0001" min="0" placeholder="e.g. 100"></div><div class="field" id="tdTxPriceField"><label>Price / share</label><input type="number" id="tdTxPrice" step="0.0001" min="0" placeholder="0.00"></div><div class="field" id="tdTxFeesField"><label>Fees</label><input type="number" id="tdTxFees" step="0.01" min="0" value="0"></div><div class="field" id="tdTxDivAmtField" style="display:none"><label>Dividend amount (total received)</label><input type="number" id="tdTxDivAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Note (optional)</label><input type="text" id="tdTxNote" placeholder="optional"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTdTx">Cancel</button><button class="btn btn-red" id="saveTdTx">Add</button></div></div></div>
 <div class="modal-overlay" id="walletOverlay"><div class="modal"><h3 id="walletModalTitle">Add account</h3><div class="field"><label>Account name</label><input type="text" id="wName" placeholder="e.g. Maybank, TNG, Cash"></div><div class="field"><label>Type</label><select id="wType"><option value="bank">Bank</option><option value="ewallet">E-wallet</option><option value="cash">Cash</option><option value="savings">Savings</option><option value="investment">Investment</option></select></div><div class="field"><label>Balance (RM)</label><input type="number" id="wBal" step="0.01" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelWallet">Cancel</button><button class="btn btn-red" id="saveWallet">Save</button></div></div></div>
 <div class="modal-overlay" id="goalOverlay"><div class="modal"><h3 id="goalModalTitle">Add savings goal</h3><div class="field"><label>Goal name</label><input type="text" id="gName" placeholder="e.g. Emergency fund, Holiday"></div><div class="field"><label>Emoji icon</label><input type="text" id="gIcon" placeholder="🎯" maxlength="2" value="🎯"></div><div class="field"><label>Target amount (RM)</label><input type="number" id="gTarget" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Current saved (RM)</label><input type="number" id="gSaved" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Target date (optional)</label><input type="date" id="gDate"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelGoal">Cancel</button><button class="btn btn-red" id="saveGoal">Save</button></div></div></div>
 <div class="modal-overlay" id="debtOverlay"><div class="modal"><h3 id="debtModalTitle">Add debt / loan</h3><div class="field"><label>Name</label><input type="text" id="dName" placeholder="e.g. PTPTN, Car loan, Credit card"></div><div class="field"><label>Total amount (RM)</label><input type="number" id="dTotal" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Amount paid so far (RM)</label><input type="number" id="dPaid" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Monthly payment (RM)</label><input type="number" id="dMonthly" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Interest rate % (optional)</label><input type="number" id="dRate" step="0.01" min="0" placeholder="e.g. 3.5"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelDebt">Cancel</button><button class="btn btn-red" id="saveDebt">Save</button></div></div></div>
@@ -3477,10 +3495,12 @@ window.nzSetRunwayThreshold=async function(v){const n=Number(v);if(!n||n<1)retur
 
 // ── TRADING TAB (📈 portfolio recorder — buy/sell/dividend log, FIFO P&L, no live proxy) ──
 function td_initTab(){
+  td_populateTxFilter();
   td_renderTxList();
   td_renderPositions();
   td_renderSummary();
   td_renderChart();
+  td_renderYearBreakdown();
 }
 function td_onTypeChange(){
   const t=document.getElementById('tdTxType').value;
@@ -3490,17 +3510,28 @@ function td_onTypeChange(){
   document.getElementById('tdTxDivAmtField').style.display=t==='dividend'?'':'none';
 }
 function td_sym(s){return (s||'').trim().toUpperCase();}
-// FIFO lot matching: returns {positions:{SYM:{qty,costBasis,avgCost,realized,dividends}}, closedRealizedTotal, dividendTotal, events:[{date,cumPnl}]}
+function td_curSym(c){return c==='USD'?'$':'RM ';}
+function td_fmtCur(n,c){return td_curSym(c)+Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});}
+// Converts a native-currency amount to MYR using state.fxRates (rates[cur] = units of `cur` per 1 MYR).
+function td_toMYR(amount,currency){
+  if(!currency||currency==='MYR')return amount;
+  const rate=state.fxRates&&state.fxRates[currency];
+  if(!rate)return amount; // no rate available — falls back to face value, flagged in UI via missing-rate note
+  return amount/rate;
+}
+function td_hasFxRate(currency){return currency==='MYR'||!!(state.fxRates&&state.fxRates[currency]);}
+// FIFO lot matching: returns {positions:{SYM:{qty,costBasis,avgCost,realized,dividends,currency}}, closedRealizedTotal, dividendTotal, events:[{date,cumPnl}]}
 function td_computeFIFO(){
   const txs=[...state.trading.tx].sort((a,b)=>a.date.localeCompare(b.date)||((a.id||0)-(b.id||0)));
   const lots={}; // SYM -> [{qty,price,fees}]
-  const pos={}; // SYM -> {qty,costBasis,realized,dividends}
+  const pos={}; // SYM -> {qty,costBasis,realized,dividends,currency}
   let cumPnl=0;
   const timeline=[];
   txs.forEach(t=>{
     const s=t.symbol;
+    const cur=t.currency||'MYR';
     if(!lots[s])lots[s]=[];
-    if(!pos[s])pos[s]={qty:0,costBasis:0,realized:0,dividends:0};
+    if(!pos[s])pos[s]={qty:0,costBasis:0,realized:0,dividends:0,currency:cur};
     if(t.type==='buy'){
       lots[s].push({qty:t.qty,price:t.price,fees:t.fees||0});
       pos[s].qty+=t.qty;
@@ -3521,27 +3552,35 @@ function td_computeFIFO(){
       pos[s].qty-=t.qty;
       pos[s].costBasis-=costOfSold;
       pos[s].realized+=realized;
-      cumPnl+=realized;
+      cumPnl+=td_toMYR(realized,cur);
       timeline.push({date:t.date,cumPnl});
     }else if(t.type==='dividend'){
       pos[s].dividends+=t.divAmt||0;
-      cumPnl+=(t.divAmt||0);
+      cumPnl+=td_toMYR(t.divAmt||0,cur);
       timeline.push({date:t.date,cumPnl});
     }
   });
   return {pos,timeline};
 }
 function td_renderSummary(){
-  const {pos,timeline}=td_computeFIFO();
-  let invested=0,realized=0,dividends=0,mktVal=0,unreal=0;
+  const {pos}=td_computeFIFO();
+  let invested=0,realized=0,dividends=0,mktVal=0,unreal=0,missingRate=false;
+  const mvBySym={};
   Object.keys(pos).forEach(s=>{
     const p=pos[s];
-    realized+=p.realized;
-    dividends+=p.dividends;
+    if(!td_hasFxRate(p.currency))missingRate=true;
+    realized+=td_toMYR(p.realized,p.currency);
+    dividends+=td_toMYR(p.dividends,p.currency);
     if(p.qty>1e-9){
-      invested+=p.costBasis;
+      invested+=td_toMYR(p.costBasis,p.currency);
       const cp=td_currentPrice(s);
-      if(cp!=null){mktVal+=p.qty*cp;unreal+=(p.qty*cp-p.costBasis);}
+      if(cp!=null){
+        const mv=p.qty*cp;
+        const mvMYR=td_toMYR(mv,p.currency);
+        mktVal+=mvMYR;
+        unreal+=td_toMYR(mv-p.costBasis,p.currency);
+        mvBySym[s]=mvMYR;
+      }
     }
   });
   document.getElementById('tdSumInvested').textContent=fmt(invested);
@@ -3551,14 +3590,60 @@ function td_renderSummary(){
   document.getElementById('tdSumDiv').textContent=fmt(dividends);
   const tot=realized+dividends+(mktVal?unreal:0);
   const te=document.getElementById('tdSumTotal');te.textContent=fmt(tot);te.style.color=tot>0?'var(--green)':tot<0?'var(--red)':'';
+  const note=document.getElementById('tdSumFxNote');
+  if(note)note.style.display=missingRate?'block':'none';
+  // Concentration check: flag any position >20% of total market value
+  const cw=document.getElementById('tdConcentrationWarn');
+  if(cw){
+    if(mktVal>0){
+      const heavy=Object.keys(mvBySym).map(s=>({s,pct:mvBySym[s]/mktVal*100})).filter(x=>x.pct>20).sort((a,b)=>b.pct-a.pct);
+      cw.innerHTML=heavy.length?`<div class="td-note" style="color:var(--amber2,var(--red))">⚠ Concentration: ${heavy.map(h=>esc(h.s)+' '+h.pct.toFixed(0)+'%').join(', ')} — above 20% of market value.</div>`:'';
+    }else{cw.innerHTML='';}
+  }
+}
+function td_renderYearBreakdown(){
+  const el=document.getElementById('tdYearBreakdown');
+  if(!el)return;
+  const txs=[...state.trading.tx].sort((a,b)=>a.date.localeCompare(b.date)||((a.id||0)-(b.id||0)));
+  const lots={};
+  const byYear={}; // year -> {realized,dividends}
+  txs.forEach(t=>{
+    const s=t.symbol;const cur=t.currency||'MYR';const yr=(t.date||'').slice(0,4);
+    if(!lots[s])lots[s]=[];
+    if(!byYear[yr])byYear[yr]={realized:0,dividends:0};
+    if(t.type==='buy'){
+      lots[s].push({qty:t.qty,price:t.price,fees:t.fees||0});
+    }else if(t.type==='sell'){
+      let remaining=t.qty,costOfSold=0;
+      while(remaining>1e-9&&lots[s]&&lots[s].length){
+        const lot=lots[s][0];const take=Math.min(lot.qty,remaining);
+        costOfSold+=take*lot.price+(lot.fees*(take/lot.qty));
+        lot.qty-=take;lot.fees-=lot.fees*(take/(take+lot.qty||take));
+        remaining-=take;
+        if(lot.qty<=1e-9)lots[s].shift();
+      }
+      const proceeds=t.qty*t.price-(t.fees||0);
+      byYear[yr].realized+=td_toMYR(proceeds-costOfSold,cur);
+    }else if(t.type==='dividend'){
+      byYear[yr].dividends+=td_toMYR(t.divAmt||0,cur);
+    }
+  });
+  const years=Object.keys(byYear).sort((a,b)=>b.localeCompare(a));
+  if(!years.length){el.innerHTML='<div class="empty">No realized events yet.</div>';return;}
+  el.innerHTML=years.map(yr=>{
+    const y=byYear[yr];const total=y.realized+y.dividends;
+    return `<div class="tx-item"><div class="tx-emoji">📅</div><div class="tx-info"><div class="tx-name">${yr}</div><div class="tx-meta">Realized ${fmt(y.realized)} · Dividends ${fmt(y.dividends)}</div></div><span class="amt ${total>0?'in':total<0?'out':''}">${(total>=0?'+':'')+fmt(total)}</span></div>`;
+  }).join('')+'<div class="td-note">Malaysia generally does not tax individual capital gains on shares; US-listed dividends may carry US withholding tax. This is informational only — verify current IRB/IRS treatment, not tax advice.</div>';
 }
 function td_currentPrice(sym){
   const v=state.trading.px&&state.trading.px[sym];
   return (v&&typeof v.price==='number')?v.price:null;
 }
 window.td_setPrice=async function(sym){
-  const cur=td_currentPrice(sym);
-  const v=prompt('Current price for '+sym+' (RM):',cur!=null?cur:'');
+  const {pos}=td_computeFIFO();
+  const cur=(pos[sym]&&pos[sym].currency)||'MYR';
+  const curVal=td_currentPrice(sym);
+  const v=prompt('Current price for '+sym+' ('+cur+'):',curVal!=null?curVal:'');
   if(v===null)return;
   const n=parseFloat(v);
   if(!n||n<=0){alert('Enter a valid positive price.');return;}
@@ -3567,20 +3652,53 @@ window.td_setPrice=async function(sym){
   await saveData();
   td_renderPositions();td_renderSummary();
 };
+window.td_bulkRefresh=async function(){
+  const {pos}=td_computeFIFO();
+  const syms=Object.keys(pos).filter(s=>pos[s].qty>1e-9).sort();
+  if(!syms.length){alert('No open positions to price.');return;}
+  if(!state.trading.px)state.trading.px={};
+  let updated=0;
+  for(const s of syms){
+    const cur=(pos[s]&&pos[s].currency)||'MYR';
+    const curVal=td_currentPrice(s);
+    const v=prompt('Current price for '+s+' ('+cur+') — Cancel to skip:',curVal!=null?curVal:'');
+    if(v===null)continue;
+    const n=parseFloat(v);
+    if(!n||n<=0)continue;
+    state.trading.px[s]={price:n,ts:Date.now()};
+    updated++;
+  }
+  if(updated){await saveData();td_renderPositions();td_renderSummary();}
+};
 function td_renderPositions(){
   const {pos}=td_computeFIFO();
-  const syms=Object.keys(pos).filter(s=>pos[s].qty>1e-9||pos[s].realized||pos[s].dividends).sort();
+  let syms=Object.keys(pos).filter(s=>pos[s].qty>1e-9||pos[s].realized||pos[s].dividends);
+  const sortSel=document.getElementById('tdPosSort');
+  const sortBy=sortSel?sortSel.value:'mktval';
+  const metricFor=s=>{
+    const p=pos[s];const cp=td_currentPrice(s);
+    if(p.qty>1e-9&&cp!=null){
+      const mv=p.qty*cp;
+      return sortBy==='pnl'?td_toMYR(mv-p.costBasis,p.currency):td_toMYR(mv,p.currency);
+    }
+    return sortBy==='pnl'?td_toMYR(p.realized,p.currency):-Infinity;
+  };
+  if(sortBy==='ticker')syms.sort();
+  else syms.sort((a,b)=>metricFor(b)-metricFor(a));
   const el=document.getElementById('tdPositions');
   if(!syms.length){el.innerHTML='<div class="empty">No open or closed positions yet.</div>';return;}
   el.innerHTML=syms.map(s=>{
     const p=pos[s];
+    const c=p.currency;
     const open=p.qty>1e-9;
     const avg=open?p.costBasis/p.qty:0;
     const cp=td_currentPrice(s);
     const mv=open&&cp!=null?p.qty*cp:null;
     const unreal=mv!=null?mv-p.costBasis:null;
     const unrealPct=unreal!=null&&p.costBasis?(unreal/p.costBasis*100):null;
-    return `<div class="tx-item"><div class="tx-emoji">${open?'📈':'✅'}</div><div class="tx-info"><div class="tx-name">${esc(s)}</div><div class="tx-meta">${open?('Qty '+p.qty+' · Avg '+fmt(avg)):'Closed'}${p.dividends?' · Div '+fmt(p.dividends):''}</div></div>${open?`<span class="amt ${unreal>0?'in':unreal<0?'out':''}" style="min-width:90px;text-align:right">${cp!=null?(unreal>=0?'+':'')+fmt(unreal)+(unrealPct!=null?' ('+unrealPct.toFixed(1)+'%)':''):'no price'}</span><button class="ic-btn" onclick="td_setPrice('${s}')" title="Set current price">✎</button>`:`<span class="amt ${p.realized>0?'in':p.realized<0?'out':''}">${(p.realized>=0?'+':'')+fmt(p.realized)}</span>`}</div>`;
+    const unrealMYR=unreal!=null?td_toMYR(unreal,c):null;
+    const myrTag=c!=='MYR'&&unrealMYR!=null&&td_hasFxRate(c)?` (${fmt(unrealMYR)})`:'';
+    return `<div class="tx-item"><div class="tx-emoji">${open?'📈':'✅'}</div><div class="tx-info"><div class="tx-name">${esc(s)} <span class="td-ind-tag">${c}</span></div><div class="tx-meta">${open?('Qty '+p.qty+' · Avg '+td_fmtCur(avg,c)):'Closed'}${p.dividends?' · Div '+td_fmtCur(p.dividends,c):''}</div></div>${open?`<span class="amt ${unreal>0?'in':unreal<0?'out':''}" style="min-width:110px;text-align:right">${cp!=null?(unreal>=0?'+':'')+td_fmtCur(unreal,c)+(unrealPct!=null?' ('+unrealPct.toFixed(1)+'%)':'')+myrTag:'no price'}</span><button class="ic-btn" onclick="td_setPrice('${s}')" title="Set current price">✎</button>`:`<span class="amt ${p.realized>0?'in':p.realized<0?'out':''}">${(p.realized>=0?'+':'')+td_fmtCur(p.realized,c)}</span>`}</div>`;
   }).join('');
 }
 function td_renderChart(){
@@ -3604,19 +3722,29 @@ function td_renderChart(){
   </svg>
   <div class="td-note">Cumulative realized P&amp;L + dividends over time (${timeline.length} closing event${timeline.length===1?'':'s'}). Unrealized P&amp;L on open positions not included in this line.</div>`;
 }
+function td_populateTxFilter(){
+  const sel=document.getElementById('tdTxFilterSym');
+  if(!sel)return;
+  const cur=sel.value;
+  const syms=[...new Set(state.trading.tx.map(t=>t.symbol))].sort();
+  sel.innerHTML='<option value="">All tickers</option>'+syms.map(s=>`<option${s===cur?' selected':''}>${esc(s)}</option>`).join('');
+}
 function td_renderTxList(){
   const el=document.getElementById('tdTxList');
-  const txs=[...state.trading.tx].sort((a,b)=>b.date.localeCompare(a.date)||((b.id||0)-(a.id||0)));
-  document.getElementById('tdTxCount').textContent=txs.length;
-  if(!txs.length){el.innerHTML='<div class="empty">No transactions yet.</div>';return;}
+  const fSym=document.getElementById('tdTxFilterSym')?document.getElementById('tdTxFilterSym').value:'';
+  const fType=document.getElementById('tdTxFilterType')?document.getElementById('tdTxFilterType').value:'';
+  const txs=[...state.trading.tx].filter(t=>(!fSym||t.symbol===fSym)&&(!fType||t.type===fType)).sort((a,b)=>b.date.localeCompare(a.date)||((b.id||0)-(a.id||0)));
+  document.getElementById('tdTxCount').textContent=txs.length+(fSym||fType?' / '+state.trading.tx.length:'');
+  if(!txs.length){el.innerHTML='<div class="empty">No transactions match this filter.</div>';return;}
   el.innerHTML=txs.map(t=>{
     const gi=state.trading.tx.indexOf(t);
+    const c=t.currency||'MYR';
     const ds=new Date(t.date).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});
     const emoji=t.type==='buy'?'🟢':t.type==='sell'?'🔴':'💰';
-    const label=t.type==='buy'?`Buy ${t.qty} @ ${fmt(t.price)}`:t.type==='sell'?`Sell ${t.qty} @ ${fmt(t.price)}`:`Dividend`;
+    const label=t.type==='buy'?`Buy ${t.qty} @ ${td_fmtCur(t.price,c)}`:t.type==='sell'?`Sell ${t.qty} @ ${td_fmtCur(t.price,c)}`:`Dividend`;
     const amt=t.type==='dividend'?t.divAmt:(t.qty*t.price+(t.type==='buy'?(t.fees||0):-(t.fees||0)));
     const cls=t.type==='sell'||t.type==='dividend'?'in':'out';
-    return `<div class="tx-item"><div class="tx-emoji">${emoji}</div><div class="tx-info"><div class="tx-name">${esc(t.symbol)} · ${label}</div><div class="tx-meta">${ds}${t.note?' · '+esc(t.note):''}</div></div><span class="amt ${cls}">${fmt(amt)}</span><button class="ic-btn del" onclick="td_delTx(${gi})">✕</button></div>`;
+    return `<div class="tx-item"><div class="tx-emoji">${emoji}</div><div class="tx-info"><div class="tx-name">${esc(t.symbol)} <span class="td-ind-tag">${c}</span> · ${label}</div><div class="tx-meta">${ds}${t.note?' · '+esc(t.note):''}</div></div><span class="amt ${cls}">${td_fmtCur(amt,c)}</span><button class="ic-btn del" onclick="td_delTx(${gi})">✕</button></div>`;
   }).join('');
 }
 window.td_delTx=async function(idx){
@@ -3625,6 +3753,77 @@ window.td_delTx=async function(idx){
   await saveData();
   td_initTab();
 };
+// CSV import/export — columns: Symbol,Type,Date,Qty,Price,Fees,DivAmount,Currency,Note
+function td_csvEscape(v){v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+window.td_exportCSV=function(){
+  const rows=[['Symbol','Type','Date','Qty','Price','Fees','DivAmount','Currency','Note']];
+  [...state.trading.tx].sort((a,b)=>a.date.localeCompare(b.date)).forEach(t=>{
+    rows.push([t.symbol,t.type,t.date,t.qty??'',t.price??'',t.fees??'',t.divAmt??'',t.currency||'MYR',t.note||'']);
+  });
+  const csv=rows.map(r=>r.map(td_csvEscape).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='trading_transactions_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+};
+function td_parseCSVLine(line){
+  const out=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(inQ){
+      if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++;}else{inQ=false;}}
+      else cur+=ch;
+    }else{
+      if(ch==='"')inQ=true;
+      else if(ch===','){out.push(cur);cur='';}
+      else cur+=ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+window.td_importCSV=function(file){
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      const lines=String(e.target.result).split(/\r?\n/).filter(l=>l.trim().length);
+      if(!lines.length){alert('Empty file.');return;}
+      const header=td_parseCSVLine(lines[0]).map(h=>h.trim().toLowerCase());
+      const idx=name=>header.indexOf(name);
+      const iSym=idx('symbol'),iType=idx('type'),iDate=idx('date'),iQty=idx('qty'),iPrice=idx('price'),iFees=idx('fees'),iDiv=idx('divamount'),iCur=idx('currency'),iNote=idx('note');
+      if(iSym<0||iType<0||iDate<0){alert('CSV must have Symbol, Type, Date columns (Qty, Price, Fees, DivAmount, Currency, Note optional). Header found: '+header.join(', '));return;}
+      let added=0,skipped=0;
+      const errors=[];
+      for(let i=1;i<lines.length;i++){
+        const cols=td_parseCSVLine(lines[i]);
+        const symbol=td_sym(cols[iSym]);
+        const type=(cols[iType]||'').trim().toLowerCase();
+        const date=(cols[iDate]||'').trim();
+        const currency=(iCur>=0&&cols[iCur]?cols[iCur].trim().toUpperCase():'MYR');
+        if(!symbol||!['buy','sell','dividend'].includes(type)||!date){errors.push('Row '+(i+1)+': invalid symbol/type/date');skipped++;continue;}
+        const existing=state.trading.tx.find(t=>t.symbol===symbol);
+        if(existing&&(existing.currency||'MYR')!==currency){errors.push('Row '+(i+1)+': '+symbol+' currency mismatch, skipped');skipped++;continue;}
+        let rec={symbol,type,date,currency,note:iNote>=0?(cols[iNote]||'').trim():'',id:Date.now()+i};
+        if(type==='dividend'){
+          const divAmt=parseFloat(cols[iDiv]);
+          if(!divAmt||divAmt<=0){errors.push('Row '+(i+1)+': invalid DivAmount');skipped++;continue;}
+          rec.divAmt=divAmt;
+        }else{
+          const qty=parseFloat(cols[iQty]),price=parseFloat(cols[iPrice]),fees=parseFloat(cols[iFees])||0;
+          if(!qty||qty<=0||!price||price<=0){errors.push('Row '+(i+1)+': invalid Qty/Price');skipped++;continue;}
+          rec.qty=qty;rec.price=price;rec.fees=fees;
+        }
+        state.trading.tx.push(rec);
+        added++;
+      }
+      if(added){await saveData();td_initTab();}
+      alert('Import complete: '+added+' added, '+skipped+' skipped.'+(errors.length?'\n\nIssues:\n'+errors.slice(0,10).join('\n')+(errors.length>10?'\n…':''):''));
+    }catch(err){alert('Import failed: '+err.message);}
+  };
+  reader.readAsText(file);
+};
+
 
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
@@ -3669,7 +3868,11 @@ const txOv=modal('txOverlay','cancelTx');const fuOv=modal('futureOverlay','cance
 
 const openTx=()=>{document.getElementById('txDate').value=new Date().toISOString().slice(0,10);renderWallets();txOv.classList.add('open');};
 document.getElementById('openTxOv').onclick=openTx;document.getElementById('openTxFull').onclick=openTx;
-document.getElementById('tdOpenAdd').onclick=()=>{document.getElementById('tdTxTicker').value='';document.getElementById('tdTxType').value='buy';td_onTypeChange();document.getElementById('tdTxDate').value=new Date().toISOString().slice(0,10);document.getElementById('tdTxQty').value='';document.getElementById('tdTxPrice').value='';document.getElementById('tdTxFees').value='0';document.getElementById('tdTxDivAmt').value='';document.getElementById('tdTxNote').value='';tdOv.classList.add('open');};
+document.getElementById('tdOpenAdd').onclick=()=>{document.getElementById('tdTxTicker').value='';document.getElementById('tdTxCurrency').value='MYR';document.getElementById('tdTxType').value='buy';td_onTypeChange();document.getElementById('tdTxDate').value=new Date().toISOString().slice(0,10);document.getElementById('tdTxQty').value='';document.getElementById('tdTxPrice').value='';document.getElementById('tdTxFees').value='0';document.getElementById('tdTxDivAmt').value='';document.getElementById('tdTxNote').value='';tdOv.classList.add('open');};
+document.getElementById('tdBulkRefreshBtn').onclick=td_bulkRefresh;
+document.getElementById('tdExportBtn').onclick=td_exportCSV;
+document.getElementById('tdImportBtn').onclick=()=>document.getElementById('tdImportFile').click();
+document.getElementById('tdImportFile').onchange=function(){if(this.files&&this.files[0])td_importCSV(this.files[0]);this.value='';};
 document.getElementById('openFutureOv').onclick=()=>fuOv.classList.add('open');document.getElementById('openFutureFull').onclick=()=>fuOv.classList.add('open');
 document.getElementById('openWallet').onclick=()=>{editWalletIdx=-1;document.getElementById('wName').value='';document.getElementById('wType').value='bank';document.getElementById('wBal').value='';document.getElementById('walletModalTitle').textContent='Add account';wOv.classList.add('open');};
 const openGoal=()=>{editGoalIdx=-1;document.getElementById('gName').value='';document.getElementById('gIcon').value='🎯';document.getElementById('gTarget').value='';document.getElementById('gSaved').value='';document.getElementById('gDate').value='';document.getElementById('goalModalTitle').textContent='Add goal';gOv.classList.add('open');};
@@ -3714,11 +3917,14 @@ document.getElementById('saveTx').onclick=async function(){const desc=document.g
 document.getElementById('saveFuture').onclick=async function(){const desc=document.getElementById('fDesc').value.trim();const amt=parseFloat(document.getElementById('fAmt').value);const date=document.getElementById('fDate').value;if(!desc||!amt||!date||amt<=0){alert('Fill all fields.');return;}state.futures.push({description:desc,amount:amt,date,category:document.getElementById('fCat').value,recurrence:document.getElementById('fRecur').value,id:Date.now()});document.getElementById('fDesc').value='';document.getElementById('fAmt').value='';document.getElementById('fDate').value='';fuOv.classList.remove('open');render();await saveData();};
 document.getElementById('saveTdTx').onclick=async function(){
   const symbol=td_sym(document.getElementById('tdTxTicker').value);
+  const currency=document.getElementById('tdTxCurrency').value;
   const type=document.getElementById('tdTxType').value;
   const date=document.getElementById('tdTxDate').value;
   const note=document.getElementById('tdTxNote').value.trim();
   if(!symbol||!date){alert('Ticker and date are required.');return;}
-  let rec={symbol,type,date,note,id:Date.now()};
+  const existing=state.trading.tx.find(t=>t.symbol===symbol);
+  if(existing&&(existing.currency||'MYR')!==currency){alert(symbol+' already has transactions in '+(existing.currency||'MYR')+'. A ticker cannot mix currencies — use a distinct symbol if needed.');return;}
+  let rec={symbol,currency,type,date,note,id:Date.now()};
   if(type==='dividend'){
     const divAmt=parseFloat(document.getElementById('tdTxDivAmt').value);
     if(!divAmt||divAmt<=0){alert('Enter a valid dividend amount.');return;}
