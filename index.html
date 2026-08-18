@@ -714,6 +714,43 @@ input,select,button,textarea{font-family:var(--sans)}
 .add-milestone-date { background: #FFFFFF !important; color: #1A1A1A !important; }
 .gantt-wrap { background: #FFFFFF !important; }
 /* TRADING TAB */
+.nt-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.nt-search{flex:1;min-width:180px;padding:9px 12px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.12);font-size:0.8rem;font-weight:700;background:rgba(255,255,255,0.75)}
+.nt-sel{padding:8px 10px;border-radius:9px;border:1.5px solid rgba(0,0,0,0.12);font-size:0.72rem;font-weight:800;background:rgba(255,255,255,0.75);color:var(--t2)}
+.nt-tagbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.nt-tagchip{font-size:0.64rem;font-weight:800;padding:4px 10px;border-radius:14px;border:1.5px solid rgba(0,0,0,0.12);cursor:pointer;color:var(--t3);background:rgba(255,255,255,0.7);user-select:none;transition:all 0.1s}
+.nt-tagchip.active{background:var(--red);border-color:var(--red);color:#fff}
+.nt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.nt-card{background:var(--glass);border-radius:var(--rl);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.09);border-left:4px solid var(--t4);padding:12px 14px;cursor:pointer;transition:transform 0.12s,box-shadow 0.12s;display:flex;flex-direction:column;min-height:110px;position:relative}
+.nt-card:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.nt-card.c-red{border-left-color:var(--red)}
+.nt-card.c-green{border-left-color:var(--green)}
+.nt-card.c-blue{border-left-color:var(--blue)}
+.nt-card.c-amber{border-left-color:var(--amber)}
+.nt-card.c-purple{border-left-color:var(--purple)}
+.nt-card.c-teal{border-left-color:var(--nz-turquoise)}
+.nt-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.nt-card-title{font-size:0.85rem;font-weight:900;color:var(--t1);line-height:1.35;word-break:break-word}
+.nt-pin{background:none;border:none;cursor:pointer;font-size:0.8rem;line-height:1;padding:2px;opacity:0.28;flex-shrink:0}
+.nt-pin.on{opacity:1}
+.nt-card-body{font-size:0.71rem;color:var(--t3);font-weight:600;line-height:1.55;margin-top:5px;flex:1;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical}
+.nt-card-foot{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:8px}
+.nt-tag{font-size:0.56rem;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,0.06);color:var(--t3)}
+.nt-date{font-size:0.58rem;color:var(--t4);font-weight:700;margin-left:auto}
+.nt-colorrow{display:flex;gap:7px;flex-wrap:wrap}
+.nt-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:transform 0.1s}
+.nt-swatch.sel{border-color:var(--t1);transform:scale(1.12)}
+.nt-editor-body{width:100%;min-height:220px;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.12);font-size:0.82rem;font-weight:600;line-height:1.6;font-family:var(--sans);resize:vertical;background:rgba(255,255,255,0.85)}
+.nt-meta{font-size:0.62rem;color:var(--t4);font-weight:700;margin-top:5px}
+.nt-view{font-size:0.84rem;color:var(--t2);font-weight:600;line-height:1.7;word-break:break-word}
+.nt-view h1{font-size:1.15rem;font-weight:900;color:var(--t1);margin:12px 0 6px}
+.nt-view h2{font-size:1rem;font-weight:900;color:var(--t1);margin:11px 0 5px}
+.nt-view h3{font-size:0.9rem;font-weight:900;color:var(--t1);margin:10px 0 4px}
+.nt-view ul{margin:6px 0 6px 18px}
+.nt-view li{margin:3px 0}
+.nt-view code{background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:0.78rem}
+.nt-view a{color:var(--blue);text-decoration:underline}
+.nt-view hr{border:none;border-top:1px solid rgba(0,0,0,0.12);margin:10px 0}
 .td-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .td-plan-item{background:rgba(255,255,255,0.6);border-radius:8px;padding:8px 10px}
 .td-plan-item .lbl{font-size:0.6rem;font-weight:800;color:var(--t4);text-transform:uppercase}
@@ -777,6 +814,9 @@ input,select,button,textarea{font-family:var(--sans)}
     </button>
     <button class="app-top-tab" id="topTabGoals" onclick="switchAppTab('goals')">
       <div class="app-top-tab-inner">🗺️ Goals</div>
+    </button>
+    <button class="app-top-tab" id="topTabNotes" onclick="switchAppTab('notes')">
+      <div class="app-top-tab-inner">📝 Notes <span class="tab-badge" id="notesBadge">0</span></div>
     </button>
     <button class="app-top-tab" id="topTabPomo" onclick="switchAppTab('pomo')">
       <div class="app-top-tab-inner">⏱ Pomo</div>
@@ -1091,6 +1131,23 @@ input,select,button,textarea{font-family:var(--sans)}
 
 
     <!-- ══ 数理 PAGE ══ -->
+    <!-- ══ NOTES PAGE ══ -->
+    <div class="app-page" id="page-notes">
+      <div class="panel">
+        <div class="ph"><div class="pt">📝 Notes <span class="badge upcoming" id="ntCount">0</span></div><div style="display:flex;gap:6px"><button class="td-refresh-btn" id="ntExportBtn">⭳ Export .md</button><button class="add-btn" id="ntNewBtn">+ New note</button></div></div>
+        <div class="nt-toolbar">
+          <input type="text" class="nt-search" id="ntSearch" placeholder="Search title, body or tag..." autocomplete="off" oninput="nt_render()">
+          <select class="nt-sel" id="ntSort" onchange="nt_render()">
+            <option value="updated">Sort: Last edited</option>
+            <option value="created">Sort: Date created</option>
+            <option value="title">Sort: Title A–Z</option>
+          </select>
+        </div>
+        <div class="nt-tagbar" id="ntTagBar"></div>
+        <div id="ntGrid"><div class="empty">No notes yet. Tap “+ New note” to start.</div></div>
+      </div>
+    </div>
+
     <!-- ══ POMODORO PAGE ══ -->
     <div class="app-page" id="page-pomo">
       <div class="pomo-tab-wrap">
@@ -1259,6 +1316,8 @@ input,select,button,textarea{font-family:var(--sans)}
 <!-- FINANCE MODALS -->
 <div class="modal-overlay" id="txOverlay"><div class="modal"><h3>Add transaction</h3><div class="field"><label>Type</label><select id="txType"><option value="expense">Expense</option><option value="income">Income</option><option value="savings">Savings transfer</option></select></div><div class="field"><label>Description</label><input type="text" id="txDesc" placeholder="e.g. Grab, Tesco, salary"></div><div class="field"><label>Amount (RM)</label><input type="number" id="txAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Account</label><select id="txWallet"><option value="">— none —</option></select></div><div class="field"><label>Category</label><select id="txCat"><option>Food &amp; drink</option><option>Transport</option><option>Groceries</option><option>Utilities</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Salary</option><option>Savings</option><option>Other</option></select></div><div class="field"><label>Date</label><input type="date" id="txDate"></div><div class="field"><label>Note (optional)</label><input type="text" id="txNote" placeholder="optional"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTx">Cancel</button><button class="btn btn-red" id="saveTx">Add</button></div></div></div>
 <div class="modal-overlay" id="futureOverlay"><div class="modal"><h3>Add bill / future payment</h3><div class="field"><label>Description</label><input type="text" id="fDesc" placeholder="e.g. Astro, TNB, car loan"></div><div class="field"><label>Amount (RM)</label><input type="number" id="fAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Due date</label><input type="date" id="fDate"></div><div class="field"><label>Category</label><select id="fCat"><option>Subscription</option><option>Rent/Mortgage</option><option>Utilities</option><option>Insurance</option><option>Loan repayment</option><option>Investment</option><option>Telco</option><option>Other</option></select></div><div class="field"><label>Recurrence</label><select id="fRecur"><option value="once">One-time</option><option value="monthly">Monthly</option><option value="weekly">Weekly</option><option value="yearly">Yearly</option></select></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelFuture">Cancel</button><button class="btn btn-red" id="saveFuture">Add</button></div></div></div>
+<div class="modal-overlay" id="ntOverlay"><div class="modal"><h3 id="ntModalTitle">New note</h3><div class="field"><label>Title</label><input type="text" id="ntTitle" placeholder="e.g. AFM — hedging notes"></div><div class="field"><label>Body</label><textarea class="nt-editor-body" id="ntBody" placeholder="Supports markdown-lite:&#10;# Heading&#10;**bold**  *italic*  `code`&#10;- bullet&#10;- [ ] task  - [x] done&#10;[link](https://...)&#10;--- for a divider"></textarea><div class="nt-meta" id="ntWordCount">0 words · 0 chars</div></div><div class="field"><label>Tags (comma separated)</label><input type="text" id="ntTags" placeholder="e.g. acca, afm, nz-move"></div><div class="field"><label>Colour</label><div class="nt-colorrow" id="ntColorRow"></div></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelNt">Cancel</button><button class="btn btn-red" id="saveNt">Save</button></div></div></div>
+<div class="modal-overlay" id="ntViewOverlay"><div class="modal"><h3 id="ntViewTitle">Note</h3><div class="nt-meta" id="ntViewMeta"></div><div class="nt-card-foot" id="ntViewTags" style="margin-bottom:10px"></div><div class="nt-view" id="ntViewBody"></div><div class="modal-actions"><button class="btn btn-ghost" id="ntDeleteBtn" style="color:var(--red)">Delete</button><button class="btn btn-ghost" id="cancelNtView">Close</button><button class="btn btn-red" id="ntEditBtn">Edit</button></div></div></div>
 <div class="modal-overlay" id="tdOverlay"><div class="modal"><h3>Add trade record</h3><div class="field"><label>Ticker</label><input type="text" id="tdTxTicker" placeholder="e.g. AAPL, 5225.KL" style="text-transform:uppercase"></div><div class="field"><label>Market</label><select id="tdTxCurrency"><option value="MYR">🇲🇾 Malaysia (MYR)</option><option value="USD">🇺🇸 US (USD)</option></select></div><div class="field"><label>Type</label><select id="tdTxType" onchange="td_onTypeChange()"><option value="buy">Buy</option><option value="sell">Sell</option><option value="dividend">Dividend</option></select></div><div class="field"><label>Date</label><input type="date" id="tdTxDate"></div><div class="field" id="tdTxQtyField"><label>Quantity</label><input type="number" id="tdTxQty" step="0.0001" min="0" placeholder="e.g. 100"></div><div class="field" id="tdTxPriceField"><label>Price / share</label><input type="number" id="tdTxPrice" step="0.0001" min="0" placeholder="0.00"></div><div class="field" id="tdTxFeesField"><label>Fees</label><input type="number" id="tdTxFees" step="0.01" min="0" value="0"></div><div class="field" id="tdTxDivAmtField" style="display:none"><label>Dividend amount (total received)</label><input type="number" id="tdTxDivAmt" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Note (optional)</label><input type="text" id="tdTxNote" placeholder="optional"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelTdTx">Cancel</button><button class="btn btn-red" id="saveTdTx">Add</button></div></div></div>
 <div class="modal-overlay" id="walletOverlay"><div class="modal"><h3 id="walletModalTitle">Add account</h3><div class="field"><label>Account name</label><input type="text" id="wName" placeholder="e.g. Maybank, TNG, Cash"></div><div class="field"><label>Type</label><select id="wType"><option value="bank">Bank</option><option value="ewallet">E-wallet</option><option value="cash">Cash</option><option value="savings">Savings</option><option value="investment">Investment</option></select></div><div class="field"><label>Balance (RM)</label><input type="number" id="wBal" step="0.01" placeholder="0.00"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelWallet">Cancel</button><button class="btn btn-red" id="saveWallet">Save</button></div></div></div>
 <div class="modal-overlay" id="goalOverlay"><div class="modal"><h3 id="goalModalTitle">Add savings goal</h3><div class="field"><label>Goal name</label><input type="text" id="gName" placeholder="e.g. Emergency fund, Holiday"></div><div class="field"><label>Emoji icon</label><input type="text" id="gIcon" placeholder="🎯" maxlength="2" value="🎯"></div><div class="field"><label>Target amount (RM)</label><input type="number" id="gTarget" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Current saved (RM)</label><input type="number" id="gSaved" step="0.01" min="0" placeholder="0.00"></div><div class="field"><label>Target date (optional)</label><input type="date" id="gDate"></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelGoal">Cancel</button><button class="btn btn-red" id="saveGoal">Save</button></div></div></div>
@@ -1345,7 +1404,7 @@ const ALL_CURRENCIES=['AUD','CAD','CHF','CNY','EUR','GBP','HKD','IDR','INR','JPY
 const PRI_COLORS={high:'#BF0000',medium:'#C06000',low:'#007A38'};
 const CAT_CSS={Work:'cat-work',Personal:'cat-personal',Finance:'cat-finance',Health:'cat-health',Other:'cat-other'};
 
-let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[],scenario:null,shuliSaved:[],bankAccounts:[],healthLog:[],hlHeight:null,trading:{tx:[]},acca:{examDate:null,papers:[]},runwayThreshold:3};
+let state={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},fxCurrencies:['USD','NZD'],fxRates:{},fxLastUpdate:null,todos:[],goalPlans:[],bsItems:[],travelPlans:[],transfers:[],scenario:null,shuliSaved:[],bankAccounts:[],healthLog:[],hlHeight:null,trading:{tx:[]},notes:[],acca:{examDate:null,papers:[]},runwayThreshold:3};
 let viewYear,viewMonth,driveFileId=null;
 let editWalletIdx=-1,editGoalIdx=-1,editDebtIdx=-1,editTaskId=null;
 let gapiInited=false,gisInited=false,tokenClient;
@@ -2065,7 +2124,7 @@ async function loadData(){
     state.transactions=p.transactions||[];state.futures=p.futures||[];state.wallets=p.wallets||[];
     state.goals=p.goals||[];state.debts=p.debts||[];state.budgets=p.budgets||{};
     state.fxCurrencies=p.fxCurrencies||['USD','NZD'];state.fxRates=p.fxRates||{};state.fxLastUpdate=p.fxLastUpdate||null;
-    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];state.scenario=p.scenario||null;state.shuliSaved=p.shuliSaved||[];state.bankAccounts=p.bankAccounts||[];state.healthLog=p.healthLog||[];state.hlHeight=p.hlHeight||null;
+    state.todos=p.todos||[];state.goalPlans=p.goalPlans||[];state.bsItems=p.bsItems||[];state.travelPlans=p.travelPlans||[];state.transfers=p.transfers||[];state.scenario=p.scenario||null;state.shuliSaved=p.shuliSaved||[];state.bankAccounts=p.bankAccounts||[];state.healthLog=p.healthLog||[];state.hlHeight=p.hlHeight||null;state.notes=Array.isArray(p.notes)?p.notes:[];
     state.trading=p.trading||{tx:[]};
     if(!Array.isArray(state.trading.tx))state.trading.tx=[];
     if(!state.trading.px||typeof state.trading.px!=='object')state.trading.px={};
@@ -2434,6 +2493,7 @@ function render(){
   try{renderBalanceSheet();}catch(e){console.error('balance sheet render',e);}
   try{renderTransfers();}catch(e){console.error('transfers render',e);}
   try{renderPlanner();}catch(e){console.error('planner render',e);}
+  try{nt_badge();}catch(e){console.error('notes badge',e);}
 }
 
 
@@ -3494,6 +3554,125 @@ function renderRunwayWidget(){
 window.nzSetRunwayThreshold=async function(v){const n=Number(v);if(!n||n<1)return;state.runwayThreshold=n;renderRunwayWidget();await saveData();};
 
 // ── TRADING TAB (📈 portfolio recorder — buy/sell/dividend log, FIFO P&L, no live proxy) ──
+// ── NOTES TAB (local note store, markdown-lite, tag filter, search) ──
+const NT_COLORS=[{k:'',hex:'#9A9A9A'},{k:'red',hex:'#BF0000'},{k:'green',hex:'#007A38'},{k:'blue',hex:'#0055AA'},{k:'amber',hex:'#C06000'},{k:'purple',hex:'#6A00CC'},{k:'teal',hex:'#1C9099'}];
+let ntEditId=null,ntViewId=null,ntColor='',ntTagFilter='';
+function nt_initTab(){nt_renderTagBar();nt_render();}
+function nt_badge(){const b=document.getElementById('notesBadge');if(b)b.textContent=state.notes.length;}
+function nt_allTags(){const s=new Set();state.notes.forEach(n=>(n.tags||[]).forEach(t=>s.add(t)));return [...s].sort();}
+function nt_renderTagBar(){
+  const el=document.getElementById('ntTagBar');if(!el)return;
+  const tags=nt_allTags();
+  if(!tags.length){el.innerHTML='';return;}
+  el.innerHTML=`<div class="nt-tagchip${ntTagFilter===''?' active':''}" onclick="nt_setTagFilter('')">All</div>`+tags.map(t=>`<div class="nt-tagchip${ntTagFilter===t?' active':''}" onclick="nt_setTagFilter('${esc(t).replace(/'/g,"\\'")}')">${esc(t)}</div>`).join('');
+}
+window.nt_setTagFilter=function(t){ntTagFilter=t;nt_renderTagBar();nt_render();};
+function nt_snippet(body){return (body||'').replace(/^#{1,6}\s+/gm,'').replace(/\*\*|\*|`/g,'').trim();}
+function nt_render(){
+  const el=document.getElementById('ntGrid');if(!el)return;
+  nt_badge();
+  const q=(document.getElementById('ntSearch')?document.getElementById('ntSearch').value:'').trim().toLowerCase();
+  const sortBy=document.getElementById('ntSort')?document.getElementById('ntSort').value:'updated';
+  let notes=state.notes.filter(n=>{
+    if(ntTagFilter&&!(n.tags||[]).includes(ntTagFilter))return false;
+    if(!q)return true;
+    return (n.title||'').toLowerCase().includes(q)||(n.body||'').toLowerCase().includes(q)||(n.tags||[]).some(t=>t.toLowerCase().includes(q));
+  });
+  notes.sort((a,b)=>{
+    if(!!b.pinned!==!!a.pinned)return (b.pinned?1:0)-(a.pinned?1:0);
+    if(sortBy==='title')return (a.title||'').localeCompare(b.title||'');
+    if(sortBy==='created')return (b.created||0)-(a.created||0);
+    return (b.updated||b.created||0)-(a.updated||a.created||0);
+  });
+  document.getElementById('ntCount').textContent=notes.length+(q||ntTagFilter?' / '+state.notes.length:'');
+  if(!notes.length){el.innerHTML='<div class="empty">'+(state.notes.length?'No notes match this search or tag.':'No notes yet. Tap “+ New note” to start.')+'</div>';return;}
+  el.innerHTML='<div class="nt-grid">'+notes.map(n=>{
+    const ds=new Date(n.updated||n.created||Date.now()).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});
+    const snip=nt_snippet(n.body);
+    return `<div class="nt-card${n.color?' c-'+n.color:''}" onclick="nt_open('${n.id}')">
+      <div class="nt-card-top"><div class="nt-card-title">${esc(n.title||'Untitled')}</div><button class="nt-pin${n.pinned?' on':''}" title="Pin" onclick="event.stopPropagation();nt_togglePin('${n.id}')">📌</button></div>
+      <div class="nt-card-body">${esc(snip)||'<span style="opacity:0.5">Empty note</span>'}</div>
+      <div class="nt-card-foot">${(n.tags||[]).slice(0,3).map(t=>`<span class="nt-tag">${esc(t)}</span>`).join('')}<span class="nt-date">${ds}</span></div>
+    </div>`;
+  }).join('')+'</div>';
+}
+window.nt_togglePin=async function(id){
+  const n=state.notes.find(x=>x.id===id);if(!n)return;
+  n.pinned=!n.pinned;n.updated=Date.now();
+  await saveData();nt_render();
+};
+// Markdown-lite renderer — escapes first, then applies a fixed set of inline/block patterns.
+function nt_md(src){
+  let s=esc(src||'');
+  const lines=s.split('\n');
+  let out=[],inList=false;
+  const inline=t=>t
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*]+)\*/g,'$1<em>$2</em>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  lines.forEach(raw=>{
+    const line=raw.trimEnd();
+    const closeList=()=>{if(inList){out.push('</ul>');inList=false;}};
+    if(/^---+$/.test(line.trim())){closeList();out.push('<hr>');return;}
+    const h=line.match(/^(#{1,3})\s+(.*)$/);
+    if(h){closeList();const lv=h[1].length;out.push(`<h${lv}>${inline(h[2])}</h${lv}>`);return;}
+    const task=line.match(/^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/);
+    if(task){if(!inList){out.push('<ul>');inList=true;}out.push(`<li>${task[1].toLowerCase()==='x'?'☑':'☐'} ${inline(task[2])}</li>`);return;}
+    const li=line.match(/^\s*[-*]\s+(.*)$/);
+    if(li){if(!inList){out.push('<ul>');inList=true;}out.push(`<li>${inline(li[1])}</li>`);return;}
+    closeList();
+    if(!line.trim()){out.push('<br>');return;}
+    out.push(`<div>${inline(line)}</div>`);
+  });
+  if(inList)out.push('</ul>');
+  return out.join('');
+}
+window.nt_open=function(id){
+  const n=state.notes.find(x=>x.id===id);if(!n)return;
+  ntViewId=id;
+  document.getElementById('ntViewTitle').textContent=n.title||'Untitled';
+  const cd=new Date(n.created||Date.now()).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});
+  const ud=new Date(n.updated||n.created||Date.now()).toLocaleString('en-MY',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const words=(n.body||'').trim()?(n.body||'').trim().split(/\s+/).length:0;
+  document.getElementById('ntViewMeta').textContent=`Created ${cd} · Edited ${ud} · ${words} words`;
+  document.getElementById('ntViewTags').innerHTML=(n.tags||[]).map(t=>`<span class="nt-tag">${esc(t)}</span>`).join('');
+  document.getElementById('ntViewBody').innerHTML=n.body?nt_md(n.body):'<div style="color:var(--t4)">Empty note.</div>';
+  document.getElementById('ntViewOverlay').classList.add('open');
+};
+function nt_renderColorRow(){
+  const el=document.getElementById('ntColorRow');if(!el)return;
+  el.innerHTML=NT_COLORS.map(c=>`<div class="nt-swatch${ntColor===c.k?' sel':''}" style="background:${c.hex}" onclick="nt_pickColor('${c.k}')"></div>`).join('');
+}
+window.nt_pickColor=function(k){ntColor=k;nt_renderColorRow();};
+function nt_openEditor(id){
+  ntEditId=id||null;
+  const n=id?state.notes.find(x=>x.id===id):null;
+  document.getElementById('ntModalTitle').textContent=n?'Edit note':'New note';
+  document.getElementById('ntTitle').value=n?(n.title||''):'';
+  document.getElementById('ntBody').value=n?(n.body||''):'';
+  document.getElementById('ntTags').value=n?(n.tags||[]).join(', '):'';
+  ntColor=n?(n.color||''):'';
+  nt_renderColorRow();nt_updateWordCount();
+  document.getElementById('ntOverlay').classList.add('open');
+}
+function nt_updateWordCount(){
+  const v=document.getElementById('ntBody').value||'';
+  const words=v.trim()?v.trim().split(/\s+/).length:0;
+  document.getElementById('ntWordCount').textContent=`${words} words · ${v.length} chars`;
+}
+window.nt_exportMD=function(){
+  if(!state.notes.length){alert('No notes to export.');return;}
+  const parts=[...state.notes].sort((a,b)=>(b.updated||b.created||0)-(a.updated||a.created||0)).map(n=>{
+    const ud=new Date(n.updated||n.created||Date.now()).toISOString().slice(0,10);
+    return `# ${n.title||'Untitled'}\n\n_Edited ${ud}${(n.tags||[]).length?' · Tags: '+(n.tags||[]).join(', '):''}_\n\n${n.body||''}\n`;
+  });
+  const blob=new Blob([parts.join('\n---\n\n')],{type:'text/markdown'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='notes_'+new Date().toISOString().slice(0,10)+'.md';
+  document.body.appendChild(a);a.click();a.remove();
+};
 function td_initTab(){
   td_populateTxFilter();
   td_renderTxList();
@@ -3828,7 +4007,7 @@ window.td_importCSV=function(file){
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
   // Use explicit add/remove instead of toggle for reliability
-  ['home','finance','todo','goals','pomo','health','shuli','bazi','trading'].forEach(n=>{
+  ['home','finance','todo','goals','notes','pomo','health','shuli','bazi','trading'].forEach(n=>{
     const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
     const page=document.getElementById('page-'+n);
     if(n===name){
@@ -3850,6 +4029,7 @@ function switchAppTab(name){
   else if(name==='shuli'){try{renderShuli();}catch(e){console.error('shuli render',e);}}
   else if(name==='bazi'){try{bz_initTab();}catch(e){console.error('bazi render',e);}}
   else if(name==='trading'){try{td_initTab();}catch(e){console.error('trading render',e);}}
+  else if(name==='notes'){try{nt_initTab();}catch(e){console.error('notes render',e);}}
   else render();
 
 }
@@ -3864,11 +4044,41 @@ document.getElementById('nextM').onclick=()=>{viewMonth++;if(viewMonth>11){viewM
 document.getElementById('signOutBtn').onclick=()=>{try{google.accounts.oauth2.revoke(gapi.client.getToken()?.access_token||'');}catch(e){}gapi.client.setToken('');localStorage.removeItem('gToken');driveFileId=null;showAuth();};
 
 const modal=(ov,cancelId)=>{const o=document.getElementById(ov);document.getElementById(cancelId).onclick=()=>o.classList.remove('open');o.onclick=e=>{if(e.target===o)o.classList.remove('open');};return o;};
-const txOv=modal('txOverlay','cancelTx');const fuOv=modal('futureOverlay','cancelFuture');const wOv=modal('walletOverlay','cancelWallet');const gOv=modal('goalOverlay','cancelGoal');const dOv=modal('debtOverlay','cancelDebt');const bOv=modal('budgetOverlay','cancelBudget');const taskOv=modal('taskOverlay','cancelTask');const tdOv=modal('tdOverlay','cancelTdTx');
+const txOv=modal('txOverlay','cancelTx');const fuOv=modal('futureOverlay','cancelFuture');const wOv=modal('walletOverlay','cancelWallet');const gOv=modal('goalOverlay','cancelGoal');const dOv=modal('debtOverlay','cancelDebt');const bOv=modal('budgetOverlay','cancelBudget');const taskOv=modal('taskOverlay','cancelTask');const tdOv=modal('tdOverlay','cancelTdTx');const ntOv=modal('ntOverlay','cancelNt');const ntVOv=modal('ntViewOverlay','cancelNtView');
 
 const openTx=()=>{document.getElementById('txDate').value=new Date().toISOString().slice(0,10);renderWallets();txOv.classList.add('open');};
 document.getElementById('openTxOv').onclick=openTx;document.getElementById('openTxFull').onclick=openTx;
 document.getElementById('tdOpenAdd').onclick=()=>{document.getElementById('tdTxTicker').value='';document.getElementById('tdTxCurrency').value='MYR';document.getElementById('tdTxType').value='buy';td_onTypeChange();document.getElementById('tdTxDate').value=new Date().toISOString().slice(0,10);document.getElementById('tdTxQty').value='';document.getElementById('tdTxPrice').value='';document.getElementById('tdTxFees').value='0';document.getElementById('tdTxDivAmt').value='';document.getElementById('tdTxNote').value='';tdOv.classList.add('open');};
+document.getElementById('ntNewBtn').onclick=()=>nt_openEditor(null);
+document.getElementById('ntExportBtn').onclick=nt_exportMD;
+document.getElementById('ntBody').oninput=nt_updateWordCount;
+document.getElementById('ntEditBtn').onclick=()=>{ntVOv.classList.remove('open');nt_openEditor(ntViewId);};
+document.getElementById('ntDeleteBtn').onclick=async function(){
+  if(!ntViewId)return;
+  const n=state.notes.find(x=>x.id===ntViewId);
+  if(!confirm('Delete note "'+(n&&n.title?n.title:'Untitled')+'"? This cannot be undone.'))return;
+  state.notes=state.notes.filter(x=>x.id!==ntViewId);
+  ntViewId=null;
+  ntVOv.classList.remove('open');
+  await saveData();
+  nt_renderTagBar();nt_render();
+};
+document.getElementById('saveNt').onclick=async function(){
+  const title=document.getElementById('ntTitle').value.trim();
+  const body=document.getElementById('ntBody').value;
+  const tags=document.getElementById('ntTags').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  if(!title&&!body.trim()){alert('Add a title or some content before saving.');return;}
+  if(ntEditId){
+    const n=state.notes.find(x=>x.id===ntEditId);
+    if(n){n.title=title;n.body=body;n.tags=tags;n.color=ntColor;n.updated=Date.now();}
+  }else{
+    state.notes.push({id:'n'+Date.now()+Math.random().toString(36).slice(2,6),title,body,tags,color:ntColor,pinned:false,created:Date.now(),updated:Date.now()});
+  }
+  ntEditId=null;
+  ntOv.classList.remove('open');
+  await saveData();
+  nt_renderTagBar();nt_render();
+};
 document.getElementById('tdBulkRefreshBtn').onclick=td_bulkRefresh;
 document.getElementById('tdExportBtn').onclick=td_exportCSV;
 document.getElementById('tdImportBtn').onclick=()=>document.getElementById('tdImportFile').click();
