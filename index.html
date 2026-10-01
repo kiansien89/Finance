@@ -2652,62 +2652,88 @@ window.addSubtask=async function(tid){
   if(dateInput)dateInput.value='';
   renderTodos();await saveData();
 };
+// ── Date popover: type a date OR pick from the calendar ──
+// Typed formats: 15/11/2026 · 15/11 · 15-11-26 · 2026-11-15 · 15 Nov · 15 Nov 2026 · today · tmr · fri · +7
+(function(){
+  if(document.getElementById('dp-css'))return;
+  const st=document.createElement('style');st.id='dp-css';
+  st.textContent='.dp-pop{position:fixed;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.28);padding:12px;width:260px;border:1px solid rgba(0,0,0,.08);font-family:var(--sans)}'
+  +'.dp-lbl{font-size:.62rem;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}'
+  +'.dp-row{display:flex;gap:6px}.dp-in{flex:1;min-width:0;border:1.5px solid rgba(0,0,0,.15);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-weight:700;font-size:.85rem;outline:none}.dp-in:focus{border-color:var(--red)}'
+  +'.dp-cal{border:none;background:rgba(0,0,0,.06);border-radius:8px;width:38px;cursor:pointer;font-size:1rem;position:relative;overflow:hidden}'
+  +'.dp-cal input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}'
+  +'.dp-prev{font-size:.7rem;font-weight:700;color:var(--t3);margin:6px 2px;min-height:16px}.dp-prev.bad{color:var(--red)}'
+  +'.dp-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}.dp-chip{border:none;background:rgba(0,0,0,.06);border-radius:14px;padding:4px 9px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:var(--sans);color:var(--t2)}'
+  +'.dp-acts{display:flex;gap:6px;justify-content:flex-end}.dp-acts button{border:none;border-radius:8px;padding:7px 12px;font-weight:800;cursor:pointer;font-family:var(--sans);font-size:.75rem}'
+  +'.dp-save{background:var(--red);color:#fff}.dp-clear{background:rgba(0,0,0,.06);color:var(--t2)}';
+  document.head.appendChild(st);
+})();
+function dpYMD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function dpParse(txt){
+  let s=String(txt||'').trim().toLowerCase();if(!s)return '';
+  const today=new Date();today.setHours(0,0,0,0);
+  const add=n=>{const d=new Date(today);d.setDate(d.getDate()+n);return dpYMD(d);};
+  if(s==='today'||s==='tdy')return add(0);
+  if(s==='tomorrow'||s==='tmr'||s==='tmrw')return add(1);
+  let m;
+  if((m=s.match(/^\+(\d{1,3})\s*(d|w)?$/)))return add(Number(m[1])*(m[2]==='w'?7:1));
+  const wd=['sun','mon','tue','wed','thu','fri','sat'];
+  if((m=s.match(/^(next\s+)?(sun|mon|tue|wed|thu|fri|sat)[a-z]*$/))){let k=(wd.indexOf(m[2])-today.getDay()+7)%7;if(k===0)k=7;if(m[1])k+=k<7?7:0;return add(k);}
+  const mk=(y,mo,d)=>{if(y<100)y+=2000;const dt=new Date(y,mo-1,d);return(dt.getMonth()===mo-1&&dt.getDate()===d)?dpYMD(dt):null;};
+  if((m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/)))return mk(+m[1],+m[2],+m[3]);
+  if((m=s.match(/^(\d{1,2})[-\/.\s](\d{1,2})[-\/.\s](\d{2}|\d{4})$/)))return mk(+m[3],+m[2],+m[1]);
+  const MON=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const nextOf=(mo,d)=>{let r=mk(today.getFullYear(),mo,d);if(r&&r<dpYMD(today))r=mk(today.getFullYear()+1,mo,d);return r;};
+  if((m=s.match(/^(\d{1,2})[-\/.](\d{1,2})$/)))return nextOf(+m[2],+m[1]);
+  if((m=s.match(/^(\d{1,2})\s*([a-z]{3})[a-z]*\.?(?:\s*(\d{2}|\d{4}))?$/))){const mo=MON.indexOf(m[2])+1;if(!mo)return null;return m[3]?mk(+m[3],mo,+m[1]):nextOf(mo,+m[1]);}
+  if((m=s.match(/^([a-z]{3})[a-z]*\.?\s*(\d{1,2})(?:,?\s*(\d{2}|\d{4}))?$/))){const mo=MON.indexOf(m[1])+1;if(!mo)return null;return m[3]?mk(+m[3],mo,+m[2]):nextOf(mo,+m[2]);}
+  return null;
+}
+function dpNice(ymd){const p=ymd.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]).toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}
+function openDatePicker(cur,onPick,title){
+  document.querySelectorAll('.dp-pop').forEach(x=>x.remove());
+  const btn=(window.event&&(window.event.currentTarget||window.event.target))||null;
+  const r=btn&&btn.getBoundingClientRect?btn.getBoundingClientRect():{left:innerWidth/2-130,bottom:innerHeight/3,top:innerHeight/3};
+  const pop=document.createElement('div');pop.className='dp-pop';
+  const fmtCur=cur?(()=>{const p=cur.split('-');return p[2]+'/'+p[1]+'/'+p[0];})():'';
+  pop.innerHTML='<div class="dp-lbl">'+(title||'Due date')+' — type or pick</div>'
+    +'<div class="dp-row"><input class="dp-in" placeholder="15/11/2026 · 15 Nov · fri · tmr" value="'+fmtCur+'"><button class="dp-cal" title="Pick from calendar">📅<input type="date" tabindex="-1" value="'+(cur||'')+'"></button></div>'
+    +'<div class="dp-prev"></div>'
+    +'<div class="dp-chips"><button class="dp-chip" data-v="today">Today</button><button class="dp-chip" data-v="tmr">Tomorrow</button><button class="dp-chip" data-v="+7">+1 week</button><button class="dp-chip" data-v="+30">+30 days</button></div>'
+    +'<div class="dp-acts"><button class="dp-clear">Clear date</button><button class="dp-save">Save</button></div>';
+  document.body.appendChild(pop);
+  const W=260,H=pop.offsetHeight||190;
+  let left=Math.min(Math.max(8,r.left),innerWidth-W-8),top=r.bottom+6;if(top+H>innerHeight-8)top=Math.max(8,(r.top||r.bottom)-H-6);
+  pop.style.left=left+'px';pop.style.top=top+'px';
+  const inp=pop.querySelector('.dp-in'),nat=pop.querySelector('.dp-cal input'),prev=pop.querySelector('.dp-prev');
+  const upd=()=>{const v=dpParse(inp.value);if(v===''){prev.textContent='No date';prev.classList.remove('bad');}else if(v){prev.textContent='→ '+dpNice(v);prev.classList.remove('bad');nat.value=v;}else{prev.textContent='Not a date I recognise';prev.classList.add('bad');}return v;};
+  const close=()=>{pop.remove();document.removeEventListener('mousedown',outside,true);};
+  const commit=v=>{close();onPick(v);};
+  const outside=e=>{if(!pop.contains(e.target))close();};
+  setTimeout(()=>document.addEventListener('mousedown',outside,true),0);
+  inp.addEventListener('input',upd);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){const v=upd();if(v!==null)commit(v);}else if(e.key==='Escape')close();});
+  nat.addEventListener('change',()=>{if(nat.value){commit(nat.value);}});
+  pop.querySelector('.dp-cal').addEventListener('click',e=>{if(e.target===nat)return;try{nat.showPicker();}catch(_){}});
+  nat.addEventListener('click',()=>{try{nat.showPicker();}catch(_){}});
+  pop.querySelectorAll('.dp-chip').forEach(c=>c.onclick=()=>{inp.value=c.dataset.v;const v=upd();if(v)commit(v);});
+  pop.querySelector('.dp-clear').onclick=()=>commit('');
+  pop.querySelector('.dp-save').onclick=()=>{const v=upd();if(v!==null)commit(v);else inp.focus();};
+  upd();setTimeout(()=>{inp.focus();inp.select();},20);
+  return true;
+}
+window.openDatePicker=openDatePicker;
 window.editSubtaskDue=function(tid,si){
   const t=state.todos.find(t=>t.id===tid);
   if(!t||!t.subtasks||!t.subtasks[si])return;
-  const cur=t.subtasks[si].due||'';
-  const save=async v=>{t.subtasks[si].due=v;renderTodos();await saveData();};
-  // Native calendar picker anchored at the 📅 button (no typing); prompt() kept only as fallback
-  const btn=(window.event&&window.event.currentTarget)||(window.event&&window.event.target)||null;
-  const r=btn&&btn.getBoundingClientRect?btn.getBoundingClientRect():{left:innerWidth/2,bottom:innerHeight/2};
-  const inp=document.createElement('input');
-  inp.type='date';inp.value=cur;
-  inp.style.cssText='position:fixed;left:'+Math.round(r.left)+'px;top:'+Math.round(r.bottom)+'px;width:1px;height:1px;opacity:0;border:0;padding:0;z-index:9999';
-  document.body.appendChild(inp);
-  let done=false;
-  const cleanup=()=>{setTimeout(()=>{if(inp.parentNode)inp.remove();},0);};
-  inp.addEventListener('change',()=>{if(done)return;done=true;save(inp.value||'');cleanup();});
-  inp.addEventListener('blur',()=>{setTimeout(()=>{if(!done)cleanup();},300);});
-  try{
-    if(typeof inp.showPicker!=='function')throw new Error('no showPicker');
-    inp.showPicker();
-  }catch(e){
-    inp.remove();
-    const val=prompt('Due date for this sub-task (YYYY-MM-DD), blank to clear:',cur);
-    if(val===null)return;
-    const trimmed=val.trim();
-    if(trimmed&&!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)){alert('Use format YYYY-MM-DD, e.g. 2026-07-15');return;}
-    save(trimmed);
-  }
+  openDatePicker(t.subtasks[si].due||'',async v=>{t.subtasks[si].due=v;renderTodos();await saveData();},'Sub-task due');
 };
-function openDatePicker(cur,onPick){
-  const btn=(window.event&&window.event.currentTarget)||(window.event&&window.event.target)||null;
-  const r=btn&&btn.getBoundingClientRect?btn.getBoundingClientRect():{left:innerWidth/2,bottom:innerHeight/2};
-  const inp=document.createElement('input');inp.type='date';inp.value=cur||'';
-  inp.style.cssText='position:fixed;left:'+Math.round(r.left)+'px;top:'+Math.round(r.bottom)+'px;width:1px;height:1px;opacity:0;border:0;padding:0;z-index:9999';
-  document.body.appendChild(inp);
-  let done=false;const cleanup=()=>setTimeout(()=>{if(inp.parentNode)inp.remove();},0);
-  inp.addEventListener('change',()=>{if(done)return;done=true;onPick(inp.value||'');cleanup();});
-  inp.addEventListener('blur',()=>setTimeout(()=>{if(!done)cleanup();},300));
-  try{if(typeof inp.showPicker!=='function')throw 0;inp.showPicker();return true;}catch(e){inp.remove();return false;}
-}
 window.editTaskDue=function(id){
   const t=state.todos.find(t=>t.id===id);if(!t)return;
   if(window.event&&window.event.stopPropagation)window.event.stopPropagation();
-  const save=async v=>{t.due=v;if(!v)t.dueTime='';renderTodos();await saveData();};
-  if(openDatePicker(t.due,save))return;
-  const val=prompt('Due date (YYYY-MM-DD), blank to clear:',t.due||'');
-  if(val===null)return;const v=val.trim();
-  if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v)){alert('Use format YYYY-MM-DD');return;}
-  save(v);
+  openDatePicker(t.due||'',async v=>{t.due=v;if(!v)t.dueTime='';renderTodos();await saveData();},'Task due');
 };
-// Any date field in the app: clicking anywhere on it opens the calendar (not just the small icon)
-document.addEventListener('click',e=>{
-  const el=e.target;
-  if(el&&el.tagName==='INPUT'&&el.type==='date'&&el.style.opacity!=='0'&&typeof el.showPicker==='function'){
-    try{el.showPicker();}catch(_){}
-  }
-});
+// Normal date fields keep the browser's built-in behaviour: type the day/month/year, or click the 📅 icon for the calendar.
 window.toggleTodo=async function(id){
   const t=state.todos.find(t=>t.id===id);
   if(!t)return;
@@ -5977,6 +6003,7 @@ function lfForm(title,fields,values,onSave){
     let inp;
     if(f.type==='select')inp='<select id="lff_'+f.k+'">'+f.opts.map(o=>{const ov=Array.isArray(o)?o[0]:o,ol=Array.isArray(o)?o[1]:o;return '<option value="'+lfE(ov)+'"'+(String(ov)===String(v)?' selected':'')+'>'+lfE(ol)+'</option>';}).join('')+'</select>';
     else if(f.type==='textarea')inp='<textarea id="lff_'+f.k+'" placeholder="'+lfE(f.ph||'')+'">'+lfE(v)+'</textarea>';
+    else if(f.type==='date'){const dv=v?String(v).split('-').reverse().join('/'):'';inp='<div class="dp-row"><input class="dp-in" id="lff_'+f.k+'" data-date="1" value="'+lfE(dv)+'" placeholder="15/11/2026 · 15 Nov · fri" oninput="lfDatePrev(this)"><button type="button" class="dp-cal" title="Pick from calendar">📅<input type="date" tabindex="-1" value="'+lfE(v||'')+'" onclick="try{this.showPicker()}catch(e){}" onchange="const t=document.getElementById(\'lff_'+f.k+'\');t.value=this.value.split(\'-\').reverse().join(\'/\');lfDatePrev(t)"></button></div><div class="dp-prev" id="lffp_'+f.k+'">'+(v?'→ '+dpNice(v):'')+'</div>';}
     else inp='<input id="lff_'+f.k+'" type="'+(f.type||'text')+'" value="'+lfE(v)+'" placeholder="'+lfE(f.ph||'')+'"'+(f.type==='number'?' step="any"':'')+'>';
     return '<div class="field"'+(f.half?' data-half="1"':'')+'><label>'+lfE(f.label)+(f.req?' <span style="color:var(--red)">*</span>':'')+'</label>'+inp+(f.hint?'<div class="lf-muted" style="margin-top:3px">'+lfE(f.hint)+'</div>':'')+'</div>';
   }).join('');
@@ -5987,6 +6014,7 @@ function lfForm(title,fields,values,onSave){
       const el=document.getElementById('lff_'+f.k);let v=el?el.value:'';
       if(typeof v==='string')v=v.trim();
       if(f.type==='number')v=v===''?null:Number(v);
+      if(f.type==='date'){const pv=dpParse(v);if(pv===null){el.focus();el.style.borderColor='var(--red)';return;}v=pv;}
       if(f.req&&(v===''||v==null)){el.focus();el.style.borderColor='var(--red)';return;}
       out[f.k]=v;
     }
@@ -6003,6 +6031,7 @@ function lfForm(title,fields,values,onSave){
   ov.onclick=e=>{if(e.target===ov)ov.classList.remove('open');};
   ov.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();if(_lfSave)_lfSave();}});
 })();
+window.lfDatePrev=function(el){const p=document.getElementById(el.id.replace('lff_','lffp_'));const v=dpParse(el.value);if(!p)return;if(v===''){p.textContent='';p.classList.remove('bad');}else if(v){p.textContent='→ '+dpNice(v);p.classList.remove('bad');el.style.borderColor='';}else{p.textContent='Not a date I recognise';p.classList.add('bad');}};
 function lfDel(arr,id,label,page){if(!confirm('Delete '+(label||'this item')+'?'))return;const i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1);lfCommit(page);}
 function lfUpsert(arr,obj,page){if(obj.id){const i=arr.findIndex(x=>x.id===obj.id);if(i>=0)arr[i]=Object.assign(arr[i],obj);else arr.push(obj);}else{obj.id=lfId();arr.push(obj);}lfCommit(page);}
 function lfHead(title,sub,btns){return '<div class="lf-head"><div><div class="lf-h1">'+title+'</div><div class="lf-h2">'+sub+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap">'+(btns||'')+'</div></div>';}
@@ -6363,7 +6392,7 @@ function dcRender(){
 /* Family */
 function faPerson(id){const r=id?state.family.people.find(x=>x.id===id):null;
   lfForm(r?'Edit person':'Add person',[
-    {k:'name',label:'Name',req:true},{k:'rel',label:'Relationship',ph:'e.g. Son, Wife, Mum'},
+    {k:'name',label:'Name',req:true},{k:'rel',label:'Relationship',type:'select',opts:['Wife','Husband','Son','Daughter','Mother','Father','Sibling','In-law','Grandparent','Friend','Other'],def:'Son'},
     {k:'bday',label:'Birthday',type:'date'},{k:'notes',label:'Notes',type:'textarea',ph:'Sizes, likes, gift ideas, medical notes…'}
   ],r,o=>{if(r)o.id=r.id;lfUpsert(state.family.people,o,'family');});}
 function faEvent(id){const r=id?state.family.events.find(x=>x.id===id):null;
@@ -6378,17 +6407,18 @@ function faEvent(id){const r=id?state.family.events.find(x=>x.id===id):null;
 window.faPerson=faPerson;window.faEvent=faEvent;
 function faAge(bday){if(!bday)return '';const b=lfParse(bday),t=new Date();let m=(t.getFullYear()-b.getFullYear())*12+(t.getMonth()-b.getMonth());if(t.getDate()<b.getDate())m--;if(m<0)return '';return m<36?Math.floor(m/12)+'y '+(m%12)+'m':Math.floor(m/12)+' yrs';}
 function faRender(){
-  const F=state.family;
-  let h=lfHead('👨‍👩‍👦 Family','People, birthdays, appointments and milestones',lfBtn('+ Person','faPerson()')+lfBtn('+ Event','faEvent()'));
-  const up=lfInboxItems(60).filter(i=>i.go==='family');
-  h+='<div class="panel"><div class="ph"><div class="pt">🗓 Next 60 days</div></div>'+(up.length?up.map(lfInboxRow).join(''):'<div class="empty">Nothing coming up.</div>')+'</div>';
-  h+='<div class="panel"><div class="ph"><div class="pt">👪 People</div></div>'+(F.people.length?F.people.map(p=>{const nb=p.bday?lfNextYearly(p.bday):null;return '<div class="lf-row"><span class="lf-ic">🙂</span><div class="lf-main"><div class="lf-title">'+lfE(p.name)+(p.rel?' <span class="lf-muted">· '+lfE(p.rel)+'</span>':'')+'</div><div class="lf-sub">'+(p.bday?'Born '+lfFmtDate(p.bday)+' · '+faAge(p.bday):'No birthday set')+'</div>'+(p.notes?'<div class="lf-note">'+lfE(p.notes)+'</div>':'')+'</div>'+(nb?lfWhen(nb,14):'')+'<button class="lf-act" onclick="faPerson(\''+p.id+'\')">✎</button><button class="lf-act red" onclick="lfDel(state.family.people,\''+p.id+'\',\''+lfE(p.name).replace(/'/g,'')+'\',\'family\')">✕</button></div>';}).join(''):'<div class="empty">Add your son, wife, mum — birthdays then show on Today.</div>')+'</div>';
-  const past=F.events.filter(e=>e.date&&e.date<=todayStr()&&e.repeat!=='yearly').sort((a,b)=>b.date.localeCompare(a.date));
-  const yearly=F.events.filter(e=>e.repeat==='yearly');
-  h+='<div class="panel"><div class="ph"><div class="pt">📖 Milestones & history</div></div>'+(past.length||yearly.length?(yearly.length?'<div class="lf-group">Every year</div>'+yearly.map(e=>faEvRow(e,true)).join(''):'')+(past.length?'<div class="lf-group">Log</div>'+past.map(e=>faEvRow(e,false)).join(''):''):'<div class="empty">Log milestones — first words, school, trips, check-ups.</div>')+'</div>';
+  const F=state.family,t=todayStr();
+  let h=lfHead('👨‍👩‍👦 Family','People, birthdays, appointments and milestones — tap ✎ to edit any item',lfBtn('+ Person','faPerson()')+lfBtn('+ Event','faEvent()'));
+  h+='<div class="panel"><div class="ph"><div class="pt">👪 People ('+F.people.length+')</div><button class="add-btn" onclick="faPerson()">+ Add person</button></div>'+(F.people.length?F.people.map(p=>{const nb=p.bday?lfNextYearly(p.bday):null;return '<div class="lf-row"><span class="lf-ic">🙂</span><div class="lf-main"><div class="lf-title">'+lfE(p.name)+(p.rel?' <span class="lf-muted">· '+lfE(p.rel)+'</span>':'')+'</div><div class="lf-sub">'+(p.bday?'Born '+lfFmtDate(p.bday)+' · '+faAge(p.bday)+' · next birthday '+lfFmtDate(nb):'No birthday set — tap ✎ to add')+'</div>'+(p.notes?'<div class="lf-note">'+lfE(p.notes)+'</div>':'')+'</div>'+(nb?lfWhen(nb,14):'')+(nb?gcal(p.name+"'s birthday",nb,'',true):'')+'<button class="lf-act" onclick="faPerson(\''+p.id+'\')" title="Edit">✎</button><button class="lf-act red" onclick="lfDel(state.family.people,\''+p.id+'\',\''+lfE(p.name).replace(/'/g,'')+'\',\'family\')" title="Delete">✕</button></div>';}).join(''):'<div class="empty">No one added yet. Tap “+ Add person” for your wife, son and parents — birthdays then show on Today.</div>')+'</div>';
+  const upcoming=F.events.filter(e=>e.repeat!=='yearly'&&e.date&&e.date>=t).sort((a,b)=>a.date.localeCompare(b.date));
+  const yearly=F.events.filter(e=>e.repeat==='yearly').sort((a,b)=>lfNextYearly(a.date).localeCompare(lfNextYearly(b.date)));
+  const past=F.events.filter(e=>e.repeat!=='yearly'&&e.date&&e.date<t).sort((a,b)=>b.date.localeCompare(a.date));
+  h+='<div class="panel"><div class="ph"><div class="pt">🗓 Upcoming events ('+upcoming.length+')</div><button class="add-btn" onclick="faEvent()">+ Add event</button></div>'+(upcoming.length?upcoming.map(e=>faEvRow(e,false,true)).join(''):'<div class="empty">No upcoming events — appointments, trips home, school dates.</div>')+'</div>';
+  if(yearly.length)h+='<div class="panel"><div class="ph"><div class="pt">🔁 Every year ('+yearly.length+')</div></div>'+yearly.map(e=>faEvRow(e,true,true)).join('')+'</div>';
+  h+='<div class="panel"><div class="ph"><div class="pt">📖 Milestones & history ('+past.length+')</div></div>'+(past.length?past.map(e=>faEvRow(e,false,false)).join(''):'<div class="empty">Past events and milestones appear here — first words, school, check-ups.</div>')+'</div>';
   return h;
 }
-function faEvRow(e,yearly){return '<div class="lf-row"><span class="lf-ic">'+(e.type==='Appointment'?'🩺':e.type==='Anniversary'?'💍':'⭐')+'</span><div class="lf-main"><div class="lf-title">'+lfE(e.title)+'</div><div class="lf-sub">'+lfFmtDate(e.date)+[e.type,e.person].filter(Boolean).map(x=>' · '+lfE(x)).join('')+'</div>'+(e.notes?'<div class="lf-note">'+lfE(e.notes)+'</div>':'')+'</div>'+(yearly?lfWhen(lfNextYearly(e.date),14):'')+'<button class="lf-act" onclick="faEvent(\''+e.id+'\')">✎</button><button class="lf-act red" onclick="lfDel(state.family.events,\''+e.id+'\',\'this event\',\'family\')">✕</button></div>';}
+function faEvRow(e,yearly,future){const d=yearly?lfNextYearly(e.date):e.date;return '<div class="lf-row"><span class="lf-ic">'+(e.type==='Appointment'?'🩺':e.type==='Anniversary'?'💍':e.type==='Visit / call'?'🏠':'⭐')+'</span><div class="lf-main"><div class="lf-title">'+lfE(e.title)+'</div><div class="lf-sub">'+lfFmtDate(yearly?d:e.date)+[e.type,e.person].filter(Boolean).map(x=>' · '+lfE(x)).join('')+'</div>'+(e.notes?'<div class="lf-note">'+lfE(e.notes)+'</div>':'')+'</div>'+(future?lfWhen(d,14)+gcal(e.title,d,e.notes||'',yearly):'')+'<button class="lf-act" onclick="faEvent(\''+e.id+'\')" title="Edit">✎</button><button class="lf-act red" onclick="lfDel(state.family.events,\''+e.id+'\',\'this event\',\'family\')" title="Delete">✕</button></div>';}
 
 /* Critical Path */
 function cpForm(id){const r=id?state.cpath.find(x=>x.id===id):null;
