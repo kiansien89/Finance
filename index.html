@@ -887,6 +887,70 @@ body.lf-privacy #page-finance:hover,body.lf-privacy #page-trading:hover,body.lf-
   .lf-eye{padding:6px 9px}
 }
 </style>
+<style id="plan-css">
+.pl-panel{margin-bottom:1rem}
+.pl-step{font-size:0.62rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--t3);margin:4px 0 6px}
+.pl-row,.pl-tl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06)}
+.pl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pl-main{flex:1;min-width:0}
+.pl-ttl{font-size:0.82rem;font-weight:700;color:var(--t1);overflow-wrap:anywhere;cursor:default}
+.pl-tl .pl-ttl[onclick]{cursor:pointer}
+.pl-par{color:var(--t4);font-weight:600;font-size:0.68rem}
+.pl-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px;align-items:center}
+.pl-tag{font-size:0.6rem;font-weight:800;padding:1px 7px;border-radius:20px;background:rgba(0,0,0,0.05);color:var(--t3)}
+.pl-tag.over{background:var(--red-light);color:var(--red)}
+.pl-tag.fix{background:var(--blue-light);color:var(--blue)}
+.pl-seg{display:flex;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;overflow:hidden;flex-shrink:0}
+.pl-segb{border:none;background:none;padding:4px 8px;font-size:0.66rem;font-weight:800;color:var(--t4);cursor:pointer;font-family:var(--sans)}
+.pl-segb+.pl-segb{border-left:1px solid rgba(0,0,0,0.08)}
+.pl-segb.on.high{background:#BF0000;color:#fff}.pl-segb.on.medium{background:#C06000;color:#fff}.pl-segb.on.low{background:#0A7A5A;color:#fff}
+.pl-est{border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:4px 6px;font-size:0.7rem;font-weight:800;color:var(--t1);background:var(--glass);font-family:var(--sans);flex-shrink:0}
+.pl-est.unset{color:var(--t4);border-style:dashed}
+.pl-add{display:flex;gap:6px;margin-top:8px;align-items:center}
+.pl-add input{flex:1;min-width:0;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:7px 10px;font-size:0.78rem;font-weight:600;font-family:var(--sans)}
+.pl-pull{flex:1;min-width:0;border:1.5px dashed rgba(0,0,0,0.15);border-radius:8px;padding:7px 8px;font-size:0.74rem;font-weight:700;color:var(--t3);background:var(--glass);font-family:var(--sans)}
+.pl-ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.pl-ctl label{font-size:0.7rem;font-weight:800;color:var(--t3);display:flex;align-items:center;gap:5px}
+.pl-ctl input{border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:6px 8px;font-size:0.76rem;font-weight:700;font-family:var(--sans)}
+.pl-go{padding:9px 16px;margin-left:auto}
+.pl-fitrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.pl-fit{font-size:0.7rem;font-weight:800;padding:3px 9px;border-radius:20px}
+.pl-fit.ok{background:var(--green-light);color:var(--green)}.pl-fit.warn{background:var(--amber-light);color:var(--amber)}.pl-fit.bad{background:var(--red-light);color:var(--red)}
+.pl-sum{font-size:0.76rem;color:var(--t2);font-weight:600;margin-bottom:6px}
+.pl-hint{font-size:0.72rem;font-weight:700;color:var(--amber);background:var(--amber-light);border-radius:8px;padding:6px 10px;margin-bottom:6px}
+.pl-hint a,.pl-home a{cursor:pointer;text-decoration:underline}
+.pl-win{font-size:0.78rem;font-weight:800;color:var(--green);background:var(--green-light);border-radius:8px;padding:8px 10px;margin-bottom:6px}
+.pl-time{font-family:var(--mono);font-size:0.72rem;font-weight:800;color:var(--t3);width:84px;flex-shrink:0}
+.pl-dur{font-size:0.6rem;font-weight:800;color:var(--t4)}
+.pl-tl.now{background:var(--red-light);border-radius:10px;padding:8px;border-bottom-color:transparent;margin:2px 0}
+.pl-tl.now .pl-time{color:var(--red)}
+.pl-tl.done .pl-ttl{text-decoration:line-through;color:var(--t4)}
+.pl-tl.done .pl-time{color:var(--t4)}
+.pl-tl.brk{padding:4px 0}.pl-brk{font-size:0.7rem;font-weight:700;color:var(--t4)}
+.pl-tl.past{opacity:0.5}
+.pl-st{font-size:0.6rem;font-weight:800;padding:1px 7px;border-radius:20px}
+.pl-st.now{background:var(--red);color:#fff}.pl-st.next{background:var(--blue-light);color:var(--blue)}.pl-st.late{background:var(--amber-light);color:var(--amber)}.pl-st.ok{background:var(--green-light);color:var(--green)}
+.pl-ck{width:24px;height:24px;border-radius:7px;border:2px solid rgba(0,0,0,0.2);background:none;cursor:pointer;flex-shrink:0;color:#fff;font-weight:900;font-size:0.8rem;line-height:1}
+.pl-ck:hover{border-color:var(--green)}.pl-ck.on{background:var(--green);border-color:var(--green)}
+.pl-over{margin-top:10px;border:1.5px dashed rgba(191,0,0,0.3);border-radius:10px;padding:8px 10px}
+.pl-over-h{font-size:0.66rem;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.pl-ov-row{display:flex;gap:6px;align-items:center;font-size:0.78rem;font-weight:700;padding:3px 0}
+.pl-ov-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.pl-foot{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pl-home{display:flex;align-items:center;gap:10px;background:var(--red-light);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.pl-home.done{background:var(--green-light)}.pl-home.late{background:var(--amber-light)}
+.pl-home-l{flex:1;min-width:0}
+.pl-home-k{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--red)}
+.pl-home.done .pl-home-k{color:var(--green)}.pl-home.late .pl-home-k{color:var(--amber)}
+.pl-home-t{font-size:0.86rem;font-weight:800;color:var(--t1);overflow-wrap:anywhere}
+@media(max-width:600px){
+  .pl-row{flex-wrap:wrap}
+  .pl-row .pl-main{flex-basis:calc(100% - 20px)}
+  .pl-row .pl-seg{margin-left:16px}
+  .pl-time{width:76px;font-size:0.68rem}
+  .pl-go{margin-left:0;width:100%}
+}
+</style>
 <style id="money-css">
 .mn-undo{position:fixed;left:50%;bottom:22px;transform:translate(-50%,140px);opacity:0;pointer-events:none;background:#1A1A1A;color:#fff;border-radius:12px;padding:9px 10px 9px 16px;display:flex;align-items:center;gap:14px;font-weight:800;font-size:0.8rem;z-index:950;transition:all .25s;box-shadow:var(--shadow2)}
 .mn-undo.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
@@ -1264,6 +1328,8 @@ i.rp-in{background:var(--green)}i.rp-out{background:var(--red)}
         <input class="todo-quick-input" type="text" id="quickTaskInput" placeholder="Quick add — type a task and press Enter...">
         <button class="btn btn-red" id="openTaskModal">+ Full add</button>
       </div>
+
+      <div id="dpPlanWrap"></div>
 
       <div class="todo-filters">
         <button class="todo-filter active" onclick="setTodoFilter('all',this)">All</button>
@@ -2338,7 +2404,7 @@ async function loadData(){
     state.runwayThreshold=p.runwayThreshold||3;
     state.baziCharts=Array.isArray(p.baziCharts)?p.baziCharts:[]; // was never reloaded → saved charts vanished after refresh
     ['renewals','docs','cpath','carhome','trips','recurring'].forEach(k=>{state[k]=Array.isArray(p[k])?p[k]:[];});
-    state.family=p.family||{people:[],events:[]};state.career=p.career||{wins:[],vesting:[]};state.quotes=p.quotes||{custom:[],pinned:null};state.cpathSeeded=!!p.cpathSeeded;
+    state.family=p.family||{people:[],events:[]};state.career=p.career||{wins:[],vesting:[]};state.quotes=p.quotes||{custom:[],pinned:null};state.cpathSeeded=!!p.cpathSeeded;state.dayPlan=p.dayPlan||null;state.planPrefs=p.planPrefs||null;
     try{if(window.lifeNormalize)lifeNormalize();}catch(e){console.error('lifeNormalize',e);}
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
@@ -4368,7 +4434,8 @@ document.getElementById('saveTask').onclick=async function(){
   const title=document.getElementById('taskTitle').value.trim();
   if(!title){alert('Please enter a task title.');return;}
   const task={id:editTaskId||Date.now(),title,note:document.getElementById('taskNote').value.trim(),category:document.getElementById('taskCat').value,priority:document.getElementById('taskPriority').value,due:document.getElementById('taskDue').value,dueTime:document.getElementById('taskDueTime').value,recur:document.getElementById('taskRecur').value,done:false,doneAt:null};
-  if(editTaskId){const idx=state.todos.findIndex(t=>t.id===editTaskId);if(idx>=0){task.done=state.todos[idx].done;task.doneAt=state.todos[idx].doneAt;task.subtasks=state.todos[idx].subtasks;state.todos[idx]=task;}}
+  const _estEl=document.getElementById('taskEst');const _est=_estEl?Number(_estEl.value)||0:0;if(_est)task.est=_est;
+  if(editTaskId){const idx=state.todos.findIndex(t=>t.id===editTaskId);if(idx>=0){const o=state.todos[idx];task.done=o.done;task.doneAt=o.doneAt;task.subtasks=o.subtasks;const m=Object.assign({},o,task);if(!_est)delete m.est;state.todos[idx]=m;}}
   else{state.todos.unshift(task);}
   taskOv.classList.remove('open');renderTodos();await saveData();
 };
@@ -7116,5 +7183,221 @@ function scAvgSavings(){ // average (income − expense) over the last 3 complet
   return n?Math.round(tot/n):null;
 }
 
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   PLAN MY DAY — set urgency + time needed, one click builds a timed plan
+   Order: urgency (High → Medium → Low); within the same urgency:
+   missed fixed time → oldest due date → shorter task first.
+   Tasks with a due time today are fixed appointments. Small tasks may fill a
+   gap before an appointment. 5-min buffer; 15-min break after ~90 min of work.
+   ═══════════════════════════════════════════════════════════════ */
+const PL_PRI={high:0,medium:1,low:2};
+const PL_EST=[[15,'15m'],[30,'30m'],[45,'45m'],[60,'1h'],[90,'1.5h'],[120,'2h'],[180,'3h'],[240,'4h']];
+const PL_DEF=30;
+let plFrom='',plEditOpen=false;
+function plPrefs(){if(!state.planPrefs||typeof state.planPrefs!=='object')state.planPrefs={};const p=state.planPrefs;if(!p.end)p.end='18:00';if(p.buffer==null)p.buffer=5;if(p.breakEvery==null)p.breakEvery=90;if(p.breakLen==null)p.breakLen=15;return p;}
+function plMin(s){if(!s||typeof s!=='string'||s.indexOf(':')<0)return null;const a=s.split(':').map(Number);return isNaN(a[0])?null:a[0]*60+(a[1]||0);}
+function plHM(m){m=Math.max(0,Math.round(m));return String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+function plDur(m){m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(h+'h'+(r?' '+r+'m':'')):r+'m';}
+function plNow(){const d=new Date();return d.getHours()*60+d.getMinutes();}
+function plEst(it){return Number(it.est)||PL_DEF;}
+function plToday(){const p=state.dayPlan;return p&&p.date===todayStr()?p:null;}
+
+/* every open task / dated sub-task due today or overdue */
+function plItems(){
+  const tod=todayStr(),out=[];
+  (state.todos||[]).forEach(t=>{
+    if(t.done)return;
+    if(t.due&&t.due<=tod)out.push({key:'t'+t.id,kind:'task',id:t.id,title:t.title,priority:t.priority||'medium',due:t.due,time:t.due===tod?(t.dueTime||''):(t.dueTime||''),today:t.due===tod,est:Number(t.est)||0});
+    else(t.subtasks||[]).forEach((s,si)=>{if(!s.done&&s.due&&s.due<=tod)out.push({key:'s'+t.id+'_'+si,kind:'subtask',tid:t.id,si,title:s.title,parent:t.title,priority:t.priority||'medium',due:s.due,time:'',today:s.due===tod,est:Number(s.est)||0});});
+  });
+  return out;
+}
+function plResolve(key){
+  if(key[0]==='t'){const id=Number(key.slice(1));const t=(state.todos||[]).find(x=>x.id===id);return t?{kind:'task',id,obj:t,title:t.title,priority:t.priority||'medium',done:!!t.done,est:Number(t.est)||0}:null;}
+  const m=key.slice(1).split('_');const tid=Number(m[0]),si=Number(m[1]);const t=(state.todos||[]).find(x=>x.id===tid);const s=t&&t.subtasks&&t.subtasks[si];
+  return s?{kind:'subtask',tid,si,obj:s,title:s.title,parent:t.title,priority:t.priority||'medium',done:!!s.done,est:Number(s.est)||0}:null;
+}
+
+/* the scheduler */
+function plBuild(){
+  const p=plPrefs(),items=plItems();
+  const start=plMin(plFrom)!=null?plMin(plFrom):Math.ceil(plNow()/5)*5;
+  const end=Math.min(plMin(p.end)!=null?plMin(p.end):1080,1439);
+  const fixed=[],flex=[];
+  items.forEach(it=>{const tm=it.today?plMin(it.time):null;if(tm!=null&&tm>=start)fixed.push(Object.assign({},it,{s:tm}));else flex.push(Object.assign({},it,{missed:tm!=null}));});
+  fixed.sort((a,b)=>a.s-b.s);
+  flex.sort((a,b)=>(PL_PRI[a.priority]??1)-(PL_PRI[b.priority]??1)||(b.missed-a.missed)||a.due.localeCompare(b.due)||plEst(a)-plEst(b)||a.key.localeCompare(b.key));
+  const blocks=[],queue=flex.slice(),fq=fixed.slice();let cur=start,run=0;
+  while(queue.length||fq.length){
+    const nf=fq[0],limit=nf?Math.min(nf.s,end):end;
+    const brk=run>=p.breakEvery?p.breakLen:0;
+    const i=queue.findIndex(it=>cur+brk+plEst(it)<=limit);
+    if(i>=0){
+      if(brk){blocks.push({kind:'break',s:cur,e:cur+brk});cur+=brk;run=0;}
+      const it=queue.splice(i,1)[0],d=plEst(it);
+      blocks.push({kind:'work',key:it.key,s:cur,e:cur+d,missed:it.missed||undefined});
+      cur+=d+p.buffer;run+=d+p.buffer;continue;
+    }
+    if(nf){
+      fq.shift();const d=plEst(nf);
+      if(nf.s-cur>=p.breakLen)run=0;
+      blocks.push({kind:'work',key:nf.key,s:nf.s,e:nf.s+d,fixed:true,conflict:cur>nf.s+0.5||undefined});
+      cur=Math.max(cur,nf.s+d+p.buffer);run+=d+p.buffer;continue;
+    }
+    break;
+  }
+  const need=items.reduce((s,it)=>s+plEst(it),0);
+  state.dayPlan={date:todayStr(),made:new Date().toISOString(),start,end,blocks,overflow:queue.map(it=>it.key),need};
+  plEditOpen=false;
+  return state.dayPlan;
+}
+window.plRun=async function(){
+  const items=plItems();
+  if(!items.length){lfToast('Nothing due today — add or pull in a task first');return;}
+  const pl=plBuild();
+  plRenderAll();
+  const n=pl.blocks.filter(b=>b.kind==='work').length;
+  lfToast(pl.overflow.length?('⚡ '+n+' planned · '+pl.overflow.length+' don’t fit'):('⚡ Planned '+n+' tasks · done by '+plHM(plLastEnd(pl))));
+  await saveData();
+};
+function plLastEnd(pl){const w=pl.blocks.filter(b=>b.kind==='work');return w.length?Math.max(...w.map(b=>b.e)):pl.start;}
+window.plClear=async function(){const snap=JSON.stringify(state.dayPlan||null);state.dayPlan=null;plRenderAll();mnUndo('Plan cleared',async()=>{state.dayPlan=JSON.parse(snap);plRenderAll();await saveData();});await saveData();};
+
+/* planning inputs */
+window.plSetPri=async function(key,v){const r=plResolve(key);if(!r)return;if(r.kind==='task')r.obj.priority=v;else{const t=state.todos.find(x=>x.id===r.tid);if(t)t.priority=v;}plRenderAll();try{renderTodosOrig();}catch(e){}await saveData();};
+window.plSetEst=async function(key,v){const r=plResolve(key);if(!r)return;const n=Number(v)||0;if(n)r.obj.est=n;else delete r.obj.est;plRenderAll();await saveData();};
+window.plSetEnd=async function(v){if(!plMin(v))return;plPrefs().end=v;plRenderAll();await saveData();};
+window.plSetFrom=function(v){plFrom=v||'';plRenderAll();};
+window.plToggleEdit=function(){plEditOpen=!plEditOpen;plRenderAll();};
+window.plQuickAdd=async function(){
+  const inp=document.getElementById('plAddTitle'),es=document.getElementById('plAddEst');if(!inp)return;
+  const title=inp.value.trim();if(!title){inp.focus();return;}
+  const t={id:Date.now(),title,note:'',category:'Work',priority:document.getElementById('plAddPri').value||'medium',due:todayStr(),dueTime:'',recur:'none',done:false,doneAt:null,subtasks:[]};
+  const n=Number(es&&es.value)||0;if(n)t.est=n;
+  state.todos.unshift(t);inp.value='';plRenderAll();try{renderTodosOrig();}catch(e){}
+  setTimeout(()=>{const i=document.getElementById('plAddTitle');if(i)i.focus();},30);
+  await saveData();
+};
+window.plPull=async function(id){
+  id=Number(id);const t=state.todos.find(x=>x.id===id);if(!t)return;
+  const prev=t.due||'';t.due=todayStr();
+  plRenderAll();try{renderTodosOrig();}catch(e){}
+  mnUndo('“'+t.title+'” pulled into today',async()=>{t.due=prev;plRenderAll();try{renderTodosOrig();}catch(e){}await saveData();});
+  await saveData();
+};
+window.plDone=async function(key){
+  const r=plResolve(key);if(!r)return;
+  if(r.kind==='task')await toggleTodo(r.id);else await toggleSubtask(r.tid,r.si);
+  plRenderAll();
+};
+window.plMoveOverflow=async function(){
+  const pl=plToday();if(!pl||!pl.overflow.length)return;
+  const snapT=JSON.stringify(state.todos),snapP=JSON.stringify(state.dayPlan);
+  const tmr=lfAddDays(todayStr(),1);let n=0;
+  pl.overflow.forEach(k=>{const r=plResolve(k);if(r&&!r.done){r.obj.due=tmr;n++;}});
+  pl.overflow=[];plRenderAll();try{renderTodosOrig();}catch(e){}
+  mnUndo(n+' task'+(n!==1?'s':'')+' moved to tomorrow',async()=>{state.todos=JSON.parse(snapT);state.dayPlan=JSON.parse(snapP);plRenderAll();try{renderTodosOrig();}catch(e){}await saveData();});
+  await saveData();
+};
+
+/* rendering */
+const PL_COL={high:'#BF0000',medium:'#C06000',low:'#0A7A5A'};
+function plPriSeg(key,pri){return '<div class="pl-seg">'+[['high','High'],['medium','Med'],['low','Low']].map(([v,l])=>'<button class="pl-segb'+(pri===v?' on '+v:'')+'" onclick="plSetPri(\''+key+'\',\''+v+'\')">'+l+'</button>').join('')+'</div>';}
+function plEstSel(key,est,id){return '<select class="pl-est'+(est?'':' unset')+'"'+(id?' id="'+id+'"':'')+(key?' onchange="plSetEst(\''+key+'\',this.value)"':'')+' title="Time needed"><option value="">'+(key?'⏱ ~30m?':'⏱ time')+'</option>'+PL_EST.map(([v,l])=>'<option value="'+v+'"'+(est===v?' selected':'')+'>⏱ '+l+'</option>').join('')+(est&&!PL_EST.some(x=>x[0]===est)?'<option value="'+est+'" selected>⏱ '+plDur(est)+'</option>':'')+'</select>';}
+function plTitle(r){return lfE(r.title)+(r.kind==='subtask'?' <span class="pl-par">— '+lfE(r.parent)+'</span>':'');}
+
+function plSetupHtml(items){
+  const tod=todayStr();
+  const rows=items.slice().sort((a,b)=>(PL_PRI[a.priority]??1)-(PL_PRI[b.priority]??1)||a.due.localeCompare(b.due)).map(it=>{
+    const r=plResolve(it.key);
+    const tags=(it.due<tod?'<span class="pl-tag over">'+Math.round((lfParse(tod)-lfParse(it.due))/86400000)+'d overdue</span>':'')+(it.today&&it.time?'<span class="pl-tag fix" title="Fixed time — the plan keeps it here">🕒 '+lfE(it.time)+'</span>':'');
+    return '<div class="pl-row"><span class="pl-dot" style="background:'+PL_COL[it.priority]+'"></span><div class="pl-main"><div class="pl-ttl">'+plTitle(r)+'</div>'+(tags?'<div class="pl-tags">'+tags+'</div>':'')+'</div>'+plPriSeg(it.key,it.priority)+plEstSel(it.key,it.est)+'</div>';
+  }).join('');
+  const inKeys=new Set(items.filter(i=>i.kind==='task').map(i=>i.id));
+  const backlog=(state.todos||[]).filter(t=>!t.done&&!inKeys.has(t.id)&&(!t.due||t.due>tod)).sort((a,b)=>(PL_PRI[a.priority]??1)-(PL_PRI[b.priority]??1)||(a.due||'9').localeCompare(b.due||'9')).slice(0,60);
+  return '<div class="pl-step">1 · Set urgency and time needed for each task</div>'
+    +(rows||'<div class="empty" style="padding:10px 0">Nothing due today yet — add one below or pull from your backlog.</div>')
+    +'<div class="pl-add"><input id="plAddTitle" placeholder="Add a task for today…" onkeydown="if(event.key===\'Enter\')plQuickAdd()"><select id="plAddPri" class="pl-est"><option value="high">🔴 High</option><option value="medium" selected>🟠 Med</option><option value="low">🟢 Low</option></select>'+plEstSel('',0,'plAddEst')+'<button class="lf-act" onclick="plQuickAdd()">＋ Add</button></div>'
+    +(backlog.length?'<div class="pl-add"><select class="pl-pull" onchange="if(this.value)plPull(this.value)"><option value="">↥ Pull in a task from your backlog ('+backlog.length+')…</option>'+backlog.map(t=>'<option value="'+t.id+'">'+({high:'🔴 ',medium:'🟠 ',low:'🟢 '}[t.priority]||'')+lfE(t.title)+(t.due?' · due '+lfFmtDate(t.due):' · no date')+'</option>').join('')+'</select></div>':'');
+}
+function plControlsHtml(items){
+  const p=plPrefs();
+  const start=plMin(plFrom)!=null?plMin(plFrom):Math.ceil(plNow()/5)*5,end=Math.min(plMin(p.end),1439);
+  const need=items.reduce((s,it)=>s+plEst(it),0),avail=Math.max(0,end-start);
+  const unset=items.filter(i=>!i.est).length;
+  const fit=!items.length?'':(need<=avail*0.85?'<span class="pl-fit ok">Needs '+plDur(need)+' · '+plDur(avail)+' free ✓</span>':need<=avail?'<span class="pl-fit warn">Needs '+plDur(need)+' · '+plDur(avail)+' free — tight</span>':'<span class="pl-fit bad">Needs '+plDur(need)+' · only '+plDur(avail)+' free — '+plDur(need-avail)+' over</span>');
+  return '<div class="pl-step">2 · One click</div><div class="pl-ctl"><label>From <input type="time" value="'+(plFrom||'')+'" placeholder="now" onchange="plSetFrom(this.value)" title="Blank = start now"></label><label>To <input type="time" value="'+lfE(p.end)+'" onchange="plSetEnd(this.value)"></label><button class="btn btn-red pl-go" onclick="plRun()">⚡ Plan my day</button></div>'
+    +'<div class="pl-fitrow">'+fit+(unset?'<span class="lf-muted">'+unset+' without a time — counted as 30m</span>':'')+(plFrom?'':'<span class="lf-muted">starts '+plHM(start)+' (now)</span>')+'</div>';
+}
+function plTimelineHtml(pl){
+  const now=plNow();let curFound=false;
+  const rows=pl.blocks.map(b=>{
+    if(b.kind==='break')return '<div class="pl-tl brk'+(now>=b.e?' past':'')+'"><span class="pl-time">'+plHM(b.s)+'–'+plHM(b.e)+'</span><span class="pl-brk">☕ Break</span></div>';
+    const r=plResolve(b.key);if(!r)return '';
+    let st='';
+    if(r.done)st=' done';
+    else if(!curFound&&now<b.e){curFound=true;st=now>=b.s?' now':' next';}
+    else if(now>=b.e)st=' late';
+    const badge=r.done?'<span class="pl-st ok">✓ done</span>':st===' now'?'<span class="pl-st now">NOW · '+plDur(b.e-now)+' left</span>':st===' next'?'<span class="pl-st next">NEXT · in '+plDur(b.s-now)+'</span>':st===' late'?'<span class="pl-st late">⏰ '+plDur(now-b.e)+' over</span>':'';
+    const flags=(b.fixed?'<span class="pl-tag fix">🕒 fixed</span>':'')+(b.conflict?'<span class="pl-tag over">⚠ overlaps previous</span>':'')+(b.missed?'<span class="pl-tag over">time passed</span>':'');
+    const click=r.kind==='task'?' onclick="openEditTask('+r.id+')"':'';
+    return '<div class="pl-tl'+st+'"><span class="pl-time">'+plHM(b.s)+'–'+plHM(b.e)+'</span><span class="pl-dot" style="background:'+PL_COL[r.priority]+'"></span><div class="pl-main"><div class="pl-ttl"'+click+'>'+plTitle(r)+'</div><div class="pl-tags"><span class="pl-dur">'+plDur(b.e-b.s)+'</span>'+flags+badge+'</div></div><button class="pl-ck'+(r.done?' on':'')+'" onclick="plDone(\''+b.key+'\')" title="'+(r.done?'Undo':'Mark done')+'">'+(r.done?'✓':'')+'</button></div>';
+  }).join('');
+  const over=pl.overflow.map(k=>plResolve(k)).filter(r=>r&&!r.done);
+  const lateCount=pl.blocks.filter(b=>{if(b.kind!=='work')return false;const r=plResolve(b.key);return r&&!r.done&&now>=b.e;}).length;
+  const workBlocks=pl.blocks.filter(b=>b.kind==='work'),doneN=workBlocks.filter(b=>{const r=plResolve(b.key);return r&&r.done;}).length;
+  const allDone=workBlocks.length&&doneN===workBlocks.length;
+  const pending=plItems().filter(i=>!pl.blocks.some(b=>b.key===i.key)&&!pl.overflow.includes(i.key)).length;
+  return '<div class="pl-sum"><b>'+doneN+'/'+workBlocks.length+'</b> done · finish by <b>'+plHM(plLastEnd(pl))+'</b>'+(lateCount?' · <span style="color:var(--red)">behind schedule</span>':'')+'</div>'
+    +(allDone?'<div class="pl-win">🎉 Plan complete. '+(over.length?'Pull the leftovers in with ↻ Re-plan.':'Nice day.')+'</div>':'')
+    +(lateCount||pending?'<div class="pl-hint">'+(pending?pending+' new task'+(pending!==1?'s':'')+' since this plan. ':'')+(lateCount?'Running late. ':'')+'<a onclick="plRun()">↻ Re-plan from now</a></div>':'')
+    +'<div class="pl-tlwrap">'+rows+'</div>'
+    +(over.length?'<div class="pl-over"><div class="pl-over-h">Doesn’t fit before '+plHM(pl.end)+' ('+over.length+')</div>'+over.map(r=>'<div class="pl-ov-row"><span class="pl-dot" style="background:'+PL_COL[r.priority]+'"></span>'+plTitle(r)+' <span class="pl-dur">'+plDur(r.est||PL_DEF)+'</span></div>').join('')+'<div class="pl-ov-act"><button class="lf-act" onclick="plMoveOverflow()">→ Move these to tomorrow</button><span class="lf-muted">or extend “To” and re-plan</span></div></div>':'');
+}
+function plRender(){
+  const wrap=document.getElementById('dpPlanWrap');if(!wrap)return;
+  const items=plItems(),pl=plToday();
+  const need=items.reduce((s,it)=>s+plEst(it),0);
+  let body='';
+  if(pl&&!plEditOpen){
+    body=plTimelineHtml(pl)+'<div class="pl-foot"><button class="lf-act" onclick="plRun()">↻ Re-plan from now</button><button class="lf-act" onclick="plToggleEdit()">✎ Adjust urgency & time</button><button class="lf-act red" onclick="plClear()">Clear plan</button></div>';
+  }else{
+    body=plSetupHtml(items)+plControlsHtml(items)+(pl?'<div class="pl-foot"><button class="lf-act" onclick="plToggleEdit()">← Back to plan</button></div>':'');
+  }
+  wrap.innerHTML='<div class="panel pl-panel"><div class="ph"><div class="pt">⚡ Today’s plan</div><span class="lf-muted">'+items.length+' due · '+plDur(need)+' of work</span></div>'+body+'</div>';
+}
+
+/* Home: "Do this now" card at the top of Tasks due today */
+function plNowHtml(){
+  const pl=plToday(),items=plItems();
+  if(!pl){return items.length?'<div class="pl-home"><div class="pl-home-l"><div class="pl-home-k">No plan yet</div><div class="pl-home-t">'+items.length+' task'+(items.length!==1?'s':'')+' due · '+plDur(items.reduce((s,i)=>s+plEst(i),0))+'</div></div><button class="btn btn-red pl-go" onclick="plRun().then(()=>{try{renderDashboard();}catch(e){}})">⚡ Plan my day</button></div>':'';}
+  const now=plNow();
+  const b=pl.blocks.find(b=>{if(b.kind!=='work')return false;const r=plResolve(b.key);return r&&!r.done;});
+  if(!b)return '<div class="pl-home done"><div class="pl-home-l"><div class="pl-home-k">Plan complete</div><div class="pl-home-t">🎉 Everything planned is done</div></div><a class="lf-act" onclick="subGo(\'todo\')">Plan →</a></div>';
+  const r=plResolve(b.key);
+  const k=now<b.s?'Next · '+plHM(b.s)+' (in '+plDur(b.s-now)+')':now<b.e?'▶ Do this now · until '+plHM(b.e):'⏰ Running '+plDur(now-b.e)+' over';
+  return '<div class="pl-home'+(now>=b.e?' late':'')+'"><span class="pl-dot" style="background:'+PL_COL[r.priority]+'"></span><div class="pl-home-l"><div class="pl-home-k">'+k+'</div><div class="pl-home-t">'+plTitle(r)+'</div></div><button class="pl-ck" title="Mark done" onclick="plDone(\''+b.key+'\').then(()=>{try{renderDashboard();}catch(e){}})"></button><a class="lf-act" onclick="subGo(\'todo\')">Plan →</a></div>';
+}
+function plRenderHome(){const t=document.getElementById('hmTasks');if(!t)return;let n=document.getElementById('hmNow');if(!n){n=document.createElement('div');n.id='hmNow';t.parentNode.insertBefore(n,t);}n.innerHTML=plNowHtml();}
+function plRenderAll(){try{plRender();}catch(e){console.error('plan',e);}try{plRenderHome();}catch(e){console.error('planHome',e);}}
+
+/* hooks */
+const renderTodosOrig=renderTodos;
+window.renderTodos=function(){const r=renderTodosOrig.apply(this,arguments);try{plRender();}catch(e){console.error('plan',e);}try{plRenderHome();}catch(e){}return r;};
+const _plDash=window.renderDashboard;
+window.renderDashboard=function(){const r=_plDash.apply(this,arguments);try{plRenderHome();}catch(e){console.error('planHome',e);}return r;};
+setInterval(()=>{if(document.hidden)return;const td=document.getElementById('page-todo'),hm=document.getElementById('page-home');const busy=plEditOpen||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#dpPlanWrap'));if(td&&td.offsetParent&&!busy)try{plRender();}catch(e){}if(hm&&hm.offsetParent)try{plRenderHome();}catch(e){}},60000);
+
+/* time needed in the task form */
+(function(){
+  const pr=document.getElementById('taskPriority');if(!pr||document.getElementById('taskEst'))return;
+  const f=document.createElement('div');f.className='field';
+  f.innerHTML='<label>Time needed (for Plan my day)</label><select id="taskEst"><option value="">Not set (~30m)</option>'+PL_EST.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')+'</select>';
+  pr.closest('.field').after(f);
+  const _oe=window.openEditTask;window.openEditTask=function(id){_oe.apply(this,arguments);const t=state.todos.find(x=>x.id===id),s=document.getElementById('taskEst');if(s){const v=t&&t.est?String(t.est):'';if(v&&!s.querySelector('option[value="'+v+'"]'))s.insertAdjacentHTML('beforeend','<option value="'+v+'">'+plDur(Number(v))+'</option>');s.value=v;}};
+  const ob=document.getElementById('openTaskModal');if(ob){const _oc=ob.onclick;ob.onclick=function(){_oc&&_oc.apply(this,arguments);const s=document.getElementById('taskEst');if(s)s.value='';};}
+})();
 </script>
 </body>
