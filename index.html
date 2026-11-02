@@ -2408,7 +2408,7 @@ async function loadData(){
     state.runwayThreshold=p.runwayThreshold||3;
     state.baziCharts=Array.isArray(p.baziCharts)?p.baziCharts:[]; // was never reloaded → saved charts vanished after refresh
     ['renewals','docs','cpath','carhome','trips','recurring'].forEach(k=>{state[k]=Array.isArray(p[k])?p[k]:[];});
-    state.family=p.family||{people:[],events:[]};state.career=p.career||{wins:[],vesting:[]};state.quotes=p.quotes||{custom:[],pinned:null};state.cpathSeeded=!!p.cpathSeeded;state.profileName=p.profileName||'';state.cpathMig2027=!!p.cpathMig2027;state.cpSlips=Array.isArray(p.cpSlips)?p.cpSlips:[];state.dayPlan=p.dayPlan||null;state.planPrefs=p.planPrefs||null;
+    state.family=p.family||{people:[],events:[]};state.career=p.career||{wins:[],vesting:[]};state.quotes=p.quotes||{custom:[],pinned:null};state.cpathSeeded=!!p.cpathSeeded;state.study=p.study||null;state.profileName=p.profileName||'';state.cpathMig2027=!!p.cpathMig2027;state.cpSlips=Array.isArray(p.cpSlips)?p.cpSlips:[];state.dayPlan=p.dayPlan||null;state.planPrefs=p.planPrefs||null;
     try{if(window.lifeNormalize)lifeNormalize();}catch(e){console.error('lifeNormalize',e);}
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
@@ -3576,7 +3576,7 @@ function pomoPopup(msg){
 }
 function pomoComplete(){
   const wasWork=pomoMode==='work';
-  if(wasWork)pomoSessions++;
+  if(wasWork){pomoSessions++;try{if(window.syPomoLog)syPomoLog();}catch(e){}}
   pomoBeep();pomoFlash();
   pomoPopup(wasWork?'\ud83c\udf45 Work session complete! Take a 5-minute break.':'\u2615 Break over \u2014 ready for the next session?');
   pomoMode=wasWork?'rest':'work';
@@ -6208,7 +6208,7 @@ const HUB_OF={home:'today',review:'today',todo:'today',notes:'today',finance:'mo
 let lfLastSub={today:'home',money:'f:overview',growth:'cpath',family:'family',admin:'renewals',well:'health'};
 let lfFinSub='f:overview';
 window.hubGo=function(hub){subGo(lfLastSub[hub]||'home');};
-window.subGo=function(go){
+window.subGo=function(go){try{document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));}catch(e){}
   if(go.startsWith('f:')){
     const t=go.slice(2);lfFinSub=go;lfLastSub.money=go;
     switchAppTab('finance');
@@ -6373,7 +6373,7 @@ function renderDashboard(){
     sc('✅','Tasks today',dueItems.length,overItems.length?overItems.length+' overdue':'all clear',overItems.length?'var(--red)':'var(--t1)'),
     sc('📊','This month','<span class="lf-amt">'+(net>=0?'+':'−')+fmtR(Math.abs(net))+'</span>','<span class="lf-amt">In '+fmtR(mf.inc)+' · Out '+fmtR(mf.exp)+'</span>',net>=0?'var(--green)':'var(--red)'),
     sc('🏦','Net worth','<span class="lf-amt">'+fmtR(nw)+'</span>','assets − liabilities',nw>=0?'var(--t1)':'var(--red)'),
-    sc('🎯','Critical path',nextCp?(lfDays(nextCp.date)>=0?lfDays(nextCp.date)+' days':Math.abs(lfDays(nextCp.date))+'d overdue'):'—',nextCp?lfE(nextCp.title.replace(/^ACCA /,''))+(lfDays(nextCp.date)<0?' · update it':''):(papers.length?passed+'/'+papers.length+' ACCA papers':'Set milestones'),'var(--blue)'),
+    sc('🎯','Critical path',nextCp?(lfDays(nextCp.date)>=0?lfDays(nextCp.date)+' days':Math.abs(lfDays(nextCp.date))+'d overdue'):'—',(window.syPaceLine&&syPaceLine())||(nextCp?lfE(nextCp.title.replace(/^ACCA /,''))+(lfDays(nextCp.date)<0?' · update it':''):(papers.length?passed+'/'+papers.length+' ACCA papers':'Set milestones')),'var(--blue)'),
     '<div class="summary-card" id="fxCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">💱 Currency</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
     '<div class="summary-card nzc"><div class="summary-lbl" style="text-align:left">🇳🇿 New Zealand · <span class="clock-time nzc-clock" data-tz="Pacific/Auckland">--:--</span></div>'
       +'<div class="nzc-w" id="qtWeatherCard"></div><div class="nzc-w" id="chcWeatherCard"></div><div class="nzc-w" id="aklWeatherCard"></div>'
@@ -6520,6 +6520,70 @@ function faRender(){
 }
 function faEvRow(e,yearly,future){const d=yearly?lfNextYearly(e.date):e.date;return '<div class="lf-row"><span class="lf-ic">'+(e.type==='Appointment'?'🩺':e.type==='Anniversary'?'💍':e.type==='Visit / call'?'🏠':'⭐')+'</span><div class="lf-main"><div class="lf-title">'+lfE(e.title)+'</div><div class="lf-sub">'+lfFmtDate(yearly?d:e.date)+[e.type,e.person].filter(Boolean).map(x=>' · '+lfE(x)).join('')+'</div>'+(e.notes?'<div class="lf-note">'+lfE(e.notes)+'</div>':'')+'</div>'+(future?lfWhen(d,14)+gcal(e.title,d,e.notes||'',yearly):'')+'<button class="lf-act" onclick="faEvent(\''+e.id+'\')" title="Edit">✎</button><button class="lf-act red" onclick="lfDel(state.family.events,\''+e.id+'\',\'this event\',\'family\')" title="Delete">✕</button></div>';}
 
+
+/* ───────── ACCA Study Engine ───────── */
+const SY_DEF=[['SBL',300],['SBR',300],['ATX',250]];
+function syMs(code){return (state.cpath||[]).find(c=>new RegExp('\\b'+code).test(c.title));}
+function syInit(){
+  if(!state.study||!Array.isArray(state.study.papers))state.study={papers:[],active:null};
+  SY_DEF.forEach(([code,hrs])=>{if(!state.study.papers.find(x=>x.code===code))state.study.papers.push({code,target:hrs,start:'',logs:[],mocks:[],passed:false});});
+  state.study.papers.forEach(x=>{if(!Array.isArray(x.logs))x.logs=[];if(!Array.isArray(x.mocks))x.mocks=[];});
+}
+function syExam(x){const m=syMs(x.code);return m&&m.date?m.date:(x.exam||'');}
+function syOpen(){return state.study.papers.filter(x=>!x.passed&&syExam(x)&&syExam(x)>=todayStr()).sort((a,b)=>syExam(a).localeCompare(syExam(b)));}
+function syActive(){syInit();const o=syOpen();return o.find(x=>x.code===state.study.active)||o[0]||null;}
+function syStart(x){if(x.start)return x.start;const ps=state.study.papers.slice().sort((a,b)=>(syExam(a)||'9').localeCompare(syExam(b)||'9'));const i=ps.indexOf(x);
+  const prev=i>0?syExam(ps[i-1]):'';const t=todayStr();return prev&&lfAddDays(prev,1)>t?lfAddDays(prev,1):t;}
+function syWeekStart(){const d=lfParse(todayStr());const w=(d.getDay()+6)%7;return lfAddDays(todayStr(),-w);}
+function syStats(x){
+  const t=todayStr(),ex=syExam(x),st=syStart(x);
+  const hrs=x.logs.reduce((a,l)=>a+(Number(l.h)||0),0);
+  const left=Math.max(0,x.target-hrs);
+  const daysLeft=Math.max(0,lfDays(ex));const wksLeft=Math.max(daysLeft/7,1/7);
+  const perWk=left/wksLeft;
+  const span=Math.max(1,(lfParse(ex)-lfParse(st))/86400000);const el=Math.min(span,Math.max(0,(lfParse(t)-lfParse(st))/86400000));
+  const expected=x.target*el/span;const gap=expected-hrs; // +ve = behind
+  const ws=syWeekStart();const wk=x.logs.filter(l=>l.d>=ws&&l.d<=t).reduce((a,l)=>a+(Number(l.h)||0),0);
+  const planWk=x.target/Math.max(1,span/7);
+  const ms=x.mocks.slice().sort((a,b)=>a.d.localeCompare(b.d)).slice(-2);
+  const ready=ms.length===2&&ms.every(m=>Number(m.s)>=50);
+  const started=t>=st;
+  const perWkF=started?perWk:x.target/Math.max(1,span/7);
+  return {hrs,left,daysLeft,perWk:perWkF,gap,wk,planWk,ms,ready,started,st,ex};
+}
+const syH=n=>(Math.round(n*10)/10).toLocaleString('en-MY');
+window.syPaceLine=function(){try{const x=syActive();if(!x)return '';const k=syStats(x);if(!k.started)return x.code+' starts '+lfFmtDate(k.st);
+  return x.code+': '+(k.gap>0.5?syH(k.gap)+'h behind':'on track')+' · '+syH(k.wk)+'/'+syH(k.perWk)+'h this wk';}catch(e){return '';}};
+function syRender(){
+  syInit();const act=syActive();
+  let h='<div class="panel"><div class="ph"><div class="pt">📚 Study engine</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="add-btn" onclick="syLog()">+ Log hours</button><button class="add-btn" onclick="syMock()">+ Mock score</button></div></div>';
+  h+='<div class="lf-muted" style="margin:-2px 0 8px">Pomodoro work sessions log 25 min to <b>'+(act?act.code:'—')+'</b> automatically'+(syOpen().length>1?' · <a href="#" onclick="sySwitch();return false">change</a>':'')+'.</div>';
+  state.study.papers.slice().sort((a,b)=>(syExam(a)||'9').localeCompare(syExam(b)||'9')).forEach(x=>{
+    const ex=syExam(x);
+    if(x.passed){h+='<div class="lf-row"><span class="lf-ic">✅</span><div class="lf-main"><div class="lf-title">'+x.code+' — passed</div></div><button class="lf-act" onclick="syEdit(\''+x.code+'\')">✎</button></div>';return;}
+    if(!ex){h+='<div class="lf-row"><span class="lf-ic">📘</span><div class="lf-main"><div class="lf-title">'+x.code+'</div><div class="lf-sub">No exam date — add a Critical Path milestone containing "'+x.code+'"</div></div><button class="lf-act" onclick="syEdit(\''+x.code+'\')">✎</button></div>';return;}
+    const k=syStats(x);const pct=Math.min(100,Math.round(k.hrs/x.target*100));
+    const status=!k.started?'<span class="lf-when blue">starts '+lfFmtDate(k.st)+'</span>':k.gap>0.5?'<span class="lf-when" style="background:rgba(191,0,0,.12);color:var(--red)">'+syH(k.gap)+'h behind</span>':'<span class="lf-when green">on track</span>';
+    const mock=k.ms.length?' · mocks '+k.ms.map(m=>m.s).join(', ')+(k.ready?' · <b style="color:var(--green)">ready</b>':' · <b style="color:var(--red)">not ready</b>'):' · no mocks yet';
+    h+='<div class="lf-row" style="flex-wrap:wrap;'+(act&&act.code===x.code?'background:rgba(191,0,0,.04);border-radius:10px;':'')+'"><span class="lf-ic">'+(act&&act.code===x.code?'🔥':'📘')+'</span><div class="lf-main" style="min-width:220px"><div class="lf-title">'+x.code+' · exam '+lfFmtDate(ex)+' · '+k.daysLeft+'d</div>'
+      +'<div class="lf-sub">'+syH(k.hrs)+' / '+x.target+'h · need <b>'+syH(k.perWk)+'h/wk</b> · this week '+syH(k.wk)+'h'+mock+'</div>'
+      +'<div class="cp-prog" style="margin-top:6px"><div class="cp-fill" style="width:'+pct+'%"></div></div>'
+      +(k.started&&k.gap>0.5?'<div class="lf-note">Fix before you delay: add '+syH(k.gap/Math.max(1,Math.min(4,k.daysLeft/7)))+'h/wk for the next '+Math.max(1,Math.min(4,Math.round(k.daysLeft/7)))+' wks to catch up.</div>':'')
+      +'</div>'+status+'<button class="lf-act" title="Edit target / start / passed" onclick="syEdit(\''+x.code+'\')">✎</button></div>';
+  });
+  const recent=[];state.study.papers.forEach(x=>x.logs.forEach((l,i)=>recent.push({c:x.code,i,...l})));
+  recent.sort((a,b)=>(b.d+b.ts).localeCompare(a.d+a.ts));
+  if(recent.length)h+='<div class="lf-muted" style="margin:10px 0 4px">Recent sessions</div>'+recent.slice(0,5).map(l=>'<div class="lf-row" style="padding:4px 0"><div class="lf-main"><div class="lf-sub">'+lfFmtDate(l.d)+' · '+l.c+' · '+syH(l.h)+'h'+(l.n?' · '+lfE(l.n):'')+'</div></div><button class="lf-act red" onclick="syDelLog(\''+l.c+'\','+l.i+')">✕</button></div>').join('');
+  return h+'</div>';
+}
+function syPaperOpts(){return state.study.papers.filter(x=>!x.passed).map(x=>x.code);}
+window.syLog=function(){syInit();const a=syActive();lfForm('Log study hours',[{k:'c',label:'Paper',type:'select',opts:syPaperOpts(),def:a?a.code:''},{k:'d',label:'Date',type:'date',req:true,def:todayStr()},{k:'h',label:'Hours',type:'number',req:true,def:1},{k:'n',label:'Topic / note',ph:'e.g. Group accounting Q2'}],null,o=>{const x=state.study.papers.find(p=>p.code===o.c);if(!x||!(Number(o.h)>0))return;x.logs.push({d:o.d,h:Number(o.h),n:o.n||'',ts:String(Date.now())});lfCommit('cpath');});};
+window.syMock=function(){syInit();const a=syActive();lfForm('Mock exam score',[{k:'c',label:'Paper',type:'select',opts:syPaperOpts(),def:a?a.code:''},{k:'d',label:'Date',type:'date',req:true,def:todayStr()},{k:'s',label:'Score (out of 100)',type:'number',req:true}],null,o=>{const x=state.study.papers.find(p=>p.code===o.c);if(!x)return;x.mocks.push({d:o.d,s:Number(o.s)});lfCommit('cpath');});};
+window.syEdit=function(code){const x=state.study.papers.find(p=>p.code===code);if(!x)return;lfForm('Study plan · '+code,[{k:'target',label:'Target study hours',type:'number',req:true,def:x.target,hint:'Typical: 250–350h per professional paper'},{k:'start',label:'Study start date',type:'date',hint:'Blank = today, or the day after the previous exam'},{k:'passed',label:'Status',type:'select',opts:[['no','Studying'],['yes','Passed']],def:x.passed?'yes':'no'}],{target:x.target,start:x.start,passed:x.passed?'yes':'no'},o=>{x.target=Number(o.target)||x.target;x.start=o.start||'';x.passed=o.passed==='yes';lfCommit('cpath');});};
+window.sySwitch=function(){const o=syOpen().map(x=>x.code);lfForm('Pomodoro counts toward',[{k:'c',label:'Paper',type:'select',opts:o,def:(syActive()||{}).code}],null,r=>{state.study.active=r.c;lfCommit('cpath');});};
+window.syDelLog=function(c,i){const x=state.study.papers.find(p=>p.code===c);if(!x)return;if(!confirm('Delete this session?'))return;x.logs.splice(i,1);lfCommit('cpath');};
+window.syPomoLog=function(){try{const x=syActive();if(!x)return;x.logs.push({d:todayStr(),h:POMO_WORK/3600,n:'Pomodoro',ts:String(Date.now())});saveData();if(window.lfToast)lfToast('+25 min to '+x.code);}catch(e){console.error(e);}};
+
 /* Critical Path */
 function cpForm(id){const r=id?state.cpath.find(x=>x.id===id):null;
   lfForm(r?'Edit milestone':'Add milestone',[
@@ -6547,6 +6611,7 @@ function cpRender(){
   const done=list.filter(c=>c.status==='Done').length;
   const next=list.find(c=>c.status!=='Done');
   let h=lfHead('🎯 Critical Path','ACCA → NZ relocation · the sequence everything else is checked against',lfBtn('+ Milestone','cpForm()'));
+  try{h+=syRender();}catch(e){console.error('study',e);}
   h+='<div class="panel"><div class="ph"><div class="pt">Progress · '+done+' of '+list.length+' done</div>'+(next?'<span class="lf-when blue">Next: '+lfE(next.title)+'</span>':'')+'</div><div class="cp-prog"><div class="cp-fill" style="width:'+(list.length?Math.round(done/list.length*100):0)+'%"></div></div>';
   if(list.length>1){const f=list[0].date,l=list[list.length-1].date;if(f&&l)h+='<div class="lf-muted">'+lfFmtDate(f)+' → '+lfFmtDate(l)+' · '+Math.round((lfParse(l)-lfParse(todayStr()))/86400000/30.44)+' months to the final milestone</div>';}
   h+='</div><div class="panel"><div class="cp-tl">'+(list.length?list.map(c=>{const cls=c.status==='Done'?'done':c===next?'next':c.status==='At risk'?'risk':'';return '<div class="cp-item '+cls+'"><span class="cp-dot"></span><div class="lf-row" style="padding:0;border:none"><div class="lf-main"><div class="lf-title">'+lfE(c.title)+'</div><div class="lf-sub">'+lfFmtDate(c.date)+' · '+lfE(c.status||'Planned')+(c.origDate&&c.origDate!==c.date?' · <span style="color:var(--red)">slipped from '+lfFmtDate(c.origDate)+'</span>':'')+'</div>'+(c.notes?'<div class="lf-note">'+lfE(c.notes)+'</div>':'')+'</div>'+(c.status==='Done'?'<span class="lf-when green">done</span>':lfWhen(c.date,30))+'<button class="lf-act '+(c.status==='Done'?'':'green')+'" onclick="cpToggle(\''+c.id+'\')" title="Toggle done">'+(c.status==='Done'?'↺':'✓')+'</button>'+gcal(c.title,c.date,c.notes||'')+(c.status!=='Done'?'<button class="lf-act" title="Delay (cascades)" onclick="cpSlip(\''+c.id+'\')">⏩</button>':'')+'<button class="lf-act" onclick="cpForm(\''+c.id+'\')">✎</button><button class="lf-act red" onclick="lfDel(state.cpath,\''+c.id+'\',\'this milestone\',\'cpath\')">✕</button></div></div>';}).join(''):'<div class="empty">No milestones.</div>')+'</div></div>';
@@ -6705,6 +6770,33 @@ function rvRender(){
 /* Data & Backup */
 let lfBkCache=null;
 window.lfExport=function(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='life_path_backup_'+todayStr()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);lfToast('Backup downloaded');};
+
+
+/* ───────── version + changelog (bump on every change) ───────── */
+const APP_VERSION='2026.11.02b';
+const APP_CHANGELOG=[
+  ['2026.11.02b','ACCA Study engine on Critical Path: hours vs target per paper, required h/wk, behind/on-track pace, catch-up fix, mock scores with readiness (last 2 ≥ 50), Pomodoro auto-logs 25 min, Today tile shows pace.'],
+  ['2026.11.02','Critical path +3m (SBL → Mar 2027) with one-time live-data migration; ⏩ Delay button with cascade + slip log; personal data scrubbed from code; display name stored in Drive only; sign-out wipes local cache; noindex; Erase data panel; Esc / tab switch closes pop-ups.']
+];
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));}});
+const LF_MONEY_KEYS={transactions:[],futures:[],wallets:[],goals:[],debts:[],budgets:{},bsItems:[],transfers:[],bankAccounts:[],recurring:[],scenario:null,trading:{tx:[],px:{}},fxRates:{},fxLastUpdate:null};
+window.lfWipe=function(mode){
+  lfForm(mode==='all'?'Erase EVERYTHING':'Erase money data',[{k:'c',label:'Type DELETE to confirm',req:true,hint:'A backup is saved to Drive first.'}],null,async o=>{
+    if(String(o.c).trim().toUpperCase()!=='DELETE'){lfToast('Not erased — you must type DELETE');return;}
+    try{await lfDailyBackup(true);}catch(e){if(!confirm('Backup failed. Erase anyway?'))return;}
+    const keep={profileName:state.profileName};
+    Object.entries(LF_MONEY_KEYS).forEach(([k,v])=>{state[k]=JSON.parse(JSON.stringify(v));});
+    if(mode==='all'){
+      ['todos','goalPlans','travelPlans','shuliSaved','baziCharts','renewals','docs','cpath','carhome','trips','notes','cpSlips'].forEach(k=>state[k]=[]);
+      state.family={people:[],events:[]};state.career={wins:[],vesting:[]};state.quotes={custom:[],pinned:null};
+      state.acca={examDate:null,papers:[]};state.dayPlan=null;state.planPrefs=null;state.cpathSeeded=false;state.cpathMig2027=true;
+    }
+    Object.assign(state,keep);
+    try{localStorage.removeItem('fin_v5');}catch(e){}
+    try{if(window.lifeNormalize)lifeNormalize();}catch(e){}
+    viewYear=new Date().getFullYear();viewMonth=new Date().getMonth();
+    await saveData();try{render();}catch(e){}lfRender('data');lfToast(mode==='all'?'All data erased':'Money data erased');
+  });};
 window.lfBackupNow=async function(){try{lfToast('Backing up…');await lfDailyBackup(true);lfBkCache=null;lfRender('data');lfToast('Backup saved to Drive');}catch(e){console.error(e);lfToast('Backup failed — are you signed in?');}};
 window.lfLoadBackups=async function(){try{lfBkCache=await lfListBackups();}catch(e){lfBkCache='err';}lfRender('data');};
 window.lfRestore=async function(id,name){
@@ -6736,6 +6828,11 @@ function daRender(){
   else if(lfBkCache==='err')h+='<div class="empty">Could not list backups — sign in first.</div>';
   else if(!lfBkCache.length)h+='<div class="empty">No backups yet. Tap “Back up now”.</div>';
   else h+=lfBkCache.map(f=>'<div class="lf-row"><span class="lf-ic">📦</span><div class="lf-main"><div class="lf-title">'+lfE(f.name)+'</div><div class="lf-sub">'+(f.size?Math.round(f.size/1024)+' KB · ':'')+new Date(f.modifiedTime).toLocaleString('en-MY')+'</div></div><button class="lf-act red" onclick="lfRestore(\''+f.id+'\',\''+lfE(f.name)+'\')">Restore</button></div>').join('');
+  h+='</div><div class="panel"><div class="ph"><div class="pt">🧾 Version '+APP_VERSION+'</div></div>'+APP_CHANGELOG.slice().reverse().map(c=>'<div class="lf-row"><div class="lf-main"><div class="lf-title">'+c[0]+'</div><div class="lf-sub">'+lfE(c[1])+'</div></div></div>').join('');
+  h+='</div><div class="panel"><div class="ph"><div class="pt">🧹 Erase data</div></div>'
+    +'<div class="lf-row"><span class="lf-ic">💰</span><div class="lf-main"><div class="lf-title">Erase money data</div><div class="lf-sub">Wallets, transactions, bills, budgets, debts, balance-sheet items, trading, goals savings. Keeps tasks, notes, critical path, family, admin.</div></div><button class="lf-act red" onclick="lfWipe(\'money\')">Erase</button></div>'
+    +'<div class="lf-row"><span class="lf-ic">🗑</span><div class="lf-main"><div class="lf-title">Erase everything</div><div class="lf-sub">Start from blank. Critical path re-seeds with the default milestones.</div></div><button class="lf-act red" onclick="lfWipe(\'all\')">Erase</button></div>'
+    +'<div class="lf-muted" style="padding:6px 2px 0">A Drive backup is taken first, so you can restore from the list above.</div>';
   h+='</div><div class="panel"><div class="ph"><div class="pt">📊 What’s stored</div></div><div class="lf-chips" style="margin:0">'+keys.map(k=>'<span class="lf-chip" style="box-shadow:none;background:rgba(0,0,0,0.05)">'+k+' <b>'+((state[k]||[]).length||0)+'</b></span>').join('')+'</div></div>';
   return h;
 }
