@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KiaN Life Path</title>
+<title>Life Path</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -993,7 +995,7 @@ i.rp-in{background:var(--green)}i.rp-out{background:var(--red)}
 <!-- AUTH -->
 <div id="authScreen">
   <div class="auth-hero">
-    <div class="auth-logo">KiaN Life Path</div>
+    <div class="auth-logo">Life Path</div>
     <div class="auth-tagline">Personal Dashboard · Malaysia</div>
   </div>
   <div class="auth-form">
@@ -1009,7 +1011,7 @@ i.rp-in{background:var(--green)}i.rp-out{background:var(--red)}
 <div id="appScreen">
   <div class="header">
     <div class="header-inner">
-      <div class="header-logo">KiaN Life Path</div>
+      <div class="header-logo" id="hdrLogo">Life Path</div>
       <div class="header-right">
         <div class="sync-pill" id="syncPill"><span class="sync-dot"></span><span id="syncLbl">Ready</span></div>
         <div class="month-nav" id="monthNavWrap">
@@ -1091,7 +1093,7 @@ i.rp-in{background:var(--green)}i.rp-out{background:var(--red)}
       </div>
       <div class="hm-greet-row">
         <div class="hm-greet">
-          <div class="hm-greet-hi" id="hmGreet">Hello</div>
+          <div class="hm-greet-hi" id="hmGreet" title="Tap to set your name" style="cursor:pointer" onclick="lpSetName()">Hello</div>
           <div class="hm-greet-date" id="hmDate"></div>
         </div>
         <button class="lf-eye" id="privacyBtn" title="Hide / show amounts (office mode)">👁 Amounts</button>
@@ -1521,7 +1523,7 @@ i.rp-in{background:var(--green)}i.rp-out{background:var(--red)}
         <div class="panel">
           <div class="ph"><div class="pt">🔮 BaZi Four Pillars 八字</div><span style="font-size:0.62rem;font-weight:700;color:var(--t3)">Four Pillars · Ten Gods · Luck Pillars · Element Analysis</span></div>
           <div class="bz-form-row">
-            <div class="field"><label>Name <span style="color:var(--t4)">(optional)</span></label><input type="text" id="bzName" placeholder="e.g. Kian Sien"></div>
+            <div class="field"><label>Name <span style="color:var(--t4)">(optional)</span></label><input type="text" id="bzName" placeholder="e.g. Alex Tan"></div>
             <div class="field"><label>Birth Date <span style="color:var(--red)">*</span></label><input type="date" id="bzDate"></div>
           </div>
           <div class="bz-form-row">
@@ -2334,6 +2336,8 @@ const monthTx=()=>state.transactions.filter(t=>{const d=new Date(t.date);return 
 function localYMD(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const todayStr=()=>localYMD(new Date()); // local (MYT) date — was UTC, which showed yesterday before 8am
 
+function lpName(){const n=(state&&state.profileName)||'';return n?', '+n:'';}
+window.lpSetName=function(){lfForm('Your display name',[{k:'n',label:'Name shown in greeting',ph:'e.g. your first name',hint:'Saved only in your private Drive file — never in the page code.'}],{n:state.profileName||''},o=>{state.profileName=(o.n||'').trim();lfCommit();try{render();if(window.hmRender)hmRender();}catch(e){}});};
 function getClientId(){return localStorage.getItem('gClientId')||'880872981289-g1eh79116mu0f061l3ie7ac8ah0q6nlb.apps.googleusercontent.com';}
 function saveClientId(){
   const v=document.getElementById('clientIdInput').value.trim();
@@ -2404,7 +2408,7 @@ async function loadData(){
     state.runwayThreshold=p.runwayThreshold||3;
     state.baziCharts=Array.isArray(p.baziCharts)?p.baziCharts:[]; // was never reloaded → saved charts vanished after refresh
     ['renewals','docs','cpath','carhome','trips','recurring'].forEach(k=>{state[k]=Array.isArray(p[k])?p[k]:[];});
-    state.family=p.family||{people:[],events:[]};state.career=p.career||{wins:[],vesting:[]};state.quotes=p.quotes||{custom:[],pinned:null};state.cpathSeeded=!!p.cpathSeeded;state.dayPlan=p.dayPlan||null;state.planPrefs=p.planPrefs||null;
+    state.family=p.family||{people:[],events:[]};state.career=p.career||{wins:[],vesting:[]};state.quotes=p.quotes||{custom:[],pinned:null};state.cpathSeeded=!!p.cpathSeeded;state.profileName=p.profileName||'';state.cpathMig2027=!!p.cpathMig2027;state.cpSlips=Array.isArray(p.cpSlips)?p.cpSlips:[];state.dayPlan=p.dayPlan||null;state.planPrefs=p.planPrefs||null;
     try{if(window.lifeNormalize)lifeNormalize();}catch(e){console.error('lifeNormalize',e);}
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
     setSyncStatus('ok','Synced');render();
@@ -3482,7 +3486,7 @@ function renderSnapshot(){
   const now2=new Date();
   const hour=now2.getHours();
   const greeting=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
-  document.getElementById('snapGreeting').textContent=greeting+', Kian Sien';
+  document.getElementById('snapGreeting').textContent=greeting+lpName();
   document.getElementById('snapDate').textContent=now2.toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   // net balance this month
   const txs=monthTx();let inc=0,exp=0,sav=0;
@@ -4311,7 +4315,7 @@ function showAuth(){document.getElementById('authScreen').style.display='flex';d
 // ── EVENTS ─────────────────────────────────────────────
 document.getElementById('prevM').onclick=()=>{viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--;}render();};
 document.getElementById('nextM').onclick=()=>{viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++;}render();};
-document.getElementById('signOutBtn').onclick=()=>{try{google.accounts.oauth2.revoke(gapi.client.getToken()?.access_token||'');}catch(e){}gapi.client.setToken('');localStorage.removeItem('gToken');driveFileId=null;showAuth();};
+document.getElementById('signOutBtn').onclick=()=>{try{google.accounts.oauth2.revoke(gapi.client.getToken()?.access_token||'');}catch(e){}gapi.client.setToken('');localStorage.removeItem('gToken');try{['fin_v5','lf_bk_day'].forEach(k=>localStorage.removeItem(k));Object.keys(localStorage).filter(k=>/^lf_|backup/i.test(k)).forEach(k=>localStorage.removeItem(k));}catch(e){}driveFileId=null;location.reload();};
 
 const modal=(ov,cancelId)=>{const o=document.getElementById(ov);document.getElementById(cancelId).onclick=()=>o.classList.remove('open');o.onclick=e=>{if(e.target===o)o.classList.remove('open');};return o;};
 const txOv=modal('txOverlay','cancelTx');const fuOv=modal('futureOverlay','cancelFuture');const wOv=modal('walletOverlay','cancelWallet');const gOv=modal('goalOverlay','cancelGoal');const dOv=modal('debtOverlay','cancelDebt');const bOv=modal('budgetOverlay','cancelBudget');const taskOv=modal('taskOverlay','cancelTask');const tdOv=modal('tdOverlay','cancelTdTx');const ntOv=modal('ntOverlay','cancelNt');const ntVOv=modal('ntViewOverlay','cancelNtView');
@@ -4759,7 +4763,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     let curCard=null;
     const pushCard=c=>{if(c&&(c.transactions.length||c.currentBalance!=null))acct.cards.push(c);};
 
-    // card header pattern: "VISA QUANTUM 4355 3100 7552 5118 SIM KIAN SIEN" or "ONE VISA CARD ** 4599..."
+    // card header pattern: "VISA QUANTUM 1234 5678 9012 3456 CARDHOLDER NAME" or "ONE VISA CARD ** 1234..."
     const PB_CARD_FULL=/([A-Z][A-Z\s]+(?:VISA|MASTER|CARD)[A-Z\s]*)\s+[\*\d]{4}[- ]?[\*\d]{4}[- ]?[\*\d]{4}[- ]?(\d{4})/i;
     const PB_CARD_NUM=/VISA\s+\w+\s+(\d{4}\s+\d{4}\s+\d{4}\s+\d{4})/i;
     // transaction row: "DD MON  Description  Amount[CR]"
@@ -4942,9 +4946,9 @@ document.getElementById('saveGoalPlan').onclick=async function(){
       return c;
     };
 
-    // card number: "4617 7290 2058 8134" — 4 groups of 4 digits, space separated
+    // card number: "1234 5678 9012 3456" — 4 groups of 4 digits, space separated
     const HSBC_CARDNUM=/(\d{4}\s\d{4}\s\d{4}\s\d{4})/;
-    // footer/reference code guard: page footers look like "4   4617729020588134   0000369042   0000061107"
+    // footer/reference code guard: page footers look like "4   1234567890123456   0000123456   0000654321"
     // (single leading digit or long unbroken digit blob before/after) — exclude these
     const HSBC_FOOTER=/^\s*\d\s+\d{12,}|^\s*\d{12,}\s+\d{4,}\s+\d{4,}/;
     // card name: lines like "MPower Platinum Card-i" before/near card number
@@ -4956,7 +4960,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
     const HSBC_SKIP=/Previous Statement Balance|Your Credit Limit|Credit used last|CASH BACK SUMMARY|Cash Back from|Cash Back earned|Bonus Cash Back|Cash Back adj|Cash Back credited|Total Cash Back|Arrears of Payment|Current Due|Minimum Monthly|Overlimit|Payment Due Date|Effective Profit|Post date|Transaction date|Transaction details|Amount \(RM\)|Account Statement|GLOSSARY/i;
 
     // ── PASS 1: Page-1 style compact summary table row ──
-    // "4617 7290 2058 8134  MPower Platinum Card-i  3,690.42  611.07  0.00  611.07"
+    // "1234 5678 9012 3456  MPower Platinum Card-i  3,690.42  611.07  0.00  611.07"
     // Also tolerates the row broken as: cardnum+cardtype on one line, 4 numbers following
     // (either same line or next 1-2 lines), matched via a wide window search.
     const HSBC_SUMMARY_ROW=/(\d{4}\s\d{4}\s\d{4}\s\d{4})\s+([A-Za-z][\w\s\-]*?(?:Card-i|Card|Platinum|Gold|Amanah))\s+(\d{1,3}(?:,\d{3})*\.\d{2})\s+(\d{1,3}(?:,\d{3})*\.\d{2})\s+(\d{1,3}(?:,\d{3})*\.\d{2})\s+(\d{1,3}(?:,\d{3})*\.\d{2})/i;
@@ -6071,7 +6075,7 @@ function lfNextYearly(ymd){
 function gcal(title,ymd,details,yearly){
   if(!ymd)return '';
   const a=ymd.replace(/-/g,''),b=lfAddDays(ymd,1).replace(/-/g,'');
-  let u='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+a+'/'+b+'&details='+encodeURIComponent((details||'')+'\n— from KiaN Life Path');
+  let u='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+a+'/'+b+'&details='+encodeURIComponent((details||'')+'\n— from Life Path');
   if(yearly)u+='&recur='+encodeURIComponent('RRULE:FREQ=YEARLY');
   return '<a class="lf-act" href="'+u+'" target="_blank" rel="noopener" title="Add to Google Calendar">📅</a>';
 }
@@ -6125,13 +6129,13 @@ const lfBtn=(label,fn)=>'<button class="btn btn-red" onclick="'+fn+'">'+label+'<
 
 /* ───────── data shape / migration ───────── */
 const CP_SEED=[
-  ['ACCA AFM exam','2026-09-11','Planned'],
-  ['ACCA SBL exam (Dec 2026 sitting)','2026-12-01','Planned'],
-  ['ACCA SBR exam (Mar 2027 sitting)','2027-03-01','Planned'],
-  ['ACCA ATX-MYS exam (Jun 2027 sitting)','2027-06-01','Planned'],
-  ['Start NZ job search','2027-07-01','Planned'],
-  ['AEWV work visa (Q4 2027)','2027-10-01','Planned'],
-  ['Family relocation to NZ (Q2 2028)','2028-04-01','Planned']
+  ['ACCA AFM exam','2026-09-11','Done'],
+  ['ACCA SBL exam (Mar 2027 sitting)','2027-03-01','Planned'],
+  ['ACCA SBR exam (Jun 2027 sitting)','2027-06-01','Planned'],
+  ['ACCA ATX-MYS exam (Sep 2027 sitting)','2027-09-01','Planned'],
+  ['Start NZ job search','2027-10-01','Planned'],
+  ['AEWV work visa (Q1 2028)','2028-01-01','Planned'],
+  ['Family relocation to NZ (Q3 2028)','2028-07-01','Planned']
 ];
 function lfNormalize(){
   ['renewals','docs','cpath','carhome','trips','recurring'].forEach(k=>{if(!Array.isArray(state[k]))state[k]=[];});
@@ -6148,6 +6152,15 @@ function lfNormalize(){
   if(!state.cpathSeeded&&!state.cpath.length){
     state.cpath=CP_SEED.map(([title,date,status])=>({id:lfId(),title,date,status,notes:'Approximate date — edit to the exact date.'}));
     state.cpathSeeded=true;
+  }
+  // One-time: SBL Dec 2026 → Mar 2027 delay (+3m cascade) for data seeded with the old path
+  if(!state.cpathMig2027){
+    const MAP={'ACCA SBL exam (Dec 2026 sitting)':CP_SEED[1],'ACCA SBR exam (Mar 2027 sitting)':CP_SEED[2],'ACCA ATX-MYS exam (Jun 2027 sitting)':CP_SEED[3],'Start NZ job search':CP_SEED[4],'AEWV work visa (Q4 2027)':CP_SEED[5],'Family relocation to NZ (Q2 2028)':CP_SEED[6]};
+    const OLD={'ACCA SBL exam (Dec 2026 sitting)':'2026-12-01','ACCA SBR exam (Mar 2027 sitting)':'2027-03-01','ACCA ATX-MYS exam (Jun 2027 sitting)':'2027-06-01','Start NZ job search':'2027-07-01','AEWV work visa (Q4 2027)':'2027-10-01','Family relocation to NZ (Q2 2028)':'2028-04-01'};
+    if(state.cpath.some(c=>c.title==='ACCA SBL exam (Dec 2026 sitting)'&&c.status!=='Done')){
+      state.cpath.forEach(c=>{const m=MAP[c.title];if(m&&c.date===OLD[c.title]&&c.status!=='Done'){c.title=m[0];c.date=m[1];}});
+    }
+    state.cpathMig2027=true;
   }
   // Migrate old travel plans into Travel
   if(!state.trips.length&&Array.isArray(state.travelPlans)&&state.travelPlans.length){
@@ -6340,7 +6353,7 @@ function renderDashboard(){
   const qEl=document.getElementById('hmQuoteText');if(!qEl)return;
   lfRenderQuote();
   const now=new Date(),hour=now.getHours();
-  const gEl=document.getElementById('hmGreet');if(gEl)gEl.textContent=(hour<12?'Good morning':hour<18?'Good afternoon':'Good evening')+', Kian Sien';
+  const gEl=document.getElementById('hmGreet');if(gEl)gEl.textContent=(hour<12?'Good morning':hour<18?'Good afternoon':'Good evening')+lpName();
   const dEl=document.getElementById('hmDate');if(dEl)dEl.textContent=now.toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const tod=todayStr();
   // tasks due today + overdue (parents and sub-tasks)
@@ -6515,6 +6528,19 @@ function cpForm(id){const r=id?state.cpath.find(x=>x.id===id):null;
     {k:'notes',label:'Notes',type:'textarea',ph:'Dependencies, prep needed, links…'}
   ],r,o=>{if(r)o.id=r.id;lfUpsert(state.cpath,o,'cpath');});}
 window.cpForm=cpForm;
+function cpRelabel(t,d){const dt=lfParse(d);if(!dt)return t;const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const y=dt.getFullYear(),mo=dt.getMonth();
+  return t.replace(/\((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} sitting\)/,'('+M[mo]+' '+y+' sitting)').replace(/\(Q[1-4] \d{4}\)/,'(Q'+(Math.floor(mo/3)+1)+' '+y+')');}
+function cpAddMonths(d,n){const [y,m,dd]=d.split('-').map(Number);const t=new Date(y,m-1+n,1);const last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();return localYMD(new Date(t.getFullYear(),t.getMonth(),Math.min(dd,last)));}
+window.cpSlip=function(id){const c=state.cpath.find(x=>x.id===id);if(!c)return;
+  lfForm('Delay "'+c.title+'"',[
+    {k:'months',label:'Delay by (months)',type:'number',req:true,def:3,hint:'Shifts this and every later open milestone by the same amount, and updates "(Mon YYYY sitting)" / "(Qn YYYY)" labels.'},
+    {k:'cascade',label:'Apply to',type:'select',opts:[['all','This + all later milestones'],['one','This milestone only']],def:'all'},
+    {k:'why',label:'Reason',type:'select',opts:['Time constraint','Not ready','Work peak','Family','Other'],def:'Time constraint'}
+  ],null,o=>{const n=Math.round(Number(o.months)||0);if(!n)return;const from=c.date;
+    state.cpath.filter(x=>x.status!=='Done'&&x.date&&(x.id===c.id||(o.cascade==='all'&&x.date>from))).forEach(x=>{
+      if(!x.origDate)x.origDate=x.date;x.date=cpAddMonths(x.date,n);x.title=cpRelabel(x.title,x.date);});
+    (state.cpSlips=state.cpSlips||[]).push({on:todayStr(),title:c.title,months:n,why:o.why,cascade:o.cascade});
+    lfCommit('cpath');});};
 window.cpToggle=function(id){const c=state.cpath.find(x=>x.id===id);if(!c)return;c.status=c.status==='Done'?'Planned':'Done';lfCommit('cpath');};
 function cpRender(){
   const list=state.cpath.slice().sort((a,b)=>(a.date||'9').localeCompare(b.date||'9'));
@@ -6523,7 +6549,10 @@ function cpRender(){
   let h=lfHead('🎯 Critical Path','ACCA → NZ relocation · the sequence everything else is checked against',lfBtn('+ Milestone','cpForm()'));
   h+='<div class="panel"><div class="ph"><div class="pt">Progress · '+done+' of '+list.length+' done</div>'+(next?'<span class="lf-when blue">Next: '+lfE(next.title)+'</span>':'')+'</div><div class="cp-prog"><div class="cp-fill" style="width:'+(list.length?Math.round(done/list.length*100):0)+'%"></div></div>';
   if(list.length>1){const f=list[0].date,l=list[list.length-1].date;if(f&&l)h+='<div class="lf-muted">'+lfFmtDate(f)+' → '+lfFmtDate(l)+' · '+Math.round((lfParse(l)-lfParse(todayStr()))/86400000/30.44)+' months to the final milestone</div>';}
-  h+='</div><div class="panel"><div class="cp-tl">'+(list.length?list.map(c=>{const cls=c.status==='Done'?'done':c===next?'next':c.status==='At risk'?'risk':'';return '<div class="cp-item '+cls+'"><span class="cp-dot"></span><div class="lf-row" style="padding:0;border:none"><div class="lf-main"><div class="lf-title">'+lfE(c.title)+'</div><div class="lf-sub">'+lfFmtDate(c.date)+' · '+lfE(c.status||'Planned')+'</div>'+(c.notes?'<div class="lf-note">'+lfE(c.notes)+'</div>':'')+'</div>'+(c.status==='Done'?'<span class="lf-when green">done</span>':lfWhen(c.date,30))+'<button class="lf-act '+(c.status==='Done'?'':'green')+'" onclick="cpToggle(\''+c.id+'\')" title="Toggle done">'+(c.status==='Done'?'↺':'✓')+'</button>'+gcal(c.title,c.date,c.notes||'')+'<button class="lf-act" onclick="cpForm(\''+c.id+'\')">✎</button><button class="lf-act red" onclick="lfDel(state.cpath,\''+c.id+'\',\'this milestone\',\'cpath\')">✕</button></div></div>';}).join(''):'<div class="empty">No milestones.</div>')+'</div></div>';
+  h+='</div><div class="panel"><div class="cp-tl">'+(list.length?list.map(c=>{const cls=c.status==='Done'?'done':c===next?'next':c.status==='At risk'?'risk':'';return '<div class="cp-item '+cls+'"><span class="cp-dot"></span><div class="lf-row" style="padding:0;border:none"><div class="lf-main"><div class="lf-title">'+lfE(c.title)+'</div><div class="lf-sub">'+lfFmtDate(c.date)+' · '+lfE(c.status||'Planned')+(c.origDate&&c.origDate!==c.date?' · <span style="color:var(--red)">slipped from '+lfFmtDate(c.origDate)+'</span>':'')+'</div>'+(c.notes?'<div class="lf-note">'+lfE(c.notes)+'</div>':'')+'</div>'+(c.status==='Done'?'<span class="lf-when green">done</span>':lfWhen(c.date,30))+'<button class="lf-act '+(c.status==='Done'?'':'green')+'" onclick="cpToggle(\''+c.id+'\')" title="Toggle done">'+(c.status==='Done'?'↺':'✓')+'</button>'+gcal(c.title,c.date,c.notes||'')+(c.status!=='Done'?'<button class="lf-act" title="Delay (cascades)" onclick="cpSlip(\''+c.id+'\')">⏩</button>':'')+'<button class="lf-act" onclick="cpForm(\''+c.id+'\')">✎</button><button class="lf-act red" onclick="lfDel(state.cpath,\''+c.id+'\',\'this milestone\',\'cpath\')">✕</button></div></div>';}).join(''):'<div class="empty">No milestones.</div>')+'</div></div>';
+  const sl=(state.cpSlips||[]).slice(-5).reverse();
+  if(sl.length){const tot=(state.cpSlips||[]).filter(x=>x.cascade==='all').reduce((a,x)=>a+x.months,0);
+    h+='<div class="panel"><div class="ph"><div class="pt">Slip log · end date pushed '+tot+' month'+(tot===1?'':'s')+' in total</div></div>'+sl.map(x=>'<div class="lf-row"><div class="lf-main"><div class="lf-title">'+lfE(x.title)+' +'+x.months+'m</div><div class="lf-sub">'+lfFmtDate(x.on)+' · '+lfE(x.why)+(x.cascade==='all'?' · cascaded':'')+'</div></div></div>').join('')+'</div>';}
   return h;
 }
 
@@ -6561,7 +6590,7 @@ function caRender(){
 /* Car & Home */
 function chForm(id){const r=id?state.carhome.find(x=>x.id===id):null;
   lfForm(r?'Edit item':'Add service / maintenance',[
-    {k:'asset',label:'Asset',req:true,ph:'e.g. Car — Honda City, Home — Sunway Serene'},
+    {k:'asset',label:'Asset',req:true,ph:'e.g. Car — Honda City, Home — condo'},
     {k:'task',label:'Task',req:true,ph:'e.g. Service 10k km, Aircon servicing, Tyres'},
     {k:'last',label:'Last done',type:'date'},{k:'next',label:'Next due',type:'date'},
     {k:'cost',label:'Last cost (RM)',type:'number'},{k:'vendor',label:'Workshop / vendor'},
@@ -6675,7 +6704,7 @@ function rvRender(){
 
 /* Data & Backup */
 let lfBkCache=null;
-window.lfExport=function(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kian_life_path_backup_'+todayStr()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);lfToast('Backup downloaded');};
+window.lfExport=function(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='life_path_backup_'+todayStr()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);lfToast('Backup downloaded');};
 window.lfBackupNow=async function(){try{lfToast('Backing up…');await lfDailyBackup(true);lfBkCache=null;lfRender('data');lfToast('Backup saved to Drive');}catch(e){console.error(e);lfToast('Backup failed — are you signed in?');}};
 window.lfLoadBackups=async function(){try{lfBkCache=await lfListBackups();}catch(e){lfBkCache='err';}lfRender('data');};
 window.lfRestore=async function(id,name){
