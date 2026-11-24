@@ -2410,6 +2410,7 @@ async function loadData(){
     state.runwayThreshold=p.runwayThreshold||3;
     state.baziCharts=Array.isArray(p.baziCharts)?p.baziCharts:[]; // was never reloaded → saved charts vanished after refresh
     ['renewals','docs','cpath','carhome','trips','recurring'].forEach(k=>{state[k]=Array.isArray(p[k])?p[k]:[];});
+    state.cpathArchive=Array.isArray(p.cpathArchive)?p.cpathArchive:[];state.jp=(p.jp&&typeof p.jp==='object')?p.jp:{days:[],apps:[]};
     state.family=p.family||{people:[],events:[]};state.career=p.career||{wins:[],vesting:[]};state.quotes=p.quotes||{custom:[],pinned:null};state.cpathSeeded=!!p.cpathSeeded;state.study=p.study||null;state.profileName=p.profileName||'';state.cpathMig2027=!!p.cpathMig2027;state.cpSlips=Array.isArray(p.cpSlips)?p.cpSlips:[];state.dayPlan=p.dayPlan||null;state.planPrefs=p.planPrefs||null;
     try{if(window.lifeNormalize)lifeNormalize();}catch(e){console.error('lifeNormalize',e);}
     localStorage.setItem('gToken',gapi.client.getToken()?.access_token||'');
@@ -4294,7 +4295,7 @@ window.td_importCSV=function(file){
 // ── APP TAB SWITCH ─────────────────────────────────────
 function switchAppTab(name){
   // Use explicit add/remove instead of toggle for reliability
-  ['home','finance','todo','goals','notes','pomo','health','shuli','bazi','trading','review','recurring','cpath','career','family','carhome','travel','renewals','docs','data'].forEach(n=>{
+  ['home','finance','todo','goals','notes','pomo','health','shuli','bazi','trading','review','recurring','cpath','japan','career','family','carhome','travel','renewals','docs','data'].forEach(n=>{
     const tab=document.getElementById('topTab'+n.charAt(0).toUpperCase()+n.slice(1));
     const page=document.getElementById('page-'+n);
     if(n===name){
@@ -6883,7 +6884,7 @@ window.lfWipe=function(mode){
     const keep={profileName:state.profileName};
     Object.entries(LF_MONEY_KEYS).forEach(([k,v])=>{state[k]=JSON.parse(JSON.stringify(v));});
     if(mode==='all'){
-      ['todos','goalPlans','travelPlans','shuliSaved','baziCharts','renewals','docs','cpath','carhome','trips','notes','cpSlips'].forEach(k=>state[k]=[]);
+      ['todos','goalPlans','travelPlans','shuliSaved','baziCharts','renewals','docs','cpath','carhome','trips','notes','cpSlips','cpathArchive'].forEach(k=>state[k]=[]);state.jp={days:[],apps:[]};try{localStorage.removeItem('jp_days');}catch(e){}
       state.family={people:[],events:[]};state.career={wins:[],vesting:[]};state.quotes={custom:[],pinned:null};
       state.acca={examDate:null,papers:[]};state.dayPlan=null;state.planPrefs=null;state.cpathSeeded=false;state.cpathMig2027=true;
     }
