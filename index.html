@@ -1056,6 +1056,7 @@ i.rp-in{background:var(--green)}i.rp-out{background:var(--red)}
     </div>
     <div class="hub-sub" data-hub="growth">
       <button class="hs-btn" data-go="cpath" onclick="subGo('cpath')">Critical Path</button>
+      <button class="hs-btn" data-go="japan" onclick="subGo('japan')">Japan 🇯🇵</button>
       <button class="hs-btn" data-go="goals" onclick="subGo('goals')">Goals</button>
       <button class="hs-btn" data-go="career" onclick="subGo('career')">Career</button>
     </div>
@@ -1127,6 +1128,7 @@ i.rp-in{background:var(--green)}i.rp-out{background:var(--red)}
     <div class="app-page" id="page-review"><div id="lf-review"></div></div>
     <div class="app-page" id="page-recurring"><div id="lf-recurring"></div></div>
     <div class="app-page" id="page-cpath"><div id="lf-cpath"></div></div>
+    <div class="app-page" id="page-japan"><div id="lf-japan"></div></div>
     <div class="app-page" id="page-career"><div id="lf-career"></div></div>
     <div class="app-page" id="page-family"><div id="lf-family"></div></div>
     <div class="app-page" id="page-carhome"><div id="lf-carhome"></div></div>
@@ -3670,6 +3672,18 @@ function renderCHCWeatherCard(){
   const[emoji,desc]=WMO[chcWeatherData.code]||['🌡️','Unknown'];
   el.innerHTML='<div class="summary-lbl">🌿 Christchurch NZ</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+chcWeatherData.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+chcWeatherData.rain+'% · 💨'+chcWeatherData.wind+'km/h</div>';
 }
+const JPW={osa:{n:'🏯 Osaka',lat:34.6937,lon:135.5023,d:null},fuk:{n:'🍜 Fukuoka',lat:33.5902,lon:130.4017,d:null}};
+function jpWeatherCard(k){const w=JPW[k],el=document.getElementById(k+'WeatherCard');if(!el)return;
+  if(!w.d){el.innerHTML='<div class="summary-lbl">'+w.n+'</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div>';return;}
+  if(w.d.error){el.innerHTML='<div class="summary-lbl">'+w.n+'</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Unavailable</div>';return;}
+  const[emoji,desc]=WMO[w.d.code]||['🌡️','Unknown'];
+  el.innerHTML='<div class="summary-lbl">'+w.n+'</div><div class="summary-val" style="font-size:1.1rem">'+emoji+' '+w.d.temp+'°C</div><div class="hm-metric-mini">'+desc+' · 💧'+w.d.rain+'% · 💨'+w.d.wind+'km/h</div>';}
+async function jpWeather(k){const w=JPW[k];if(w.d&&!w.d.error){jpWeatherCard(k);return;}jpWeatherCard(k);
+  try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+w.lat+'&longitude='+w.lon+'&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&timezone=Asia/Tokyo&wind_speed_unit=kmh');
+    if(!r.ok)throw new Error('fetch failed');const c=(await r.json()).current;
+    w.d={temp:Math.round(c.temperature_2m),code:c.weathercode,wind:Math.round(c.windspeed_10m),rain:c.precipitation_probability??0};}catch(e){w.d={error:true};}
+  jpWeatherCard(k);}
+
 let aklWeatherData=null;
 async function fetchAKLWeather(){
   try{
@@ -6050,7 +6064,7 @@ document.getElementById('saveGoalPlan').onclick=async function(){
    Documents, Recurring money, Weekly Review, Data & Backup)
    All data lives in `state` → saved to Drive via saveData().
    ═══════════════════════════════════════════════════════════════ */
-const LF_PAGES=['review','recurring','cpath','career','family','carhome','travel','renewals','docs','data'];
+const LF_PAGES=['review','recurring','cpath','japan','career','family','carhome','travel','renewals','docs','data'];
 window.LF_PAGES=LF_PAGES;
 
 /* ───────── small helpers ───────── */
@@ -6130,12 +6144,17 @@ const lfBtn=(label,fn)=>'<button class="btn btn-red" onclick="'+fn+'">'+label+'<
 /* ───────── data shape / migration ───────── */
 const CP_SEED=[
   ['ACCA AFM exam','2026-09-11','Done'],
-  ['ACCA SBL exam (Mar 2027 sitting)','2027-03-01','Planned'],
+  ['ACCA EPSM (Ethics module) complete','2026-12-31','Planned'],
+  ['RSU vest','2027-01-02','Planned'],
+  ['Feb 2027 bonus received','2027-02-15','Planned'],
+  ['Japan job applications live (Kansai / Fukuoka)','2027-02-16','Planned'],
+  ['ACCA ATX exam (Mar 2027 sitting)','2027-03-01','Planned'],
   ['ACCA SBR exam (Jun 2027 sitting)','2027-06-01','Planned'],
-  ['ACCA ATX-MYS exam (Sep 2027 sitting)','2027-09-01','Planned'],
-  ['Start NZ job search','2027-10-01','Planned'],
-  ['AEWV work visa (Q1 2028)','2028-01-01','Planned'],
-  ['Family relocation to NZ (Q3 2028)','2028-07-01','Planned']
+  ['JLPT N4 (Jul 2027)','2027-07-04','Planned'],
+  ['ACCA SBL exam (Sep 2027 sitting) → ACCA affiliate','2027-09-01','Planned'],
+  ['Japan job offer + COE (Q4 2027)','2027-10-01','Planned'],
+  ['Family move to Japan — Kansai / Fukuoka (Q2 2028)','2028-04-01','Planned'],
+  ['JLPT N2 (Dec 2028)','2028-12-03','Planned']
 ];
 function lfNormalize(){
   ['renewals','docs','cpath','carhome','trips','recurring'].forEach(k=>{if(!Array.isArray(state[k]))state[k]=[];});
@@ -6162,6 +6181,22 @@ function lfNormalize(){
     }
     state.cpathMig2027=true;
   }
+  // One-time (Nov 2026): re-plan to ATX → SBR → SBL + Japan move; NZ milestones archived as backup
+  // Data-driven (not flag-driven) so it still runs when older saved data is loaded from Drive later.
+  {
+    const OLD=/\b(NZ|AEWV|New Zealand)\b|^ACCA ATX-MYS exam|^ACCA SBL exam \((Dec 2026|Mar 2027) sitting\)$|^ACCA SBR exam \(Mar 2027 sitting\)$/;
+    const isOld=c=>c&&c.status!=='Done'&&!c.keep&&OLD.test(c.title||'');
+    if(state.cpath.some(isOld)){
+      if(!Array.isArray(state.cpathArchive))state.cpathArchive=[];
+      state.cpath.filter(isOld).forEach(c=>state.cpathArchive.push(Object.assign({},c,{archivedOn:todayStr()})));
+      state.cpath=state.cpath.filter(c=>!isOld(c));
+      CP_SEED.forEach(([title,date,status])=>{if(!state.cpath.some(c=>c.title===title))state.cpath.push({id:lfId(),title,date,status,notes:'Approximate date — edit to the exact date.'});});
+    }
+  }
+  if(!Array.isArray(state.cpathArchive))state.cpathArchive=[];
+  if(!state.jp||typeof state.jp!=='object')state.jp={days:[],apps:[]};
+  if(!Array.isArray(state.jp.days))state.jp.days=[];
+  if(!Array.isArray(state.jp.apps))state.jp.apps=[];
   // Migrate old travel plans into Travel
   if(!state.trips.length&&Array.isArray(state.travelPlans)&&state.travelPlans.length){
     state.trips=state.travelPlans.filter(t=>t&&t.dest).map(t=>({id:lfId(),dest:t.dest,start:t.startStr||'',end:t.startStr&&t.days?lfAddDays(t.startStr,Math.max(0,(Number(t.days)||1)-1)):'',budget:t.budget||null,notes:'',pack:[]}));
@@ -6203,7 +6238,7 @@ window.lfAfterLoad=async function(fid){
 
 /* ───────── HUB NAVIGATION ───────── */
 const HUB_OF={home:'today',review:'today',todo:'today',notes:'today',finance:'money',recurring:'money',trading:'money',
-  cpath:'growth',goals:'growth',career:'growth',family:'family',carhome:'family',travel:'family',
+  cpath:'growth',japan:'growth',goals:'growth',career:'growth',family:'family',carhome:'family',travel:'family',
   renewals:'admin',docs:'admin',data:'admin',health:'well',pomo:'well',bazi:'well',shuli:'well'};
 let lfLastSub={today:'home',money:'f:overview',growth:'cpath',family:'family',admin:'renewals',well:'health'};
 let lfFinSub='f:overview';
@@ -6375,14 +6410,12 @@ function renderDashboard(){
     sc('🏦','Net worth','<span class="lf-amt">'+fmtR(nw)+'</span>','assets − liabilities',nw>=0?'var(--t1)':'var(--red)'),
     sc('🎯','Critical path',nextCp?(lfDays(nextCp.date)>=0?lfDays(nextCp.date)+' days':Math.abs(lfDays(nextCp.date))+'d overdue'):'—',(window.syPaceLine&&syPaceLine())||(nextCp?lfE(nextCp.title.replace(/^ACCA /,''))+(lfDays(nextCp.date)<0?' · update it':''):(papers.length?passed+'/'+papers.length+' ACCA papers':'Set milestones')),'var(--blue)'),
     '<div class="summary-card" id="fxCard" style="justify-content:center;align-items:center;text-align:center"><div class="summary-lbl">💱 Currency</div><div class="summary-val" style="font-size:0.8rem;color:var(--t4)">Loading...</div></div>',
-    '<div class="summary-card nzc"><div class="summary-lbl" style="text-align:left">🇳🇿 New Zealand · <span class="clock-time nzc-clock" data-tz="Pacific/Auckland">--:--</span></div>'
-      +'<div class="nzc-w" id="qtWeatherCard"></div><div class="nzc-w" id="chcWeatherCard"></div><div class="nzc-w" id="aklWeatherCard"></div>'
-      +'<div class="nzc-row"><span class="summary-lbl">🏯 Kagoshima</span><span class="clock-time nzc-clock" data-tz="Asia/Tokyo">--:--</span></div></div>'
+    '<div class="summary-card nzc"><div class="summary-lbl" style="text-align:left">🇯🇵 Japan · <span class="clock-time nzc-clock" data-tz="Asia/Tokyo">--:--</span></div>'
+      +'<div class="nzc-w" id="osaWeatherCard"></div><div class="nzc-w" id="fukWeatherCard"></div>'
+      +'<div class="nzc-row"><span class="summary-lbl">🇳🇿 Auckland (backup)</span><span class="clock-time nzc-clock" data-tz="Pacific/Auckland">--:--</span></div></div>'
   ].join('');
   try{renderClocks();ensureHmTimers();}catch(e){}
-  try{if(!qtWeatherData)fetchQTWeather();else renderQTWeatherCard();}catch(e){}
-  try{if(!chcWeatherData)fetchCHCWeather();else renderCHCWeatherCard();}catch(e){}
-  try{if(typeof aklWeatherData==='undefined'||!aklWeatherData)fetchAKLWeather();else renderAKLWeatherCard();}catch(e){}
+  try{jpWeather('osa');jpWeather('fuk');}catch(e){}
   try{if(!fxData)fetchFXRates();else renderFXCard();}catch(e){}
   // tasks panel
   const PRI={high:'#BF0000',medium:'#C06000',low:'#0A7A5A'};
@@ -6441,7 +6474,7 @@ window.renderRunwayWidget=renderRunwayWidget;
 /* ───────── PAGE RENDERERS ───────── */
 function lfRender(page){
   const el=document.getElementById('lf-'+page);if(!el)return;
-  const R={review:rvRender,recurring:rcRender,cpath:cpRender,career:caRender,family:faRender,carhome:chRender,travel:trRender,renewals:rnRender,docs:dcRender,data:daRender}[page];
+  const R={review:rvRender,recurring:rcRender,cpath:cpRender,japan:jpRender,career:caRender,family:faRender,carhome:chRender,travel:trRender,renewals:rnRender,docs:dcRender,data:daRender}[page];
   if(R)el.innerHTML=R();
   lfApplyPrivacy();
 }
@@ -6522,7 +6555,7 @@ function faEvRow(e,yearly,future){const d=yearly?lfNextYearly(e.date):e.date;ret
 
 
 /* ───────── ACCA Study Engine ───────── */
-const SY_DEF=[['SBL',300],['SBR',300],['ATX',250]];
+const SY_DEF=[['EPSM',20],['ATX',250],['SBR',300],['SBL',300]];
 function syMs(code){return (state.cpath||[]).find(c=>new RegExp('\\b'+code).test(c.title));}
 function syInit(){
   if(!state.study||!Array.isArray(state.study.papers))state.study={papers:[],active:null};
@@ -6605,12 +6638,13 @@ window.cpSlip=function(id){const c=state.cpath.find(x=>x.id===id);if(!c)return;
       if(!x.origDate)x.origDate=x.date;x.date=cpAddMonths(x.date,n);x.title=cpRelabel(x.title,x.date);});
     (state.cpSlips=state.cpSlips||[]).push({on:todayStr(),title:c.title,months:n,why:o.why,cascade:o.cascade});
     lfCommit('cpath');});};
+window.cpRestore=function(id){const ar=state.cpathArchive||[];const i=ar.findIndex(x=>x.id===id);if(i<0)return;const c=ar.splice(i,1)[0];delete c.archivedOn;c.keep=true;state.cpath.push(c);lfCommit('cpath');};
 window.cpToggle=function(id){const c=state.cpath.find(x=>x.id===id);if(!c)return;c.status=c.status==='Done'?'Planned':'Done';lfCommit('cpath');};
 function cpRender(){
   const list=state.cpath.slice().sort((a,b)=>(a.date||'9').localeCompare(b.date||'9'));
   const done=list.filter(c=>c.status==='Done').length;
   const next=list.find(c=>c.status!=='Done');
-  let h=lfHead('🎯 Critical Path','ACCA → NZ relocation · the sequence everything else is checked against',lfBtn('+ Milestone','cpForm()'));
+  let h=lfHead('🎯 Critical Path','ACCA → Japan move · NZ = backup · the sequence everything else is checked against',lfBtn('+ Milestone','cpForm()'));
   try{h+=syRender();}catch(e){console.error('study',e);}
   h+='<div class="panel"><div class="ph"><div class="pt">Progress · '+done+' of '+list.length+' done</div>'+(next?'<span class="lf-when blue">Next: '+lfE(next.title)+'</span>':'')+'</div><div class="cp-prog"><div class="cp-fill" style="width:'+(list.length?Math.round(done/list.length*100):0)+'%"></div></div>';
   if(list.length>1){const f=list[0].date,l=list[list.length-1].date;if(f&&l)h+='<div class="lf-muted">'+lfFmtDate(f)+' → '+lfFmtDate(l)+' · '+Math.round((lfParse(l)-lfParse(todayStr()))/86400000/30.44)+' months to the final milestone</div>';}
@@ -6618,6 +6652,54 @@ function cpRender(){
   const sl=(state.cpSlips||[]).slice(-5).reverse();
   if(sl.length){const tot=(state.cpSlips||[]).filter(x=>x.cascade==='all').reduce((a,x)=>a+x.months,0);
     h+='<div class="panel"><div class="ph"><div class="pt">Slip log · end date pushed '+tot+' month'+(tot===1?'':'s')+' in total</div></div>'+sl.map(x=>'<div class="lf-row"><div class="lf-main"><div class="lf-title">'+lfE(x.title)+' +'+x.months+'m</div><div class="lf-sub">'+lfFmtDate(x.on)+' · '+lfE(x.why)+(x.cascade==='all'?' · cascaded':'')+'</div></div></div>').join('')+'</div>';}
+  const ar=state.cpathArchive||[];
+  if(ar.length)h+='<div class="panel"><div class="ph"><div class="pt">🇳🇿 NZ backup · '+ar.length+' archived milestone'+(ar.length===1?'':'s')+'</div></div>'+ar.map(c=>'<div class="lf-row"><div class="lf-main"><div class="lf-title">'+lfE(c.title)+'</div><div class="lf-sub">was '+lfFmtDate(c.date)+'</div></div><button class="lf-act" title="Restore to Critical Path" onclick="cpRestore(\''+c.id+'\')">↩</button></div>').join('')+'</div>';
+  return h;
+}
+
+/* Japan */
+const JP_TESTS=[['JLPT N4','2027-07-04'],['JLPT N2','2028-12-03']];
+function jpSyncDays(){let loc=[];try{loc=JSON.parse(localStorage.getItem('jp_days')||'[]');}catch(e){}
+  const all=[...new Set([...(state.jp.days||[]),...(Array.isArray(loc)?loc:[])])].filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+  const changed=all.length!==state.jp.days.length;state.jp.days=all;
+  try{localStorage.setItem('jp_days',JSON.stringify(all.slice(-800)));}catch(e){}
+  return changed;}
+function jpStreak(){const s=new Set(state.jp.days);let d=todayStr();if(!s.has(d))d=lfAddDays(d,-1);let n=0;while(s.has(d)){n++;d=lfAddDays(d,-1);}return n;}
+function jpWeekDays(){const ws=syWeekStart(),t=todayStr();return state.jp.days.filter(d=>d>=ws&&d<=t).length;}
+function jpSaveLocal(){try{localStorage.setItem('jp_days',JSON.stringify(state.jp.days.slice(-800)));}catch(e){}}
+window.jpLogToday=function(){const d=todayStr();if(!state.jp.days.includes(d))state.jp.days.push(d);state.jp.days.sort();jpSaveLocal();lfCommit('japan');lfToast('Japanese logged for today 🇯🇵');};
+window.jpUnlogToday=function(){const d=todayStr();state.jp.days=state.jp.days.filter(x=>x!==d);jpSaveLocal();lfCommit('japan');};
+const JP_ST=['Applied','Recruiter call','Interview','Offer','Rejected','Withdrawn'];
+function jpApp(id){const r=id?state.jp.apps.find(x=>x.id===id):null;
+  lfForm(r?'Edit application':'Add application',[
+    {k:'co',label:'Company',req:true,ph:'e.g. foreign-capital manufacturer'},
+    {k:'role',label:'Role',ph:'e.g. Finance Manager / FP&A'},
+    {k:'city',label:'City',type:'select',opts:['Osaka','Kobe','Kyoto','Fukuoka','Other Kansai','Other Kyushu','Remote / other'],def:'Osaka'},
+    {k:'via',label:'Via',ph:'e.g. Robert Walters, Michael Page, direct'},
+    {k:'date',label:'Date applied',type:'date',req:true,def:todayStr()},
+    {k:'status',label:'Status',type:'select',opts:JP_ST,def:'Applied'},
+    {k:'notes',label:'Notes',type:'textarea',ph:'Language requirement, salary range, next step…'}
+  ],r,o=>{if(r)o.id=r.id;lfUpsert(state.jp.apps,o,'japan');});}
+window.jpApp=jpApp;
+window.jpDelApp=function(id){lfDel(state.jp.apps,id,'this application','japan');};
+function jpRender(){
+  if(jpSyncDays())saveData();
+  const t=todayStr(),st=jpStreak(),wk=jpWeekDays(),done=state.jp.days.includes(t);
+  let h=lfHead('🇯🇵 Japan','Kansai or Fukuoka · job offer + work visa · Japanese 30 min a day','<a class="btn btn-red" href="n5.html" style="text-decoration:none">Open N5 study →</a>');
+  h+='<div class="panel"><div class="ph"><div class="pt">Daily Japanese · 30 min</div>'+(done?'<button class="add-btn" onclick="jpUnlogToday()">Undo today</button>':'<button class="add-btn" onclick="jpLogToday()">✓ Done today</button>')+'</div>';
+  h+='<div class="lf-chips"><span class="lf-chip">Streak <b>'+st+'</b> day'+(st===1?'':'s')+'</span><span class="lf-chip">This week <b>'+wk+'</b>/7</span><span class="lf-chip">Total <b>'+state.jp.days.length+'</b> day'+(state.jp.days.length===1?'':'s')+'</span></div>';
+  let dots='';for(let i=13;i>=0;i--){const d=lfAddDays(t,-i);const on=state.jp.days.includes(d);dots+='<span title="'+lfFmtDate(d)+'" style="display:inline-block;width:14px;height:14px;border-radius:4px;margin:2px;background:'+(on?'var(--green)':'rgba(0,0,0,.1)')+'"></span>';}
+  h+='<div style="margin-top:6px">'+dots+'</div><div class="lf-muted" style="margin-top:4px">Last 14 days. Grading a drill card, ticking a plan day or finishing a mock on the N5 page logs the day automatically.</div></div>';
+  h+='<div class="panel"><div class="ph"><div class="pt">JLPT targets</div></div>'+JP_TESTS.map(([n,d])=>{const k=lfDays(d);return '<div class="lf-row"><span class="lf-ic">🎌</span><div class="lf-main"><div class="lf-title">'+n+' · '+lfFmtDate(d)+'</div><div class="lf-sub">'+(k>=0?k+' days · ~'+Math.round(k/7)+' weeks':'past')+' · approximate date — confirm on jlpt.jp</div></div></div>';}).join('')+'<div class="lf-muted">N5 material is the foundation; the first exam you sit is N4.</div></div>';
+  const apps=state.jp.apps.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const cnt=s=>apps.filter(a=>a.status===s).length;
+  const fwd=apps.filter(a=>['Recruiter call','Interview','Offer'].includes(a.status)).length;
+  h+='<div class="panel"><div class="ph"><div class="pt">Job applications · Kansai / Fukuoka</div><button class="add-btn" onclick="jpApp()">+ Add</button></div>';
+  h+='<div class="lf-chips"><span class="lf-chip">Sent <b>'+apps.length+'</b></span><span class="lf-chip" style="color:var(--blue)">Callbacks <b>'+fwd+'</b></span><span class="lf-chip" style="color:var(--green)">Offers <b>'+cnt('Offer')+'</b></span><span class="lf-chip" style="color:var(--red)">Rejected <b>'+cnt('Rejected')+'</b></span></div>';
+  h+=apps.length?apps.map(a=>'<div class="lf-row"><span class="lf-ic">💼</span><div class="lf-main"><div class="lf-title">'+lfE(a.co)+(a.role?' · '+lfE(a.role):'')+'</div><div class="lf-sub">'+lfE(a.city||'')+(a.via?' · via '+lfE(a.via):'')+' · '+lfFmtDate(a.date)+'</div>'+(a.notes?'<div class="lf-note">'+lfE(a.notes)+'</div>':'')+'</div><span class="lf-when '+(a.status==='Offer'?'green':(a.status==='Rejected'||a.status==='Withdrawn')?'':'blue')+'">'+lfE(a.status)+'</span><button class="lf-act" onclick="jpApp(\''+a.id+'\')">✎</button><button class="lf-act red" onclick="jpDelApp(\''+a.id+'\')">✕</button></div>').join(''):'<div class="lf-muted">No applications yet. Target: industry-finance roles (FP&amp;A, consolidation, controller) at foreign-capital firms.</div>';
+  h+='<div class="lf-muted" style="margin-top:6px">Sep 2027 checkpoint: no callbacks by then means the region filter is the blocker — widen the search or switch to NZ.</div></div>';
+  const ms=(state.cpath||[]).filter(c=>/Japan|JLPT/.test(c.title||'')).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(ms.length)h+='<div class="panel"><div class="ph"><div class="pt">Move milestones</div><button class="add-btn" onclick="subGo(\'cpath\')">Critical Path →</button></div>'+ms.map(c=>'<div class="lf-row"><span class="lf-ic">'+(c.status==='Done'?'✅':'📍')+'</span><div class="lf-main"><div class="lf-title">'+lfE(c.title)+'</div><div class="lf-sub">'+lfFmtDate(c.date)+' · '+lfE(c.status)+'</div></div></div>').join('')+'</div>';
   return h;
 }
 
@@ -6764,6 +6846,20 @@ function rvRender(){
   h+='<div class="panel"><div class="ph"><div class="pt">🎯 Critical path</div></div>'+(nextCp?'<div class="lf-row"><span class="lf-ic">🎯</span><div class="lf-main"><div class="lf-title">'+lfE(nextCp.title)+'</div><div class="lf-sub">'+lfFmtDate(nextCp.date)+'</div></div>'+lfWhen(nextCp.date,30)+'</div><div class="lf-muted" style="margin-top:6px">Ask: is this week’s plan moving this milestone?</div>':'<div class="empty">No open milestones.</div>')+'</div></div>';
   const nx=lfInboxItems(7);
   h+='<div class="panel"><div class="ph"><div class="pt">📌 Next 7 days</div></div>'+(nx.length?nx.map(lfInboxRow).join(''):'<div class="empty">Nothing scheduled.</div>')+'</div>';
+  try{
+    syInit();const act=syActive();let accH=0,need=0;
+    const ws=syWeekStart();state.study.papers.forEach(x=>x.logs.forEach(l=>{if(l.d>=ws&&l.d<=t)accH+=Number(l.h)||0;}));
+    if(act){const k=syStats(act);need=k.started?k.perWk:k.planWk;}
+    jpSyncDays();const jd=jpWeekDays();const apps=(state.jp.apps||[]).filter(a=>a.date>=ws&&a.date<=t).length;
+    const ok=f=>need?accH>=need*f:accH>=10*f;
+    const lvl=ok(1)&&jd>=7&&apps>=3?'Exceptional':ok(0.8)&&jd>=6&&apps>=1?'Good':ok(0.5)&&jd>=4?'Minimum':'Below minimum';
+    const col=lvl==='Below minimum'?'var(--red)':lvl==='Minimum'?'var(--amber)':'var(--green)';
+    h+='<div class="panel"><div class="ph"><div class="pt">📏 Standards · this week</div><span class="lf-when" style="color:'+col+'"><b>'+lvl+'</b></span></div>'
+      +'<div class="lf-sub">ACCA '+syH(accH)+'h'+(need?' of '+syH(need)+'h needed':'')+' · Japanese '+jd+'/7 days · Japan applications '+apps+'</div>'
+      +'<div class="lf-note">Minimum: ACCA ≥50% of needed hours + Japanese 4 days. Good: ≥80% + 6 days + 1 application. Exceptional: 100% + 7 days + 3 applications.</div>'
+      +'<div class="lf-note">Missed a day? Never miss twice: tomorrow do 30 min ACCA questions + 15 min Japanese, nothing else. Bad week? Drop to minimum — don\'t re-plan.</div></div>';
+  }catch(e){console.error('standards',e);}
+
   return h;
 }
 
